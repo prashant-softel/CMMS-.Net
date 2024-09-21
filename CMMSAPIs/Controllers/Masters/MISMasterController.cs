@@ -2027,10 +2027,10 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-
-        [Route("CreateEvaluation")]
+        //Evalution 
+        [Route("CreateEvaluationPlan")]
         [HttpPost]
-        public async Task<IActionResult> CreateEvaluation(EvaluationCreate request)
+        public async Task<IActionResult> CreateEvaluation(CMEvaluationCreate request)
         {
             try
             {
@@ -2040,10 +2040,14 @@ namespace CMMSAPIs.Controllers.Masters
             }
             catch (Exception ex)
             {
-                throw ex;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
             }
         }
-        [Route("ApproveEvaluation")]
+
+        [Route("ApproveEvaluationPlan")]
         [HttpPost]
         public async Task<IActionResult> ApproveEvaluation(CMApproval request)
         {
@@ -2056,6 +2060,269 @@ namespace CMMSAPIs.Controllers.Masters
             catch (Exception ex)
             {
                 throw ex;
+            }
+        }
+        [Route("EvaluationPlanRejected")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationPlanRejected(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationPlanRejected(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+        [Route("EvaluationPlanUpdated")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationPlanUpdated(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationPlanUpdated(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationPlanDeleted")]
+        [HttpDelete]
+        public async Task<IActionResult> EvaluationPlanDeleted(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationPlanDeleted(id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskSchedule")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskSchedule(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskSchedule(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskAssign")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskAssign(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskAssign(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+        [Route("EvaluationTaskLinkPtw")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskLinkPtw(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskLinkPtw(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskStart")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskStart(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskStart(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskClose")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskClosed(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskClosed(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskCloseReject")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskClosedReject(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskClosedReject(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskCloseApproved")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskClosedApproved(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskClosedApproved(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationTaskCancel")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationTaskCancelled(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskCancelled(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationCancelReject")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationCancelledReject(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskCancelledReject(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+
+        [Route("EvaluationCancelApproved")]
+        [HttpPost]
+        public async Task<IActionResult> EvaluationCancelledApproved(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.EvaluationTaskCancelledApproved(request, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+        [Route("DeleteEvaluationPlan")]
+        [HttpDelete]
+        public async Task<IActionResult> DeleteEvaluationPlan(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.DeleteEvaluationPlan(id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
             }
         }
     }

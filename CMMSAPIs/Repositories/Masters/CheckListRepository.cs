@@ -95,7 +95,7 @@ namespace CMMSAPIs.Repositories.Masters
                 string query = "INSERT INTO checklist_number(checklist_number, checklist_type, facility_id, status ,created_by ," +
                     " created_at , asset_category_id ,frequency_id ,manpower , duration,Sop_number)VALUES" +
                             $"('{request.checklist_number}', {request.type}, {request.facility_id}, 1, {userID}," +
-                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'{request.Sop_number}'); select LAST_INSERT_ID();";
+                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'a'); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -275,12 +275,15 @@ namespace CMMSAPIs.Repositories.Masters
              * Read All properties mention in CMCheckPointList and return list
              * Code goes here
             */
+
+
             string myQuery = "SELECT " +
                                 "checkpoint.id as id, check_point, check_list_id as checklist_id, checklist_number.checklist_number as checklist_name, " +
                                 "requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id," +
                                 " CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, " +
                                 "checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, " +
-                                "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type, m.name AS type_of_observation, r.risktype AS risk_type, " +
+                                "CASE WHEN checkpoint.type_id=1 THEN 'PM' WHEN  checkpoint.type_id=2 THEN 'HOTO'  WHEN  checkpoint.type_id=3 THEN 'AUDIT' WHEN  checkpoint.type_id=4 THEN 'MIS' ELSE 'Unknown Type' END as type_name , " +
+                                "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type_id as type, m.name AS type_of_observation, r.risktype AS risk_type, " +
                                 "CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , " +
                                 "CASE WHEN checkpoint.cost_type = 1 then 'capex'  WHEN checkpoint.cost_type = 2  then 'opex'  ELSE 'Empty' END as Cost_type_name ,checkpoint.cost_type as Cost_Type,  " +
                                 "checkpoint.min_range as min ,checkpoint.max_range as max " +
@@ -345,28 +348,24 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (CMCreateCheckPoint request in requestList)
             {
 
-                if (request.checkpoint_type.type != 2)
+                if (request.checkpoint_type.id != 2)
                 {
                     request.checkpoint_type.min = 0;
                     request.checkpoint_type.max = 0;
                 }
-
-                if (request.checkpoint_type.type != 1)
+                if (request.checkpoint_type.id != 1)
                 {
-                    request.checkpoint_type.type = 0;
-
+                    request.checkpoint_type.id = 0;
                 }
-
                 string query = "INSERT INTO checkpoint " +
                "(check_point, check_list_id, requirement, is_document_required, action_to_be_done, " +
-               "failure_weightage, type, min_range, max_range, created_by, created_at, status, " +
+               "failure_weightage, type, min_range, max_range,type_id ,created_by, created_at, status, " +
                "type_of_observation, risk_type,cost_type) " +
                "VALUES " +
                $"('{request.check_point}', {request.checklist_id}, '{request.requirement.Replace("'", "''")}', " +
                $"{(request.is_document_required ?? 0)}, '{request.action_to_be_done}', '{request.failure_weightage}', " +
-               $"'{request.checkpoint_type.type}', '{request.checkpoint_type.min}', '{request.checkpoint_type.max}', " +
-               $"'{userID}', '{UtilsRepository.GetUTCTime()}', 1, " +
-               $"{request.type_of_observation}, {request.risk_type},{request.cost_type}); " +
+               $"'{request.checkpoint_type.id}','{request.checkpoint_type.min}', '{request.checkpoint_type.max}', '{request.type}'," +
+               $"'{userID}', '{UtilsRepository.GetUTCTime()}', 1,{request.type_of_observation},{request.risk_type},{request.cost_type}); " +
                "SELECT LAST_INSERT_ID();";
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
                 int id = Convert.ToInt32(dt.Rows[0][0]);
@@ -387,7 +386,6 @@ namespace CMMSAPIs.Repositories.Masters
             List<int> idList = new List<int>();
             foreach (CMCreateCheckPoint request in requestList)
             {
-
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
                                 "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
                                 $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
@@ -413,13 +411,12 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
 
-            if (request.checkpoint_type.type != 2)
+            if (request.checkpoint_type.id != 2)
             {
                 request.checkpoint_type.min = 0;
                 request.checkpoint_type.max = 0;
             }
-
-            if (request.checkpoint_type.type != 1)
+            if (request.checkpoint_type.id != 1)
             {
                 request.checkpoint_type.type = 0;
 
@@ -444,14 +441,15 @@ namespace CMMSAPIs.Repositories.Masters
             if (request.type_of_observation != null)
                 updateQry += $"type_of_observation = {request.type_of_observation}, ";
             if (request.checkpoint_type != null)
-                updateQry += $"type = '{request.checkpoint_type.type}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
+                updateQry += $"type = '{request.checkpoint_type.id}', min_range = '{request.checkpoint_type.min}',max_range = '{request.checkpoint_type.max}', ";
+            if (request.type != null)
+                updateQry += $"type_id = {request.type}, ";
             if (request.failure_weightage != 0)
                 updateQry += $"failure_weightage = {request.failure_weightage}, ";
             updateQry += $"updated_by = {userID}, updated_at='{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, request.id, 0, 0, "Check Point Updated", CMMS.CMMS_Status.UPDATED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Checkpoint updated successfully");
-
             return response;
         }
 
@@ -508,7 +506,7 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Category", new Tuple<string, Type>("category_name", typeof(string)) },
                 { "Man Power", new Tuple<string, Type>("manPower", typeof(int)) },
                 { "Duration", new Tuple<string, Type>("duration", typeof(int)) },
-                { "Sop_number", new Tuple<string, Type>("Sop_number", typeof(int)) },
+                //{ "Sop_number", new Tuple<string, Type>("Sop_number", typeof(int)) },
             };
 
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
@@ -675,14 +673,14 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
                             else if (Convert.ToDouble(newR["duration"]) == 0)
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
-                            if (newR["Sop_number"].ToString() == "" && newR["Sop_number"] == DBNull.Value)
-                            {
-                                m_errorLog.SetError($"[Sop_number: Row {rN}]  value cannot be empty.");
-                            }
-                            else
-                            {
-                                newR["Sop_number"] = newR["Sop_number"].ToString();
-                            }
+                            /* if (newR["Sop_number"].ToString() == "" && newR["Sop_number"] == DBNull.Value)
+                             {
+                                 m_errorLog.SetError($"[Sop_number: Row {rN}]  value cannot be empty.");
+                             }
+                             else
+                             {
+                                 newR["Sop_number"] = newR["Sop_number"].ToString();
+                             }*/
                             dt2.Rows.Add(newR);
                             /*
                              { "Facility_Name", new Tuple<string, Type>("facility_name", typeof(string)) },
@@ -776,9 +774,9 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Checkpoint Type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
                 { "Range Min", new Tuple<string, Type>("range_min", typeof(string)) },
                 { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) },
-                { "Risk Type", new Tuple<string, Type>("risk_type_id", typeof(string)) },
+                /*{ "Risk Type", new Tuple<string, Type>("risk_type_id", typeof(string)) },
                 { "Type Observation", new Tuple<string, Type>("observation_type_id", typeof(string)) },
-                { "Cost Type", new Tuple<string, Type>("cost_typ_id", typeof(string)) },
+                { "Cost Type", new Tuple<string, Type>("cost_typ_id", typeof(string)) },*/
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -862,7 +860,6 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (Convert.ToString(newR["check_point"]) != "" && Convert.ToInt32(newR["checklist_id"]) != 0)
                             {
-
                                 string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);

@@ -1,32 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Grievance;
+using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
-using System.IO;
 using Microsoft.AspNetCore.Hosting;
-using OfficeOpenXml;
-using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.Calibration;
-using CMMSAPIs.Models.Jobs;
-using iTextSharp.tool.xml.html;
-using Org.BouncyCastle.Asn1.X500;
-using System.Drawing;
-using System.Text.RegularExpressions;
-using MySqlX.XDevAPI.Relational;
-using Microsoft.IdentityModel.Tokens;
-using CMMSAPIs.Models.Inventory;
-using CMMSAPIs.Models.Users;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using CMMSAPIs.Models.Masters;
-using CMMSAPIs.BS.Facility;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 using static CMMSAPIs.Helper.CMMS;
-using Microsoft.AspNetCore.Http.Features;
 using GrievanceSummaryReport = CMMSAPIs.Models.Grievance.GrievanceSummaryReport;
 //using static System.Net.WebRequestMethods;
 //using IronXL;
@@ -71,8 +54,6 @@ namespace CMMSAPIs.Repositories.Grievance
             return retValue;
 
         }
-
-
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMGrievance InvObj)
         {
             string retValue = "Grievance";
@@ -96,14 +77,9 @@ namespace CMMSAPIs.Repositories.Grievance
                     break;
                 default:
                     break;
-                default:
-                    break; 
             }
             return retValue;
-
         }
-
-
         internal async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilitytimezone)
         {
             // validate facilityid is not empty
@@ -237,7 +213,7 @@ namespace CMMSAPIs.Repositories.Grievance
                     await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED, new int[] { userID }, _GrievanceAdded);
                 }
 
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine("Failed to send Grievance", ex.Message);
                 }
@@ -375,8 +351,8 @@ namespace CMMSAPIs.Repositories.Grievance
 
             //_GrievanceAdded.status_short = Convert.ToInt32(_shortStatus);
 
-           /* string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
-            _GrievanceAdded.statusLong = _longStatus;*/
+            /* string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
+             _GrievanceAdded.statusLong = _longStatus;*/
 
 
 
@@ -441,7 +417,7 @@ namespace CMMSAPIs.Repositories.Grievance
         {
             Dictionary<int, GrievanceSummaryReport> dictionary = new Dictionary<int, GrievanceSummaryReport>();
 
-            
+
 
             string myQuery =
                 "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.resolutionLevel, g.status_id as statusId " +

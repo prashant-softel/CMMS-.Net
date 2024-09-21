@@ -294,6 +294,7 @@ namespace CMMSAPIs.Models.SM
         public int ID { get; set; }
         public int facilityId { get; set; }
         public string facilityName { get; set; }
+
         public int requested_by_emp_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
         public string approver_name { get; set; }
@@ -327,6 +328,10 @@ namespace CMMSAPIs.Models.SM
         public int issue_rejected_by_emp_ID { get; set; }
         public string updated_by_emp { get; set; }
         public string rejected_by_emp { get; set; }
+        public int from_actor_type_id { get; set; }
+        public int from_actor_id { get; set; }
+        public int to_actor_type_id { get; set; }
+        public int to_actor_id { get; set; }
         public string issue_approved_by_emp { get; set; }
         public string issue_rejected_by_emp { get; set; }
         public int UpdatedByEmpID { get; set; }
@@ -337,6 +342,7 @@ namespace CMMSAPIs.Models.SM
         public DateTime? issue_rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
+
 
     public class CMMRSReturnList
     {

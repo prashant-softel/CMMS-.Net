@@ -36,37 +36,37 @@ namespace CMMSAPIs.Repositories.Calibration
         internal string getLongStatus(CMMS.CMMS_Status notificationID, CMCalibrationDetails CaliObj)
         {
             string retValue = " ";
-            int calibrationId = CaliObj.calibration_id;
+
 
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST:
-                    retValue = String.Format("Calibration CAL{0} Requested by {1}", calibrationId, CaliObj.responsible_person);
+                    retValue = String.Format("Calibration Requested by {0}", CaliObj.responsible_person);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_APPROVED:
-                    retValue = String.Format("Calibration CAL{0} Request Approved by {1}", calibrationId, CaliObj.request_approved_by);
+                    retValue = String.Format("Calibration Request Approved by {0}", CaliObj.request_approved_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REQUEST_REJECTED:
-                    retValue = String.Format("Calibration CAL{0} Request Rejected by {1}", calibrationId, CaliObj.request_rejected_by);
+                    retValue = String.Format("Calibration  Request Rejected by {0}", CaliObj.request_rejected_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_STARTED:
-                    retValue = String.Format("Calibration CAL{0} started at {1}", calibrationId, CaliObj.started_at);
+                    retValue = String.Format("Calibration started at {0}", CaliObj.started_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_COMPLETED:
                     //retValue = String.Format("Calibration Dispachted by {0} at {1}", CaliObj.dispatched_by, CaliObj.dispatched_at);
-                    retValue = String.Format("Calibration Completed by {0} at {1}", calibrationId, CaliObj.completed_by, CaliObj.completed_at);
+                    retValue = String.Format("Calibration Completed by {0} at {1}", CaliObj.completed_by, CaliObj.completed_at);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_CLOSED:
-                    retValue = String.Format("Calibration CAL{0} Closed by {0} at {1}", calibrationId, CaliObj.Closed_at, CaliObj.Closed_by);
+                    retValue = String.Format("Calibration by {0} at {1}", CaliObj.Closed_at, CaliObj.Closed_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_APPROVED:
-                    retValue = String.Format("Calibration CAL{0} Closed/Skip request Approved by {1}", calibrationId, CaliObj.approved_by);
+                    retValue = String.Format("Calibration Approved by {0}", CaliObj.approved_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_REJECTED:
-                    retValue = String.Format("Calibration CAL{0} Closed/Skip request Rejected by {1}", calibrationId, CaliObj.rejected_by);
+                    retValue = String.Format("Calibration Rejected by {0}", CaliObj.rejected_by);
                     break;
                 case CMMS.CMMS_Status.CALIBRATION_SKIPPED:
-                    retValue = String.Format("Calibration CAL{0} Skip requested by {1}", calibrationId, CaliObj.approved_by);
+                    retValue = String.Format("Calibration Skipped by {0}", CaliObj.approved_by);
                     break;
                 default:
                     break;
@@ -113,10 +113,10 @@ namespace CMMSAPIs.Repositories.Calibration
                             "business as vendor ON a_calibration.vendor_id=vendor.id " +
                             "LEFT JOIN " +
                            "users as request_by ON a_calibration.requested_by=request_by.id " +
-                          " WHERE categories.calibrationStatus = 1  "; //(a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
+                          " WHERE  "; //(a_calibration.requested_at = (SELECT MAX(requested_at) FROM calibration as b_calibration WHERE a_calibration.asset_id = b_calibration.asset_id) OR a_calibration.requested_at is null) ";
             if (facility_id > 0)
             {
-                myQuery += $"AND assets.facilityId = {facility_id} ;";
+                myQuery += $" assets.facilityId = {facility_id} ;";
             }
             else
             {
@@ -273,7 +273,6 @@ namespace CMMSAPIs.Repositories.Calibration
             }
             if (request.vendor_id <= 0)
             {
-                //if vendor id is not passed, take assets vendor id
                 string vendorQry = $"SELECT vendorId FROM assets WHERE id = {request.asset_id};";
                 DataTable dtVendor = await Context.FetchData(vendorQry).ConfigureAwait(false);
                 if (dtVendor.Rows.Count > 0)

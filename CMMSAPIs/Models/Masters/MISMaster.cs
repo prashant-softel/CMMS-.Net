@@ -915,28 +915,20 @@ namespace CMMSAPIs.Models.Masters
         public DateTime updated_at { get; set; }  // updated_at
         public int updated_by { get; set; }  // updated_by
     }
-    public class EvaluationCreate
+    public class CMEvaluationCreate
     {
         public int id { get; set; }
         public string plan_name { get; set; }
         public int facility_id { get; set; }
         public int frequency_id { get; set; }
-        public int category_id { get; set; }
         public DateTime plan_date { get; set; }
         public string assigned_to { get; set; }
         public string status { get; set; }
         public int created_by { get; set; }
-        public DateTime created_at { get; set; }
         public int updated_by { get; set; }
-        public DateTime updated_at { get; set; }
         public int approved_by { get; set; }
-        public DateTime approved_at { get; set; }
         public int rejected_by { get; set; }
-        public DateTime rejected_at { get; set; }
         public string remarks { get; set; }
-        public bool Deleted { get; set; }
-        public int type_id { get; set; }
-        public List<MapAuditlist> mapauditlist { get; set; }
     }
     public class MapAuditlist
     {
@@ -950,5 +942,8 @@ namespace CMMSAPIs.Models.Masters
         public int updated_by { get; set; }
         public DateTime updated_at { get; set; }
     }
+
+
+
 }
 

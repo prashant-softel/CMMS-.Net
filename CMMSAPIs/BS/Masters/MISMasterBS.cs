@@ -143,8 +143,23 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<KaizensData>> GetKaizensData();
         Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date);
         Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request);
-        Task<CMDefaultResponse> CreateEvaluation(EvaluationCreate request, int userID);
+        //Evaution
+        Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int userID);
         Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanRejected(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosedApproved(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelledReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosedReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosed(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelled(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelledApproved(CMApproval request, int userID);
+        Task<CMDefaultResponse> DeleteEvaluationPlan(int id, int userID);
+        Task<CMDefaultResponse> EvaluationTaskStart(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanUpdated(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskSchedule(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskAssign(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -2085,8 +2100,7 @@ namespace CMMSAPIs.BS.MISMasters
 
         }
 
-
-        public async Task<CMDefaultResponse> CreateEvaluation(EvaluationCreate request, int userID)
+        public async Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int userID)
         {
             try
             {
@@ -2100,7 +2114,6 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-
         public async Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID)
         {
             try
@@ -2114,6 +2127,75 @@ namespace CMMSAPIs.BS.MISMasters
             {
                 throw;
             }
+        }
+        public Task<CMDefaultResponse> EvaluationPlanRejected(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosedApproved(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelledReject(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosedReject(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosed(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelled(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelledApproved(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> DeleteEvaluationPlan(int id, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskStart(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationPlanUpdated(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskSchedule(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskAssign(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID)
+        {
+            throw new NotImplementedException();
         }
     }
 }
