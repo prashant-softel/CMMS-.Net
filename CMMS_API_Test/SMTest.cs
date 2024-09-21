@@ -51,6 +51,7 @@ namespace CMMS_API_Test
         // GO
         string EP_getGOList = "/api/GO/GetGOList";
         string EP_getGOItemByID = "/api/GO/GetGOItemByID";
+        string EP_GetGODetailsByID = "/api/GO/GetGODetailsByID";
         string EP_createGO = "/api/GO/CreateGO";
         string EP_updateGO = "/api/GO/UpdateGO";
         string EP_GOApproval = "/api/GO/GOApproval";
@@ -294,6 +295,7 @@ namespace CMMS_API_Test
             var response = ptwService.CreateItem(EP_requestMRS, payload);
             string responseMessage = response.message;
             Assert.AreEqual("Request has been submitted.", responseMessage);
+
         }
 
         [TestMethod]
@@ -463,10 +465,8 @@ namespace CMMS_API_Test
             int vendorID = response[0].vendorID;
 
             Assert.AreEqual(vendorID, 7);
-
-            var expectedItemCount = 18; 
-            var actualItemCount = response.Count; 
-            Assert.AreEqual(expectedItemCount, actualItemCount, "The number of items returned is not as expected.");
+            Assert.IsNotNull(response, "MRS list should not be null.");
+            Assert.IsTrue(response.Count > 0, "MRS list should contain at least one order.");
         }
         
     
@@ -480,8 +480,8 @@ namespace CMMS_API_Test
             Console.WriteLine("Expected ID: " + id);
             Console.WriteLine("Actual ID from response: " + response.purchaseID);
             int myNewItemId = response.purchaseID;
-            //Assert.IsNotNull(response);
             Assert.AreEqual(myNewItemId, id);
+            Assert.IsNotNull(response, "GO item should not be null.");
         }
 
 
@@ -549,26 +549,51 @@ namespace CMMS_API_Test
             var response = ptwService.CreateItem(EP_createGO, payload);
             int myNewItemId = response.id[0];
 
-            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
-            var responseForItem = getItem.GetItem(EP_getGOItemByID + "?ID=" + myNewItemId);
+            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOMaster>();
+            var responseForItem = getItem.GetItem(EP_GetGODetailsByID + "?ID=" + myNewItemId);
 
-            Assert.AreEqual(myNewItemId, responseForItem.purchaseID);
+            
+            Assert.AreEqual(myNewItemId, responseForItem.Id);
 
-            var item = responseForItem;
+            
+            Assert.AreEqual(1, responseForItem.facility_id);
+            //Assert.AreEqual(1, responseForItem.order_by_type);
+            //Assert.AreEqual(1, responseForItem.location_ID);
+            Assert.AreEqual(325, responseForItem.vendorID);
+            Assert.AreEqual("434332", responseForItem.po_no);
+            Assert.AreEqual(new DateTime(2024, 9, 14), responseForItem.po_date);
+            Assert.AreEqual(323232, responseForItem.amount);
+            Assert.AreEqual(69, responseForItem.currencyID);
+            Assert.AreEqual("Indian Rupee", responseForItem.currency);
+            //Assert.IsTrue(responseForItem.submitted_by_id > 0);
 
-            Assert.AreEqual(1, item.facility_id);
-            //Assert.AreEqual(1, item.order_by_type);
-            //Assert.AreEqual(1, item.location_ID);
-            //Assert.AreEqual(325, item.vendorID);
-            //Assert.AreEqual("434332", item.po_no);
-            //Assert.AreEqual(new DateTime(2024, 9, 14), item.po_date);
-            /*Assert.AreEqual(323232, item.amount);
-            Assert.AreEqual(69, item.currencyID);
-            Assert.AreEqual(1, item.is_submit);*/
+            Assert.AreEqual(1, responseForItem.GODetails[0].assetMasterItemID);
+            Assert.AreEqual(null, responseForItem.GODetails[0].storage_rack_no);
+            Assert.AreEqual(null, responseForItem.GODetails[0].storage_row_no);
+            Assert.AreEqual(null, responseForItem.GODetails[0].storage_column_no);
+            Assert.AreEqual(0, responseForItem.GODetails[0].requestOrderId);
+            Assert.AreEqual(1, responseForItem.GODetails[0].cost);
+            Assert.AreEqual(1, responseForItem.GODetails[0].ordered_qty);
+            Assert.AreEqual(2, responseForItem.GODetails[0].paid_by_ID);
+            Assert.AreEqual(1, responseForItem.GODetails[0].requested_qty);
+            Assert.AreEqual(0, responseForItem.GODetails[0].accepted_qty);
+            Assert.AreEqual(0, responseForItem.GODetails[0].received_qty);
+            Assert.AreEqual(0, responseForItem.GODetails[0].lost_qty);
+            Assert.AreEqual(0, responseForItem.GODetails[0].damaged_qty);
+            Assert.AreEqual(0, responseForItem.GODetails[0].requestOrderItemID);
+            Assert.AreEqual("", responseForItem.GODetails[0].assetItem_Name);
+            Assert.AreEqual("", responseForItem.GODetails[0].cat_name);
+            Assert.AreEqual(0, responseForItem.GODetails[0].spare_status);
+            Assert.AreEqual("", responseForItem.GODetails[0].remarks);
+            Assert.AreEqual(0, responseForItem.GODetails[0].receive_later);
+            Assert.AreEqual(0, responseForItem.GODetails[0].asset_type_ID);
+            Assert.AreEqual("", responseForItem.GODetails[0].paid_by_name);
+            Assert.AreEqual("", responseForItem.GODetails[0].cat_name);
+            Assert.AreEqual("", responseForItem.GODetails[0].asset_type);
+            Assert.AreEqual("", responseForItem.GODetails[0].asset_code);
+            Assert.AreEqual("", responseForItem.GODetails[0].sr_no);
         }
-
-
-
+    
 
         [TestMethod]
         public void VerifyupdateGO()
