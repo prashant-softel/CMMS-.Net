@@ -426,8 +426,6 @@ namespace CMMSAPIs.Helper
             PM_TASK_UPDATED,//Only for notification purpose
             PM_TASK_DELETED,
             PM_SUBMIT,
-
-
             /*
                         MC_EXECUTION_STARTED,
                         MC_EXECUTION_CLOSED,
@@ -483,13 +481,6 @@ namespace CMMSAPIs.Helper
             CALIBRATION_SKIPPED,
             CALIBRATION_SKIPPED_REJCTED,
             CALIBRATION_SKIPPED_APPROVED,
-
-
-
-
-
-
-
 
             INVENTORY_IMPORTED = 221,
             INVENTORY_ADDED,
@@ -656,6 +647,27 @@ namespace CMMSAPIs.Helper
             VEG_EXECUTION_ABANDONED,
             VEG_EXECUTION_COMPLETED,
 
+
+
+            EVAL_PLAN_CREATED = 800,
+            EVAL_PLAN_APPROVED,
+            EVAL_PLAN_REJECTED,
+            EVAL_PLAN_UPDATED,              //Only for notification purpose
+            EVAL_PLAN_DELETED,
+            EVAL_SCHEDULED,
+            EVAL_ASSIGNED,
+            EVAL_REJECTED,
+            EVAL_APPROVED,
+            //EVAL_LINKED_TO_PTW,
+            EVAL_START,
+            EVAL_CLOSED,
+            EVAL_CLOSE_REJECTED,
+            EVAL_CLOSE_APPROVED,
+            EVAL_CANCELLED,
+            EVAL_CANCELLED_REJECTED,
+            EVAL_CANCELLED_APPROVED,
+            EVAL_DELETED,
+            EVAL_UPDATED,
         }
 
         public enum ApprovalStatus

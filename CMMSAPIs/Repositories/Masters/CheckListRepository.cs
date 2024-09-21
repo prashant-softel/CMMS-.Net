@@ -93,9 +93,9 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (CMCreateCheckList request in request_list)
             {
                 string query = "INSERT INTO checklist_number(checklist_number, checklist_type, facility_id, status ,created_by ," +
-                    " created_at , asset_category_id ,frequency_id ,manpower , duration)VALUES" +
+                    " created_at , asset_category_id ,frequency_id ,manpower , duration,Sop_number)VALUES" +
                             $"('{request.checklist_number}', {request.type}, {request.facility_id}, 1, {userID}," +
-                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration}); select LAST_INSERT_ID();";
+                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'{request.Sop_number}'); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -130,6 +130,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $" frequency_id = {request.frequency_id}, ";
             if (request.manPower > 0)
                 updateQry += $" manpower = {request.manPower}, ";
+            if (request.Sop_number != null)
+                updateQry += $" Sop_number = '{request.Sop_number}', ";
             if (request.duration > 0)
                 updateQry += $" duration = {request.duration}, ";
             updateQry += $" updated_by = {userID}, updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id}; ";
@@ -280,6 +282,7 @@ namespace CMMSAPIs.Repositories.Masters
                                 "checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, " +
                                 "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type as type, m.name AS type_of_observation, r.risktype AS risk_type, " +
                                 "CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , " +
+                                "CASE WHEN checkpoint.cost_type = 1 then 'capex'  WHEN checkpoint.cost_type = 2  then 'opex'  ELSE 'Empty' END as Cost_type_name ,checkpoint.cost_type as Cost_Type,  " +
                                 "checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " +
                                 "checkpoint " +
@@ -344,32 +347,28 @@ namespace CMMSAPIs.Repositories.Masters
 
                 if (request.checkpoint_type.type != 2)
                 {
-                    request.checkpoint_type.min = 0; // Consider min value if type is 2
-                    request.checkpoint_type.max = 0; // Consider max value if type is 2
+                    request.checkpoint_type.min = 0;
+                    request.checkpoint_type.max = 0;
                 }
 
                 if (request.checkpoint_type.type != 1)
                 {
                     request.checkpoint_type.type = 0;
-                    // Only consider type 1
+
                 }
-
-
 
                 string query = "INSERT INTO checkpoint " +
                "(check_point, check_list_id, requirement, is_document_required, action_to_be_done, " +
                "failure_weightage, type, min_range, max_range, created_by, created_at, status, " +
-               "type_of_observation, risk_type) " +
+               "type_of_observation, risk_type,cost_type) " +
                "VALUES " +
                $"('{request.check_point}', {request.checklist_id}, '{request.requirement.Replace("'", "''")}', " +
                $"{(request.is_document_required ?? 0)}, '{request.action_to_be_done}', '{request.failure_weightage}', " +
                $"'{request.checkpoint_type.type}', '{request.checkpoint_type.min}', '{request.checkpoint_type.max}', " +
                $"'{userID}', '{UtilsRepository.GetUTCTime()}', 1, " +
-               $"{request.type_of_observation}, {request.risk_type}); " +
+               $"{request.type_of_observation}, {request.risk_type},{request.cost_type}); " +
                "SELECT LAST_INSERT_ID();";
-
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
-
                 int id = Convert.ToInt32(dt.Rows[0][0]);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKPOINTS, id, 0, 0, "Check Point Created", CMMS.CMMS_Status.CREATED, userID);
                 idList.Add(id);
@@ -416,14 +415,14 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (request.checkpoint_type.type != 2)
             {
-                request.checkpoint_type.min = 0; // Consider min value if type is 2
-                request.checkpoint_type.max = 0; // Consider max value if type is 2
+                request.checkpoint_type.min = 0;
+                request.checkpoint_type.max = 0;
             }
 
             if (request.checkpoint_type.type != 1)
             {
                 request.checkpoint_type.type = 0;
-                // Only consider type 1
+
             }
             string updateQry = $"UPDATE checkpoint SET ";
             if (request.check_point != "" && request.check_point != null)
@@ -440,6 +439,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"status = {request.status}, ";
             if (request.risk_type != null)
                 updateQry += $"risk_type = {request.risk_type}, ";
+            if (request.cost_type != null)
+                updateQry += $"cost_type = {request.cost_type}, ";
             if (request.type_of_observation != null)
                 updateQry += $"type_of_observation = {request.type_of_observation}, ";
             if (request.checkpoint_type != null)
@@ -507,6 +508,7 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Category", new Tuple<string, Type>("category_name", typeof(string)) },
                 { "Man Power", new Tuple<string, Type>("manPower", typeof(int)) },
                 { "Duration", new Tuple<string, Type>("duration", typeof(int)) },
+                { "Sop_number", new Tuple<string, Type>("Sop_number", typeof(int)) },
             };
 
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
@@ -548,6 +550,7 @@ namespace CMMSAPIs.Repositories.Masters
                         dt2.Columns.Add("category_id", typeof(int));
                         dt2.Columns.Add("frequency_id", typeof(int));
                         dt2.Columns.Add("type", typeof(int));
+
                         //Pending: Reasons for skipping 3 rows
                         //
                         for (int rN = 2; rN <= sheet.Dimension.End.Row; rN++)
@@ -597,11 +600,7 @@ namespace CMMSAPIs.Repositories.Masters
                             catch (KeyNotFoundException)
                             {
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
-                                //if (Convert.ToString(newR["facility_name"]) == null || Convert.ToString(newR["facility_name"]) == "")
-                                //    m_errorLog.SetError($"[Checklist: Row {rN}] Facility Name cannot be empty.");
-                                //else
-                                //    m_errorLog.SetError($"[Checklist: Row {rN}] Invalid Facility '{newR["facility_name"]}'.");
-                                //newR["facility_id"] = 0;
+
                             }
 
                             if (Convert.ToString(newR["checklist_number"]) == null || Convert.ToString(newR["checklist_number"]) == "")
@@ -630,17 +629,6 @@ namespace CMMSAPIs.Repositories.Masters
                                     newR.Delete();
                                     continue;
                                 }
-
-                                //    else
-                                //    {
-
-                                //      newR["facility_id"] = 0;
-                                //     string updateQry = $"UPDATE  checklist_number SET  facility_id =0   where facility_id=" + newR["facility_id"]+" and checklist_number ='" + Convert.ToString(newR["checklist_number"]) + "';";
-                                //     await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                                //     continue;
-                                //   }
-                                // m_errorLog.SetError($"[Checklist: Row {rN}] Checklist name : {Convert.ToString(newR["checklist_number"])} already present in plant {facility_name}.");
-                                // }*/
                             }
                             else
                             {
@@ -687,6 +675,14 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
                             else if (Convert.ToDouble(newR["duration"]) == 0)
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
+                            if (newR["Sop_number"].ToString() == "" && newR["Sop_number"] == DBNull.Value)
+                            {
+                                m_errorLog.SetError($"[Sop_number: Row {rN}]  value cannot be empty.");
+                            }
+                            else
+                            {
+                                newR["Sop_number"] = newR["Sop_number"].ToString();
+                            }
                             dt2.Rows.Add(newR);
                             /*
                              { "Facility_Name", new Tuple<string, Type>("facility_name", typeof(string)) },
@@ -764,8 +760,11 @@ namespace CMMSAPIs.Repositories.Masters
                 { "bool", 1 },
                 { "range", 2 }
             };
-
-
+            Dictionary<string, int> cost_type = new Dictionary<string, int>()
+            {
+                { "capex", 1 },
+                { "opex", 2 },
+            };
             Dictionary<string, Tuple<string, Type>> columnNames = new Dictionary<string, Tuple<string, Type>>()
             {
                 { "Checkpoint Name", new Tuple<string, Type>("check_point", typeof(string)) },
@@ -775,9 +774,11 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Action to be taken", new Tuple<string, Type>("action_to_be_done", typeof(string)) },
                 { "Failure Weightage", new Tuple<string, Type>("failure_weightage", typeof(int)) },
                 { "Checkpoint Type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
-
                 { "Range Min", new Tuple<string, Type>("range_min", typeof(string)) },
-                { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) }
+                { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) },
+                { "Risk Type", new Tuple<string, Type>("risk_type_id", typeof(string)) },
+                { "Type Observation", new Tuple<string, Type>("observation_type_id", typeof(string)) },
+                { "Cost Type", new Tuple<string, Type>("cost_typ_id", typeof(string)) },
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -898,7 +899,14 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid checkpoint type.");
                             }
-
+                            try
+                            {
+                                newR["cost_typ_id"] = cost_type[Convert.ToString(newR["Cost Type"]).ToUpper()];
+                            }
+                            catch
+                            {
+                                m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid Cost type.");
+                            }
 
                             if (Convert.ToInt32(newR["failure_weightage"]) > 100)
                             {

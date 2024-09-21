@@ -30,11 +30,19 @@ using CMMSAPIs.Repositories.Utils;
 using CMMSAPIs.Repositories.MCVCRepository;
 using CMMSAPIs.Repositories.WC;
 using CMMSAPIs.Repositories.PM;
+using CMMSAPIs.Repositories.MCVCRepository;
+using CMMSAPIs.Repositories.Permits;
+using CMMSAPIs.Repositories.PM;
+using CMMSAPIs.Repositories.SM;
+using CMMSAPIs.Repositories.Users;
+using CMMSAPIs.Repositories.Utils;
+using CMMSAPIs.Repositories.WC;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static CMMSAPIs.Helper.CMMS;
 
 //using CommonUtilities;
 //using CMMSAPIs.Models.Notifications;
@@ -274,6 +282,7 @@ namespace CMMSAPIs.Models.Notifications
                 }
                 List<string> EmailTo = new List<string>();
            if (getDB == null)
+                if (getDB == null)
                 {
                     getDB = new MYSQLDBHelper(_conString);
                 }
@@ -292,7 +301,6 @@ namespace CMMSAPIs.Models.Notifications
                         emailCount++;
                     }
                 }
-
                 EmailTo.Add("notifications@softeltech.in");
                 if (users.Count > 0)
                  {
@@ -305,6 +313,17 @@ namespace CMMSAPIs.Models.Notifications
                      System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
                  }
                  
+                EmailTo.Add("notifications@softeltech.in");
+                if (users.Count > 0)
+                {
+                    notificationRecordsQry = notificationRecordsQry.TrimEnd(',');
+                    //notificationRecordsQry = notificationRecordsQry.Substring(0, notificationRecordsQry.Length - 1);
+                    if (getDB == null)
+                    {
+                        getDB = new MYSQLDBHelper(_conString);
+                    }
+                    System.Data.DataTable dt2 = await getDB.FetchData(notificationRecordsQry).ConfigureAwait(false);
+                }
 
                 if (print)
                 {
@@ -332,6 +351,12 @@ namespace CMMSAPIs.Models.Notifications
         }
 
         public static async Task<CMDefaultResponse> sendNotification2(int notificationType, CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, string additionalUserIds, int userId, string facilitytimeZone, int role=0, int delayDays=0)
+
+            }
+            return response;
+        }
+
+        public static async Task<CMDefaultResponse> sendNotification2(int notificationType, CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, int module_ref_id, string additionalUserIds, int userId, string facilitytimeZone, int role = 0, int delayDays = 0)
         {
             CMDefaultResponse retValue;
             //string facilitytimeZone = "";
@@ -621,6 +646,37 @@ namespace CMMSAPIs.Models.Notifications
                 CMMRSReturnList _RMRS = (CMMRSReturnList)args[0];
                 notificationObj = new ReturnMRSNotification(moduleID, notificationID, _RMRS);
                 facilityId = _RMRS.facilityId;   
+            }
+            else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
+            {
+                CMPMPlanDetail _Plan = (CMPMPlanDetail)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Plan);
+                facilityId = _Plan.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.PM_TASK)
+            {
+                CMPMTaskView _Task = (CMPMTaskView)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Task);
+                facilityId = _Task.facility_id;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.PM_SCHEDULE)
+            {
+                CMPMScheduleExecutionDetail _Schedule = (CMPMScheduleExecutionDetail)args[0];
+                notificationObj = new PMNotification(moduleID, notificationID, _Schedule);
+                //facilityId = _Schedule.facility_id;
+            }
+            }
+            else if (moduleID == CMMS.CMMS_Modules.SM_MRS)     //MRS Report
+            {
+                CMMRSList _MRS = (CMMRSList)args[0];
+                notificationObj = new MRSNotification(moduleID, notificationID, _MRS);
+                facilityId = _MRS.facilityId;
+            }
+            else if (moduleID == CMMS.CMMS_Modules.SM_MRS_RETURN)     //Return MRS Report
+            {
+                CMMRSReturnList _RMRS = (CMMRSReturnList)args[0];
+                notificationObj = new ReturnMRSNotification(moduleID, notificationID, _RMRS);
+                facilityId = _RMRS.facilityId;
             }
             else if (moduleID == CMMS.CMMS_Modules.PM_PLAN)
             {

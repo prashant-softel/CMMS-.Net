@@ -95,6 +95,8 @@ namespace CMMSAPIs.Repositories.Grievance
                     retValue += String.Format("Asset {0} Ongoing by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
                     break;
                 default:
+                    break;
+                default:
                     break; 
             }
             return retValue;

@@ -150,13 +150,18 @@ namespace CMMSAPIs.Repositories.JC
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
                 jc.status_short = _shortStatus;
             }
-            //job equipment category
-            string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
-                              $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
-                              $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid} and job.facilityId = {facility_id}";
-            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
 
-            _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
+            foreach (var jc in _ViewJobCardList)
+            {
+                if (jc.jobid > 0)
+                {
+                    string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
+                                      $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
+                                      $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {jc.jobid} and job.facilityId = {facility_id}";
+                    List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
+                    _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
+                }
+            }
             foreach (var v in _ViewJobCardList)
             {
 
