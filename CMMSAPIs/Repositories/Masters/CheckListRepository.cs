@@ -100,7 +100,7 @@ namespace CMMSAPIs.Repositories.Masters
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
                 int id = Convert.ToInt32(dt.Rows[0][0]);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, 0, 0, $"Check List {request.checklist_number} Created", CMMS.CMMS_Status.CREATED, userID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.CHECKLIST_NUMBER, id, , 0, $"Check List {request.checklist_number} Created", CMMS.CMMS_Status.CREATED, userID);
                 id_list.Add(id);
             }
             CMDefaultResponse response = new CMDefaultResponse(id_list, CMMS.RETRUNSTATUS.SUCCESS, $"{id_list.Count} Checklist(s) Created Successfully");
