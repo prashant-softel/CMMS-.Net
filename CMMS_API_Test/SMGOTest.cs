@@ -253,9 +253,9 @@ namespace CMMS_API_Test
                                   ""gir_no"": """",
                                   ""closedBy"": null,
                                   ""job_ref"": """",
-                                  ""amount"": 434343,
+                                  ""amount"": 87878,
                                   ""currencyID"": 69,
-                                  ""id"": 148,
+                                  ""id"": 157,
                                   ""is_submit"": 1,
                                   ""go_items"": [
                                       {
@@ -297,12 +297,39 @@ namespace CMMS_API_Test
             string expectedMessage = "Goods order updated successfully.";
 
             Assert.AreEqual(expectedMessage, actualMessage);
+            
 
-            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
-            var updatedGO = getItem.GetItem(EP_getGOItemByID + "?ID=" + goId);
+            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOMaster>();
+            var updatedGO = getItem.GetItem(EP_GetGODetailsByID + "?ID=" + goId);
 
-            Assert.AreEqual(434343, updatedGO.amount);
+            Assert.AreEqual((int)CMMS.CMMS_Status.GO_SUBMITTED, updatedGO.status);
+
+            Assert.AreEqual(87878, updatedGO.amount);
             Assert.AreEqual("434343", updatedGO.po_no);
+            Assert.AreEqual(1, updatedGO.facility_id);
+            Assert.AreEqual(0, updatedGO.location_ID);
+            Assert.AreEqual(325, updatedGO.vendorID);
+            //Assert.AreEqual("0001-01-01", updatedGO.purchaseDate);
+            //Assert.AreEqual("2024-09-14", updatedGO.po_date);
+            Assert.AreEqual(69, updatedGO.currencyID);
+            Assert.AreEqual("Indian Rupee", updatedGO.currency);
+
+            var goItem = updatedGO.GODetails[0];
+            //Assert.AreEqual(2599, updatedGO.GODetails[0].requestOrderId);
+            //Assert.AreEqual(2599, updatedGO.GODetails[0].assetMasterItemID);
+            Assert.AreEqual(1, updatedGO.GODetails[0].cost);
+            Assert.AreEqual(1, updatedGO.GODetails[0].ordered_qty);
+            Assert.AreEqual(2, updatedGO.GODetails[0].paid_by_ID);
+            Assert.AreEqual(1, updatedGO.GODetails[0].requested_qty);
+            Assert.AreEqual(0, updatedGO.GODetails[0].accepted_qty);
+            Assert.AreEqual(0, updatedGO.GODetails[0].received_qty);
+            Assert.AreEqual("DC Disconnector Switch", updatedGO.GODetails[0].assetItem_Name);
+            Assert.AreEqual("operator", updatedGO.GODetails[0].paid_by_name);
+            Assert.AreEqual(0, updatedGO.GODetails[0].receive_later);
+            Assert.AreEqual(2, updatedGO.GODetails[0].asset_type_ID);
+            Assert.AreEqual("SMB", updatedGO.GODetails[0].cat_name);
+            Assert.AreEqual("Spare", updatedGO.GODetails[0].asset_type);
+            Assert.AreEqual("S043213001", updatedGO.GODetails[0].asset_code);
         }
 
 
