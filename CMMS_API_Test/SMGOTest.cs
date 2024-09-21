@@ -22,7 +22,6 @@ namespace CMMS_API_Test
         string EP_ApproveGOReceive = "/api/GO/ApproveGOReceive";
         string EP_RejectGOReceive = "/api/GO/RejectGOReceive";
         string EP_CloseGO = "/api/GO/CloseGO";
-        string EP_withdrawGO = "/api/GO/WithdrawGO";
         string EP_DeleteGO = "/api/GO/DeleteGO";
         string EP_GetGoodsOrderData = "/api/GO/GetGoodsOrderData";
         string EP_SubmitGoodsOrderData = "/api/GO/SubmitGoodsOrderData";
@@ -35,8 +34,8 @@ namespace CMMS_API_Test
             int facilityID = 1;
             string fromDate = "2024-09-13";
             string toDate = "2024-09-14";
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOListByFilter>();
-            var response = ptwService.GetItemList(EP_getGOList + "?facility_id=" + facilityID + "&fromDate=" + fromDate + "&toDate=" + toDate);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOListByFilter>();
+            var response = goService.GetItemList(EP_getGOList + "?facility_id=" + facilityID + "&fromDate=" + fromDate + "&toDate=" + toDate);
 
             int vendorID = response[0].vendorID;
 
@@ -52,8 +51,8 @@ namespace CMMS_API_Test
             int empRole = 1;
             string fromDate = "2024-09-13";
             string toDate = "2024-09-14";
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOListByFilter>();
-            var response = ptwService.GetItemList(EP_GetGoodsOrderData + "?facility_id=" + facilityID + "&fromDate=" + fromDate + "&toDate=" + toDate + "&empRole=" + empRole);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOListByFilter>();
+            var response = goService.GetItemList(EP_GetGoodsOrderData + "?facility_id=" + facilityID + "&fromDate=" + fromDate + "&toDate=" + toDate + "&empRole=" + empRole);
             Assert.IsNotNull(response, "GO Data should not be null.");
             Assert.IsTrue(response.Count > 0, "GO Data should contain at least one order.");
         }
@@ -62,8 +61,8 @@ namespace CMMS_API_Test
         public void VerifyGetGODetailsByID()
         {
             int id = 156;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
-            var response = ptwService.GetItem(EP_GetGODetailsByID + "?ID=" + id);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
+            var response = goService.GetItem(EP_GetGODetailsByID + "?ID=" + id);
 
             int myNewItemId = response.id;
             Assert.AreEqual(myNewItemId, id);
@@ -131,8 +130,8 @@ namespace CMMS_API_Test
         public void VerifygetGOItemById()
         {
             int id = 1;
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
-            var response = ptwService.GetItem(EP_getGOItemByID + "?ID=" + id);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.CMGoodsOrderList>();
+            var response = goService.GetItem(EP_getGOItemByID + "?ID=" + id);
             Console.WriteLine("Expected ID: " + id);
             Console.WriteLine("Actual ID from response: " + response.purchaseID);
             int myNewItemId = response.purchaseID;
@@ -183,15 +182,13 @@ namespace CMMS_API_Test
                                 ]
                             }";
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-            var response = ptwService.CreateItem(EP_createGO, payload);
-            int myNewItemId = response.id[0];
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = goService.CreateItem(EP_createGO, payload);
+            int goId = response.id[0];
 
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOMaster>();
-            var responseForItem = getItem.GetItem(EP_GetGODetailsByID + "?ID=" + myNewItemId);
+            var responseForItem = getItem.GetItem(EP_GetGODetailsByID + "?ID=" + goId);
 
-
-            Assert.AreEqual(myNewItemId, responseForItem.Id);
             Assert.AreEqual((int)CMMS.CMMS_Status.GO_SUBMITTED, responseForItem.status);
 
             Assert.AreEqual(1, responseForItem.facility_id);
@@ -224,7 +221,7 @@ namespace CMMS_API_Test
 
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The submitted timestamp should be the same");
 
-            Assert.AreEqual(responseForItem.Id, response.id[0]);
+            Assert.AreEqual(responseForItem.Id, goId);
         }
 
 
@@ -238,21 +235,8 @@ namespace CMMS_API_Test
                                   ""location_ID"": 1,
                                   ""vendorID"": 0,
                                   ""purchaseDate"": ""0001-01-01"",
-                                  ""challan_no"": """",
-                                  ""challan_date"": ""0001-01-01"",
                                   ""po_no"": ""434343"",
                                   ""po_date"": ""2024-09-14"",
-                                  ""freight"": """",
-                                  ""receivedAt"": ""0001-01-01"",
-                                  ""no_pkg_received"": """",
-                                  ""lr_no"": """",
-                                  ""freight_value"": """",
-                                  ""inspection_report"": """",
-                                  ""condition_pkg_received"": """",
-                                  ""vehicle_no"": """",
-                                  ""gir_no"": """",
-                                  ""closedBy"": null,
-                                  ""job_ref"": """",
                                   ""amount"": 87878,
                                   ""currencyID"": 69,
                                   ""id"": 157,
@@ -260,9 +244,6 @@ namespace CMMS_API_Test
                                   ""go_items"": [
                                       {
                                           ""assetMasterItemID"": 2599,
-                                          ""storage_rack_no"": """",
-                                          ""storage_row_no"": """",
-                                          ""storage_column_no"": """",
                                           ""goItemID"": 2599,
                                           ""cost"": 1,
                                           ""ordered_qty"": 1,
@@ -288,8 +269,8 @@ namespace CMMS_API_Test
                                   ]
                             }";
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-            var response = ptwService.CreateItem(EP_updateGO, payload);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = goService.CreateItem(EP_updateGO, payload);
 
             int goId = response.id[0];
             string actualMessage = response.message;
@@ -343,9 +324,9 @@ namespace CMMS_API_Test
                                  }";
 
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
 
-            var response = ptwService.CreateItem(EP_GOApproval, payload);
+            var response = goService.CreateItem(EP_GOApproval, payload);
 
             Assert.AreEqual("Approval Successful.", response.message);
 
@@ -363,7 +344,7 @@ namespace CMMS_API_Test
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The approved timestamp should be the same");
 
-            Assert.AreEqual(goResponse.Id, response.id[0]);
+            Assert.AreEqual(goResponse.Id,goId);
         }
 
         /*[TestMethod]
@@ -409,9 +390,9 @@ namespace CMMS_API_Test
                                  }";
 
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
 
-            var response = ptwService.CreateItem(EP_RejectGO, payload);
+            var response = goService.CreateItem(EP_RejectGO, payload);
 
             int goId = response.id[0];
 
@@ -433,7 +414,7 @@ namespace CMMS_API_Test
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The rejected timestamp should be the same");
 
-            Assert.AreEqual(goResponse.Id, response.id[0]);
+            Assert.AreEqual(goResponse.Id, goId);
         }
 
 
@@ -497,8 +478,8 @@ namespace CMMS_API_Test
                           ]
                     }";
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-            var response = ptwService.CreateItem(EP_UpdateGOReceive, payload);
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = goService.CreateItem(EP_UpdateGOReceive, payload);
 
             int goId = response.id[0];
 
@@ -524,7 +505,7 @@ namespace CMMS_API_Test
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The receive submitted timestamp should be the same");
 
-            Assert.AreEqual(goResponse.Id, response.id[0]);
+            Assert.AreEqual(goResponse.Id, goId);
         }
 
         [TestMethod]
@@ -537,9 +518,9 @@ namespace CMMS_API_Test
                                  }";
 
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
 
-            var response = ptwService.CreateItem(EP_ApproveGOReceive, payload);
+            var response = goService.CreateItem(EP_ApproveGOReceive, payload);
 
             int goId = response.id[0];
 
@@ -577,9 +558,9 @@ namespace CMMS_API_Test
                                  }";
 
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
 
-            var response = ptwService.CreateItem(EP_RejectGOReceive, payload);
+            var response = goService.CreateItem(EP_RejectGOReceive, payload);
 
             int goId = response.id[0];
 
@@ -602,7 +583,7 @@ namespace CMMS_API_Test
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The receive rejected timestamp should be the same");
 
-            Assert.AreEqual(goResponse.Id, response.id[0]);
+            Assert.AreEqual(goResponse.Id, goId);
 
 
         }
@@ -617,9 +598,9 @@ namespace CMMS_API_Test
                                  }";
 
 
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
 
-            var response = ptwService.CreateItem(EP_CloseGO, payload);
+            var response = goService.CreateItem(EP_CloseGO, payload);
 
             int goId = response.id[0];
 
@@ -642,12 +623,8 @@ namespace CMMS_API_Test
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
             Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The closed timestamp should be the same");
 
-            Assert.AreEqual(goResponse.Id, response.id[0]);
-
+            Assert.AreEqual(goResponse.Id, goId);
 
         }
-
-        
-
     }
 }
