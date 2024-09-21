@@ -426,13 +426,13 @@ namespace CMMSAPIs.Repositories.JC
             //  string myQuery7 = $"SELECT jc.id as id, PTWFiles.File_Name as fileName, PTWFiles.File_Category_name as fileCategory, PTWFiles.File_Size as fileSize, PTWFiles.status as status FROM st_ptw_files AS PTWFiles LEFT JOIN permits as ptw on  ptw.id = PTWFiles.PTW_id JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = { jc_id }";
             // string q = "select jobId from  WHERE id ="+jc_id;
             //int job_id   = await Context.FetchData<int>(q).ConfigureAwait(false);
-            string myQuery17 = "SELECT jc.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+            string myQuery17 = "SELECT U.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
                               "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +
                               "where module_ref_id =" + id + " and U.module_type = " + (int)CMMS.CMMS_Modules.JOB + ";";
 
             List<CMFileDetail> _fileUpload = await Context.GetData<CMFileDetail>(myQuery17).ConfigureAwait(false);
             //uploadjobcard
-            string myQuery18 = "SELECT jc.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
+            string myQuery18 = "SELECT U.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
                               "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +
                               "where module_ref_id =" + jc_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.JOB + ";";
 
@@ -703,7 +703,6 @@ namespace CMMSAPIs.Repositories.JC
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOBCARD, request.id, 0, 0, comment, CMMS.CMMS_Status.JC_UPDATED, userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOBCARD, CMMS.CMMS_Status.JC_UPDATED, new[] { userID }, _jcDetails[0]);
