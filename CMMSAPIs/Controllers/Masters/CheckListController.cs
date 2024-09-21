@@ -1,5 +1,6 @@
 ﻿using CMMSAPIs.BS.Masters;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,9 +39,12 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -55,9 +59,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.CreateChecklist(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -72,9 +79,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.UpdateCheckList(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -89,9 +99,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.DeleteChecklist(id, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -105,13 +118,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.GetCheckListMap(facility_id, category_id, type);
                 return Ok(data);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception)
-            {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -126,9 +138,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.CreateCheckListMap(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -142,9 +157,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.UpdateCheckListMap(request);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -163,9 +181,12 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -180,9 +201,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.CreateCheckPoint(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -197,9 +221,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.UpdateCheckPoint(request, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
 
@@ -247,9 +274,12 @@ namespace CMMSAPIs.Controllers.Masters
                 var data = await _CheckListBS.ImportChecklistCheckpoint(file_id, userID);
                 return Ok(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 400;
+                data.Message = ex.Message;
+                return BadRequest(data);
             }
         }
     }

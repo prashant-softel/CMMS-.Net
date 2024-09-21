@@ -13,7 +13,7 @@
         public int? risk_type { get; set; }
         public int? cost_type { get; set; }
         public int? type_of_observation { get; set; }
-        public int type { get; set; }
+        public int? type { get; set; }
         public int? status { get; set; }
     }
 
@@ -40,6 +40,8 @@
         public string? checkpoint_type { get; set; } // bool,renge
         public double? min { get; set; } // bool,renge
         public double? max { get; set; } // bool,renge
+
+        public string type_name { get; set; }
         public int created_by_id { get; set; }
         public string created_by_name { get; set; }
         public dynamic created_at { get; set; }

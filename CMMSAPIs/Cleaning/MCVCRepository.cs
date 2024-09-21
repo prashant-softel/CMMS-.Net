@@ -479,7 +479,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
                     ViewMCTaskList.Abondond_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.Abondond_done_date);
-
             }
             return _ViewMCTaskList;
         }
