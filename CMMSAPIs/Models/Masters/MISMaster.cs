@@ -899,15 +899,9 @@ namespace CMMSAPIs.Models.Masters
         public int type_of_observation { get; set; }
         public DateTime target_date { get; set; }
         public string comment { get; set; }
-
-
-    }
         public int assigned_to_id { get; set; }
         public int cost_type { get; set; }
         public string preventive_action { get; set; }
-        public int type_of_observation { get; set; }
-        public DateTime target_date { get; set; }
-        public string comment { get; set; }
         public string observation_description { get; set; }
         public string contractor_name { get; set; }  // contractor_name
         public int risk_type_id { get; set; }  // risk_type_id
