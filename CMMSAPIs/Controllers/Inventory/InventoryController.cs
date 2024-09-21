@@ -1,4 +1,4 @@
-﻿using CMMSAPIs.BS.Inventory;
+using CMMSAPIs.BS.Inventory;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.SM;

@@ -340,7 +340,7 @@ namespace CMMSAPIs.Models.MC
         public string responsibility { get; set; }
         public string frequency { get; set; }
         public int noOfDays { get; set; }
-        public DateTime startDate { get; set; }
+        public DateTime scheduledDate { get; set; }
         public DateTime doneDate { get; set; }
         public DateTime lastDoneDate { get; set; }
         public DateTime Abondond_done_date { get; set; }

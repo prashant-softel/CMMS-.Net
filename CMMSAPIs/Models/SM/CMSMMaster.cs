@@ -294,7 +294,6 @@ namespace CMMSAPIs.Models.SM
         public int ID { get; set; }
         public int facilityId { get; set; }
         public string facilityName { get; set; }
-
         public int requested_by_emp_ID { get; set; }
         public int approved_by_emp_ID { get; set; }
         public string approver_name { get; set; }

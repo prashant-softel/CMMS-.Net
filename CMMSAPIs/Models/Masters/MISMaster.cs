@@ -896,6 +896,12 @@ namespace CMMSAPIs.Models.Masters
     {
         public int id { get; set; }
         public int user_id { get; set; }
+        public int type_of_observation { get; set; }
+        public DateTime target_date { get; set; }
+        public string comment { get; set; }
+
+
+    }
         public int assigned_to_id { get; set; }
         public int cost_type { get; set; }
         public string preventive_action { get; set; }
@@ -950,8 +956,5 @@ namespace CMMSAPIs.Models.Masters
         public int updated_by { get; set; }
         public DateTime updated_at { get; set; }
     }
-
-
-
 }
 

@@ -387,6 +387,7 @@ namespace CMMSAPIs.Repositories.Masters
             List<int> idList = new List<int>();
             foreach (CMCreateCheckPoint request in requestList)
             {
+
                 string query = "INSERT INTO  checkpoint (check_point, check_list_id, requirement, is_document_required, " +
                                 "action_to_be_done,failure_weightage,type,min_range,max_range ,created_by, created_at, status) VALUES " +
                                 $"(\"{request.check_point}\", {request.checklist_id}, '{request.requirement.Replace("'", "")}', " +
@@ -861,6 +862,7 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                             else if (Convert.ToString(newR["check_point"]) != "" && Convert.ToInt32(newR["checklist_id"]) != 0)
                             {
+
                                 string checkpoint_q = "select * from checkpoint where check_point = \"" + Convert.ToString(newR["check_point"]) + "\" and check_list_id=" + Convert.ToInt32(newR["checklist_id"]) + ";";
                                 //checkpoint_q = System.Text.RegularExpressions.Regex.Replace(checkpoint_q, "[@,\\.\";'\\\\]", string.Empty);
                                 DataTable st_cp = await Context.FetchData(checkpoint_q).ConfigureAwait(false);

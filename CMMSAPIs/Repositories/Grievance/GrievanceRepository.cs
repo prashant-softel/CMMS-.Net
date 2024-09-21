@@ -96,6 +96,8 @@ namespace CMMSAPIs.Repositories.Grievance
                     break;
                 default:
                     break;
+                default:
+                    break; 
             }
             return retValue;
 

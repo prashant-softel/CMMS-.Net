@@ -89,6 +89,7 @@ namespace CMMSAPIs.Models.Masters
         public int facility_id { get; set; }
         public string facility_name { get; set; }
         public int wo_number { get; set; }
+        public int plan_id { get; set; }
         public string wo_decription { get; set; }
         public string assetsname { get; set; }
         public int status { get; set; }
@@ -134,6 +135,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic TotalWaterUsed { get; set; }
         public dynamic plan_days { get; set; }
         public dynamic no_of_cleaned { get; set; }
+        public dynamic Scheduled { get; set; }
     }
     public class CMROLE
     {
@@ -151,6 +153,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic TotalWaterUsed { get; set; }
         public dynamic plan_days { get; set; }
         public dynamic no_of_cleaned { get; set; }
+        public dynamic total_module_count { get; set; }
 
     }
 }

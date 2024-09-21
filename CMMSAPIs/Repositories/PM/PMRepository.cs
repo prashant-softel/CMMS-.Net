@@ -194,7 +194,6 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
-
         internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytimeZone)
         {
             if (facility_id <= 0)
@@ -390,6 +389,8 @@ namespace CMMSAPIs.Repositories.PM
 
             return _scheduleList;
         }
+
+
 
         internal async Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID)
         {

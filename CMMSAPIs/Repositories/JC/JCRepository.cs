@@ -98,15 +98,6 @@ namespace CMMSAPIs.Repositories.JC
                 case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
                     retValue = String.Format("JobCard JC{0} Closed but Rejected by {1}", jobCardId, jobCardObj.JC_Rejected_By_Name);
                     break;
-                //case CMMS.CMMS_Status.JC_APPROVED:
-                //    retValue = String.Format("Job Card Approved by {0}", jobObj.JC_Approved_By_Name);
-                //    break;
-                //case CMMS.CMMS_Status.JC_REJECTED5:
-                //    retValue = String.Format("Job card Rejected by {0}", jobObj.JC_Rejected_By_Name);
-                //    break;
-                //case CMMS.CMMS_Status.JC_PTW_TIMED_OUT:
-                //    retValue = String.Format("PTW <{0}> Timed Out", jobObj.ptwId);
-                //    break;
                 default:
                     break;
             }

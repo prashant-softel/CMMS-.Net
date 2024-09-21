@@ -222,7 +222,7 @@ namespace CMMS_API_Test
             var pmService2 = new CMMS_Services.APIService<CMMSAPIs.Models.PM.CMPMScheduleViewDetail>(true);
             var response2 = pmService2.GetItem($"/api/PMScheduleView/GetPMTaskDetail?schedule_id={pm_schedule_id}");
             Assert.IsNotNull(response2);
-            Assert.AreEqual((int)CMMS.CMMS_Status.PM_COMPLETED, response2.status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.PM_CLOSED, response2.status);
         }
         [TestMethod]
         public void RejectPMTaskExecution()
@@ -236,7 +236,7 @@ namespace CMMS_API_Test
             var pmService2 = new CMMS_Services.APIService<CMMSAPIs.Models.PM.CMPMScheduleViewDetail>(true);
             var response2 = pmService2.GetItem($"/api/PMScheduleView/GetPMTaskDetail?schedule_id={pm_schedule_id}");
             Assert.IsNotNull(response2);
-            Assert.AreEqual((int)CMMS.CMMS_Status.PM_REJECTED, response2.status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.PM_CLOSE_REJECTED, response2.status);
         }
         [TestMethod]
         public void ApprovePMTaskExecution()
@@ -250,7 +250,7 @@ namespace CMMS_API_Test
             var pmService2 = new CMMS_Services.APIService<CMMSAPIs.Models.PM.CMPMScheduleViewDetail>(true);
             var response2 = pmService2.GetItem($"/api/PMScheduleView/GetPMTaskDetail?schedule_id={pm_schedule_id}");
             Assert.IsNotNull(response2);
-            Assert.AreEqual((int)CMMS.CMMS_Status.PM_APPROVED, response2.status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.PM_CLOSE_APPROVED, response2.status);
         }
         
         [TestMethod]

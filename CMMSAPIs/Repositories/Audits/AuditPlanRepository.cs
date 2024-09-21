@@ -1086,7 +1086,6 @@ namespace CMMSAPIs.Repositories.Audits
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_number plan_name, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date,plan.description, plan.checklist_id,Employees, " +
                 " checklist_number as checklist_name,plan.Schedule_Date, " +
                 $" facilities.id as facility_id, facilities.name as facility_name," +
@@ -1139,9 +1138,6 @@ namespace CMMSAPIs.Repositories.Audits
             planDetails[0].status_short = _shortStatus;
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
-
-            /*         string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, planDetails[0]);
-                     planDetails[0].status_long = _longStatus;*/
 
             CMPMTaskView m_AuditObj = new CMPMTaskView();
             string _longStatus = getLongStatus_Details(CMMS.CMMS_Modules.AUDIT_PLAN, _Status_long, planDetails[0], m_AuditObj);
