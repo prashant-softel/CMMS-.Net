@@ -129,13 +129,11 @@ namespace CMMSAPIs.Repositories.PM
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "PM Plan  added", CMMS.CMMS_Status.PM_PLAN_CREATED, userID);
-
             try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
-
             catch (Exception e)
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
