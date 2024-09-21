@@ -20,6 +20,10 @@ using CMMSAPIs.BS.SM;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.WC;
+using CMMSAPIs.BS.Portfolio;
+using CMMSAPIs.BS.Dashboard;
+using CMMSAPIs.BS.Inverter;
+using CMMSAPIs.BS.MFM;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Middlewares;
 using CMMSAPIs.Models.Mails;
@@ -84,7 +88,6 @@ namespace CMMSAPIs
             services.AddScoped<IPermitBS, PermitBS>();
             services.AddScoped<IFacilityBS, FacilityBs>();
             services.AddScoped<IJobWorkTypeBS, JobWorkTypeBS>();
-            services.AddScoped<IPMBS, PMBS>();
             services.AddScoped<iLoginBS, LoginBS>();
             services.AddScoped<IRoleAccessBS, RoleAccessBS>();
             services.AddScoped<IUserAccessBS, UserAccessBS>();
@@ -117,7 +120,10 @@ namespace CMMSAPIs
             services.AddScoped<AttendeceBS, _AttendeceBS>();
             services.AddScoped<TrainingCourseBS, Traningbs>();
             services.AddScoped<IMCVCBS, MCVCBS>();
-
+            services.AddScoped<IPorfolioBS, PortfolioBS>();
+            services.AddScoped<IDashboardBS, DashboardBS>();
+            services.AddScoped<IInverterBS, InverterBS>();
+            services.AddScoped<IMFMBS, MFMBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
