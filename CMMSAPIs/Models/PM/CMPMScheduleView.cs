@@ -35,7 +35,7 @@ namespace CMMSAPIs.Models.PM
         public DateTime? last_done_date { get; set; }
         public DateTime? due_date { get; set; }
         public DateTime? done_date { get; set; }
-        public DateTime? start_date { get; set; }
+        public DateTime? scheduledDate { get; set; }
         public DateTime? close_time { get; set; }
         public string Isolation_taken { get; set; }
         public string permit_type { get; set; }

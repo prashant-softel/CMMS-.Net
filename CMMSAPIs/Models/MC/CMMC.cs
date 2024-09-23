@@ -336,6 +336,7 @@ namespace CMMSAPIs.Models.MC
         public int executionId { get; set; }
         public int planId { get; set; }
         public string sitename { get; set; }
+        public string cleaningTypeName { get; set; }
         public string responsibility { get; set; }
         public string frequency { get; set; }
         public int noOfDays { get; set; }

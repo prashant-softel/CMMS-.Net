@@ -1086,7 +1086,6 @@ namespace CMMSAPIs.Repositories.Audits
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-           
             string planListQry = $"SELECT plan.id as plan_id, plan.plan_number plan_name, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date,plan.description, plan.checklist_id,Employees, " +
                 " checklist_number as checklist_name,plan.Schedule_Date, " +
                 $" facilities.id as facility_id, facilities.name as facility_name," +
@@ -1139,9 +1138,6 @@ namespace CMMSAPIs.Repositories.Audits
             planDetails[0].status_short = _shortStatus;
 
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(planDetails[0].status_id);
-
-   /*         string _longStatus = getLongStatus_taskview(CMMS.CMMS_Modules.AUDIT_SCHEDULE, _Status, planDetails[0]);
-            planDetails[0].status_long = _longStatus;*/
 
             CMPMTaskView m_AuditObj = new CMPMTaskView();
             string _longStatus = getLongStatus_Details(CMMS.CMMS_Modules.AUDIT_PLAN, _Status_long, planDetails[0], m_AuditObj);
@@ -1332,7 +1328,7 @@ namespace CMMSAPIs.Repositories.Audits
                 $"CONCAT(Skip_rejected_by.firstName,' ',Skip_rejected_by.lastName)  as skip_rejected_by_name, pm_task.Skip_rejected_Date, " +
                 $"CONCAT(skip_approved_by.firstName,' ',skip_approved_by.lastName)  as skip_approved_by_name, pm_task.skip_approved_at, " +
                 $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status,ptype.title as  permit_type, " +
-                $"pm_task.Status as status, {statusQry} as status_short " +",  " +
+                $"pm_task.Status as status, {statusQry} as status_short " + ",  " +
                                "CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null  then 0 else  permit.TBT_Done_By end ptw_tbt_done, pm_plan.Employees employee_list,case when pm_plan.is_PTW = 1 then 'True' else 'False' end is_PTW" +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
@@ -1370,8 +1366,7 @@ namespace CMMSAPIs.Repositories.Audits
                 $"where task_id = {task_id} and Asset_id=0;";
 
             List<CMPMScheduleExecutionDetail> checklist_collection = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery2).ConfigureAwait(false);
-
-
+            taskViewDetail[0].Material_consumption = new List<Materialconsumption>();
             //string myQuery2 = $"SELECT DISTINCT checklist.id, checklist.checklist_number AS name FROM pm_execution " + 
             //                    $"JOIN checkpoint on pm_execution.Check_Point_id = checkpoint.id " + 
             //                    $"JOIN checklist_number as checklist ON checklist.id = checkpoint.check_list_id " +
@@ -1511,7 +1506,7 @@ namespace CMMSAPIs.Repositories.Audits
                     retValue = String.Format("AUD{0} Close Rejected by {1}", Obj.id, Obj.closeRejectedbyName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    retValue = $"Audit linked with permit By {Obj.closed_by_name}"; 
+                    retValue = $"Audit linked with permit By {Obj.closed_by_name}";
                     break;
                 default:
                     break;

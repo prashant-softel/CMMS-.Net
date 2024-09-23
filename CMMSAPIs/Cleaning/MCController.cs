@@ -33,7 +33,7 @@ namespace CMMSAPIs.Controllers.MC
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
 
-                var data = await _CleaningBS.GetPlanList(facilityId, facilitytimeZone,  startDate,  endDate);
+                var data = await _CleaningBS.GetPlanList(facilityId, facilitytimeZone, startDate, endDate);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -61,7 +61,6 @@ namespace CMMSAPIs.Controllers.MC
                 // Pass the first facility ID and its time zone to the business service
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _CleaningBS.GetTaskList(facility_Id, facilitytimeZone, startDate, endDate, selfView, userId);
-
                 return Ok(data);
             }
             catch (Exception ex)
@@ -350,22 +349,22 @@ namespace CMMSAPIs.Controllers.MC
         }
 
         //[Authorize]
-     /*   [Route("GetMCScheduleExecutionSummary")]
-        [HttpPut]
-        public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule, int facility_id)
-        {
-            try
-            {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-                var data = await _CleaningBS.GetScheduleExecutionSummary(schedule, facilitytimeZone);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-*/
+        /*   [Route("GetMCScheduleExecutionSummary")]
+           [HttpPut]
+           public async Task<IActionResult> GetMCScheduleExecutionSummary(CMMCGetScheduleExecution schedule, int facility_id)
+           {
+               try
+               {
+                   var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
+                   var data = await _CleaningBS.GetScheduleExecutionSummary(schedule, facilitytimeZone);
+                   return Ok(data);
+               }
+               catch (Exception ex)
+               {
+                   throw;
+               }
+           }
+   */
         [Route("GetMCExecutionDetails")]
         [HttpGet]
         public async Task<IActionResult> GetMCExecutionDetails(int executionId, int facility_id)

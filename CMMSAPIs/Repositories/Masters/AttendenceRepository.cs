@@ -201,15 +201,19 @@ namespace CMMSAPIs.Repositories.Masters
 
             List<DetailsOFMonth> EmpAteendence = await Context.GetData<DetailsOFMonth>(queryByEmp).ConfigureAwait(false);
 
-            var result = empDetails.Select(a => new EmployeeMonth
-            {
-                employeeId = a.employeeId,
-                employeeName = a.employeeName,
-                dateOfJoining = a.dateOfJoining,
-                DateofExit = a.DateofExit,
-                workingStatus = a.workingStatus,
-                details = EmpAteendence.Where(x => x.emp_id == a.employeeId).ToList()
-            }).ToList();
+            var result = empDetails
+    .Where(a => a.employeeId != null && a.employeeName != null && a.dateOfJoining != null && a.DateofExit != null && a.workingStatus != null)
+    .Select(a => new EmployeeMonth
+    {
+        employeeId = a.employeeId,
+        employeeName = a.employeeName,
+        dateOfJoining = a.dateOfJoining,
+        DateofExit = a.DateofExit,
+        workingStatus = a.workingStatus,
+        details = EmpAteendence.Where(x => x.emp_id == a.employeeId).ToList()
+    })
+    .ToList();
+
 
             var response = new
             {
