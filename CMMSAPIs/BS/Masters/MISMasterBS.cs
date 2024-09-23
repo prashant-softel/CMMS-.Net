@@ -16,6 +16,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> AddSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> UpdateSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId);
+        Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone);
         Task<MISTypeObservation> GetTypeOfObservation(int id);
         Task<List<MISTypeObservation>> GetTypeOfObservationList();
         Task<CMDefaultResponse> AddTypeOfObservation(MISTypeObservation request, int userId);
@@ -245,6 +247,36 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.DeleteSourceOfObservation(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.ApproveObservation(request, userId, facilitytimeZone);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.RejectObservation(request, userId, facilitytimeZone);
                 }
             }
             catch (Exception ex)

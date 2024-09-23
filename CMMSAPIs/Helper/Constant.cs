@@ -609,11 +609,14 @@ namespace CMMSAPIs.Helper
             STATUTORY_APPROVED,
             STATUTORY_REJECTED,
             STATUTORY_RENEWD,
+
             OBSERVATION_CREATED = 551,
             OBSERVATION_ASSIGNED,
             OBSERVATION_CLOSED,
             OBSERVATION_DELETED,
-            OBSERVATION_UPDATED,
+            OBSERVATION_REJECTED,
+            OBSERVATION_APPROVED,
+            //OBSERVATION_UPDATED,        //only for notification purpose
 
 
             VEG_PLAN_DRAFT = 701,

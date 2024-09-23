@@ -162,7 +162,7 @@ namespace CMMSAPIs.Repositories.Masters
                 case CMMS.CMMS_Status.OBSERVATION_DELETED:
                     statusName = "Deleted ";
                     break;
-                case CMMS.CMMS_Status.OBSERVATION_UPDATED:
+                case CMMS.CMMS_Status.UPDATED:
                     statusName = "Updated ";
                     break;
                 case CMMS.CMMS_Status.OBSERVATION_CLOSED:
@@ -1920,7 +1920,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
-                                     $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_UPDATED}," +
+                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
@@ -1939,7 +1939,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     sb.Append(": " + request.comment);
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
             }
             catch (Exception ex)
@@ -2828,5 +2828,35 @@ namespace CMMSAPIs.Repositories.Masters
             return null;
         }
 
+            internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone)
+        {
+            CMMS.CMMS_Modules module = CMMS.CMMS_Modules.OBSERVATION;
+            CMMS.CMMS_Status status = CMMS.CMMS_Status.OBSERVATION_APPROVED;
+
+            string approveQuery = $"Update observations set status_code= {(int)status} ,approvedById={userID}, approveRemark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            //ADD REMARK TO HISTORY
+            //add db col rejectRemark approveRemark
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Approved", CMMS.CMMS_Status.OBSERVATION_APPROVED, userID); 
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Approved");
+            return response;
+        }
+
+        internal async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userID, string facilitytimeZone)
+        {
+            CMMS.CMMS_Modules module = CMMS.CMMS_Modules.OBSERVATION;
+            CMMS.CMMS_Status status = CMMS.CMMS_Status.OBSERVATION_REJECTED;
+
+            string approveQuery = $"Update observations set status_code= {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            //ADD REMARK TO HISTORY
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Rejected", CMMS.CMMS_Status.OBSERVATION_REJECTED, userID);
+
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Rejected");
+            return response;
+        }
     }
 }

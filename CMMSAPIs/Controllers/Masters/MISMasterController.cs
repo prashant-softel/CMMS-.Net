@@ -2325,6 +2325,40 @@ namespace CMMSAPIs.Controllers.Masters
                 return Ok(data);
             }
         }
+
+        [Route("ApproveObservation")]
+        [HttpPut]
+        public async Task<IActionResult> ApproveObservation(CMApproval request, int facilityId)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.ApproveObservation(request, userId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        [Route("RejectObservation")]
+        [HttpPut]
+        public async Task<IActionResult> RejectObservation(CMApproval request, int facilityId)
+        {
+            try
+            {
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.RejectObservation(request, userId, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
     }
 }
 
