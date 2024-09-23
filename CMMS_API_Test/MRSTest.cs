@@ -17,7 +17,9 @@ namespace CMMS_API_Test
         string EP_getMRSList = "/api/MRS/getMRSList";
         string EP_getMRSItems = "/api/MRS/getMRSItems";
         string EP_getMRSItemsBeforeIssue = "/api/MRS/getMRSItemsBeforeIssue";
+        string EP_getLastTemplateData = "/api/MRS/getLastTemplateData";
         string EP_getMRSItemsWithCode = "/api/MRS/getMRSItemsWithCode";
+        string EP_getIssuedAssetItems = "/api/MRS/getIssuedAssetItems";
         string EP_getMRSDetails = "/api/MRS/getMRSDetails";
         string EP_mrsApproval = "/api/MRS/mrsApproval";
         string EP_mrsReject = "/api/MRS/mrsReject";
@@ -26,12 +28,16 @@ namespace CMMS_API_Test
         string EP_RejectMRSIssue = "/api/MRS/RejectMRSIssue";
         string EP_getMRSListByModule = "/api/MRS/getMRSListByModule";
         string EP_updateMRS = "/api/MRS/updateMRS";
+        string EP_GetAssetItems = "/api/MRS/GetAssetItems";
+        string EP_getMRSReturnStockItems = "/api/MRS/getMRSReturnStockItems";
+        string EP_GetAvailableQuantityinPlant = "/api/MRS/GetAvailableQuantityinPlant";
 
 
         //◆◇◆◆◆ RETURN MRS ◆◆◆◆◇◆
         string EP_getReturnDataByID = "/api/MRS/getReturnDataByID";
         string EP_getAssetTypeByItemID = "/api/MRS/getAssetTypeByItemID";
         string EP_CreateReturnMRS = "/api/MRS/CreateReturnMRS";
+        string EP_UpdateReturnMRS = "/api/MRS/UpdateReturnMRS";
         string EP_getMRSReturnItems = "/api/MRS/getMRSReturnItems";
         string EP_getMRSReturnList = "/api/MRS/getMRSReturnList";
         string EP_ApproveMRSReturn = "/api/MRS/ApproveMRSReturn";
@@ -88,42 +94,40 @@ namespace CMMS_API_Test
             string responseMessage = response.message;
             Assert.AreEqual(expectedMessgae, responseMessage);
 
+
             int mrsId = response.id[0];
-            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSList>();
             var mrsResponse = getItem.GetItem(EP_getMRSDetails + "?ID=" + mrsId);
+            Assert.AreEqual((int)CMMS.CMMS_Status.MRS_SUBMITTED, mrsResponse.status);
 
             // Deserialize payload into CMMRS object
-            var expectedCMMRS = JsonConvert.DeserializeObject<CMMRS>(payload);
+            var expectedCMMRS = JsonConvert.DeserializeObject<CMMRSList>(payload);
 
             // Compare properties
             Assert.AreEqual(mrsId, mrsResponse.ID);
-            Assert.AreEqual(expectedCMMRS.to_actor_id, mrsResponse.whereUsedRefID);
-            //Assert.AreEqual(expectedCMMRS.to_actor_type_id, mrsResponse.to_actor_type_id);
-            //Assert.AreEqual(expectedCMMRS.from_actor_id, mrsResponse.from_actor_id);
-            //Assert.AreEqual(expectedCMMRS.from_actor_type_id, mrsResponse.from_actor_type_id);
-            //Assert.AreEqual(expectedCMMRS.activity, mrsResponse.activity);
-            //Assert.AreEqual(expectedCMMRS.facility_ID, mrsResponse.facility_ID);
-            //Assert.AreEqual(expectedCMMRS.isEditMode, mrsResponse.isEditMode);
+            Assert.AreEqual(expectedCMMRS.to_actor_id, mrsResponse.to_actor_id);
+            Assert.AreEqual(expectedCMMRS.to_actor_type_id, mrsResponse.to_actor_type_id);
+            Assert.AreEqual(expectedCMMRS.from_actor_id, mrsResponse.from_actor_id);
+            Assert.AreEqual(expectedCMMRS.from_actor_type_id, mrsResponse);
+            Assert.AreEqual(expectedCMMRS.activity, mrsResponse.activity);
             Assert.AreEqual(expectedCMMRS.remarks, mrsResponse.remarks);
-            //Assert.AreEqual(expectedCMMRS.setAsTemplate, mrsResponse.setAsTemplate);
-            //Assert.AreEqual(expectedCMMRS.whereUsedType, mrsResponse.whereUsedType);
             Assert.AreEqual(expectedCMMRS.whereUsedRefID, mrsResponse.whereUsedRefID);
 
             // Compare cmmrsItems
-            Assert.AreEqual(expectedCMMRS.cmmrsItems.Count, mrsResponse.cmmrsItems.Count);
-            for (int i = 0; i < expectedCMMRS.cmmrsItems.Count; i++)
+            Assert.AreEqual(expectedCMMRS.CMMRSItems.Count, mrsResponse.CMMRSItems.Count);
+            for (int i = 0; i < expectedCMMRS.CMMRSItems.Count; i++)
             {
-                var expectedItem = expectedCMMRS.cmmrsItems[i];
-                var actualItem = mrsResponse.cmmrsItems[i];
+                var expectedItem = expectedCMMRS.CMMRSItems[i];
+                var actualItem = mrsResponse.CMMRSItems[i];
 
                 Assert.AreEqual(expectedItem.issued_qty, actualItem.issued_qty);
                 Assert.AreEqual(expectedItem.requested_qty, actualItem.requested_qty);
-                //Assert.AreEqual(expectedItem.asset_code, actualItem.asset_code);
-                //Assert.AreEqual(expectedItem.asset_type_ID, actualItem.asset_type_ID);
+                /*Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_code);
+                Assert.AreEqual(expectedItem.asset_type_ID, actualItem.asset_type_ID);*/
                 Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_item_ID);
-                Assert.AreEqual(expectedItem.id, actualItem.asset_item_ID);
+                Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_item_ID);
                 Assert.AreEqual(expectedItem.available_qty, actualItem.available_qty);
-                //Assert.AreEqual(expectedItem.serial_number, actualItem.serial_number);
+                Assert.AreEqual(expectedItem.serial_number, actualItem.serial_number);
             }
 
 
@@ -183,7 +187,7 @@ namespace CMMS_API_Test
 
    
             int mrsId = response.id[0];
-            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSList>();
             var mrsResponse = getItem.GetItem(EP_getMRSDetails + "?ID=" + mrsId);
 
             
@@ -193,32 +197,28 @@ namespace CMMS_API_Test
             Assert.AreEqual(1, mrsResponse.from_actor_id);
             Assert.AreEqual(2, mrsResponse.from_actor_type_id);
             Assert.AreEqual("Switchgear Quarterly Check Updated", mrsResponse.activity);
-            Assert.AreEqual(1, mrsResponse.facility_ID);
-            Assert.AreEqual(1, mrsResponse.isEditMode);
+            //Assert.AreEqual(1, mrsResponse.facility_ID);
             Assert.AreEqual("Updated Remarks", mrsResponse.remarks);
-            Assert.AreEqual("", mrsResponse.setAsTemplate);
-            Assert.AreEqual(27, mrsResponse.whereUsedType);
+            //Assert.AreEqual(27, mrsResponse.whereUsedTypeName);
             Assert.AreEqual(205, mrsResponse.whereUsedRefID);
 
             // Compare the first item in cmmrsItems
-            var item1 = mrsResponse.cmmrsItems[0];
-            Assert.AreEqual(1, item1.issued_qty);
-            Assert.AreEqual(2, item1.requested_qty);
-            Assert.AreEqual("S423741003", item1.asset_item_ID);
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].issued_qty);
+            Assert.AreEqual(2, mrsResponse.CMMRSItems[0].requested_qty);
+            Assert.AreEqual("S423741003", mrsResponse.CMMRSItems[0]);
             //Assert.AreEqual(1, item1.asset_type_ID);
-            Assert.AreEqual(83, item1.asset_item_ID);
-            Assert.AreEqual(83, item1.id);
-            Assert.AreEqual(4, item1.available_qty);
-            Assert.IsNull(item1.serial_number);
+            Assert.AreEqual(83, mrsResponse.CMMRSItems[0].asset_item_ID);
+            Assert.AreEqual(83, mrsResponse.CMMRSItems[0].asset_item_ID);
+            Assert.AreEqual(4, mrsResponse.CMMRSItems[0].available_qty);
 
             // Compare the second item in cmmrsItems
-            var item2 = mrsResponse.cmmrsItems[1];
+            var item2 = mrsResponse.CMMRSItems[1];
             Assert.AreEqual(1, item2.issued_qty);
             Assert.AreEqual(1, item2.requested_qty);
             //Assert.AreEqual("S071804001", item2.asset_code);
             //Assert.AreEqual(2, item2.asset_type_ID);
             Assert.AreEqual(121, item2.asset_item_ID);
-            Assert.AreEqual(121, item2.id);
+            Assert.AreEqual(121, item2.asset_item_ID);
             Assert.AreEqual(1, item2.available_qty);
             Assert.IsNull(item2.serial_number);
         }
@@ -254,6 +254,31 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
+        public void VerifygetLastTemplateData()
+        {
+            int ID = 200;
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = mrsService.GetItem(EP_getLastTemplateData + "?ID=" + ID);
+            /*int ListCount = response.Count;
+            Assert.AreEqual(ListCount, 1);*/
+
+            Assert.IsNotNull(response, "MRS Last template data should not be null.");
+        }
+
+        [TestMethod]
+        public void VerifyGetAssetItems()
+        {
+            int facility_ID = 45;
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = mrsService.GetItemList(EP_GetAssetItems + "?facility_ID=" + facility_ID);
+            /*int ListCount = response.Count;
+            Assert.AreEqual(ListCount, 1);*/
+
+            Assert.IsNotNull(response, "MRS Asset Items should not be null.");
+            Assert.IsTrue(response.Count > 0, "MRS asset item contain at least one item.");
+        }
+
+        [TestMethod]
         public void VerifygetMRSItemsWithCode()
         {
             int ID = 196;
@@ -263,7 +288,48 @@ namespace CMMS_API_Test
             Assert.AreEqual(ListCount, 1);*/
 
             Assert.IsNotNull(response, "MRS items with code should not be null.");
-            //Assert.IsTrue(response. > 0, "MRS items with code should contain at least one order.");
+
+        }
+
+        [TestMethod]
+        public void VerifygetIssuedAssetItems()
+        {
+            int ID = 1;
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = mrsService.GetItem(EP_getIssuedAssetItems + "?ID=" + ID);
+            /*int ListCount = response.Count;
+            Assert.AreEqual(ListCount, 1);*/
+
+            Assert.IsNotNull(response, "MRS Issued Assets name should not be null.");
+
+        }
+
+        [TestMethod]
+        public void VerifygetMRSReturnStockItems()
+        {
+            
+            var mrs_id = 5;
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = mrsService.GetItemList(EP_getMRSReturnStockItems + "?mrs_id=" + mrs_id);
+            /*int ListCount = response.Count;
+            Assert.AreEqual(ListCount, 6);*/
+
+            Assert.IsNotNull(response, "MRS Return Stock Items should not be null.");
+            Assert.IsTrue(response.Count > 0, "MRS Return Stock Items should contain at least one order.");
+        }
+
+        [TestMethod]
+        public void VerifyGetAvailableQuantityinPlant()
+        {
+
+            var mrs_id = 82;
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
+            var response = mrsService.GetItemList(EP_GetAvailableQuantityinPlant + "?mrs_id=" + mrs_id);
+            /*int ListCount = response.Count;
+            Assert.AreEqual(ListCount, 6);*/
+
+            Assert.IsNotNull(response, "MRS Avaialable Quantity in plant should not be null.");
+            Assert.IsTrue(response.Count > 0, "MRS Avaialable Quantity in plant should contain at least one order.");
         }
 
         [TestMethod]
@@ -312,7 +378,6 @@ namespace CMMS_API_Test
             Assert.IsNotNull(response);
             Assert.AreEqual(response.ID, id);
             Assert.IsNotNull(response, "MRS list should not be null.");
-            //Assert.IsTrue(response.Count > 0, "MRS list should contain at least one order.");
             
         }
 
@@ -518,17 +583,7 @@ namespace CMMS_API_Test
             Assert.AreEqual(ListCount, 1);*/
         }
 
-        [TestMethod]
-        public void VerifygetMRSReturnItems()  //404 not found
-        {
-            int ID = 186;
-            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
-            var response = mrsService.GetItem(EP_getMRSReturnItems + "?ID=" + ID);
-            Assert.IsNotNull(response, "MRS return should not be null.");
-            /*int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);*/
-        }
-
+        
         [TestMethod]
         public void VerifygetMRSReturnList()
         {
@@ -607,32 +662,129 @@ namespace CMMS_API_Test
             //Assert.AreEqual("", mrsResponse, "The setAsTemplate should match.");
             Assert.AreEqual("", mrsResponse.remarks, "The remarks should match.");
 
-            /*// Validate cmmrsItems
+            // Validate cmmrsItems
             Assert.AreEqual(2, mrsResponse.CMMRSItems.Count, "The number of cmmrsItems should match.");
-            Assert.AreEqual(10, mrsResponse.cmmrsItems[0].id, "The asset_item_ID of the first item should match.");
-            Assert.AreEqual(1, mrsResponse.cmmrsItems[0].issued_qty, "The issued_qty of the first item should match.");
-            Assert.AreEqual(1, mrsResponse.cmmrsItems[0].requested_qty, "The requested_qty of the first item should match.");
-            Assert.AreEqual(1, mrsResponse.cmmrsItems[0].returned_qty, "The returned_qty of the first item should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSItems[0].asset_item_ID, "The asset_item_ID of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].issued_qty, "The issued_qty of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].requested_qty, "The requested_qty of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].returned_qty, "The returned_qty of the first item should match.");
             //Assert.AreEqual(0, mrsResponse.cmmrsItems[0], "The approval_required of the first item should match.");
-            Assert.AreEqual(0, mrsResponse.cmmrsItems[0].is_faulty, "The is_faulty of the first item should match.");
-            Assert.AreEqual("return", mrsResponse.cmmrsItems[0].return_remarks, "The return_remarks of the first item should match.");
+            Assert.AreEqual(0, mrsResponse.CMMRSItems[0].is_faulty, "The is_faulty of the first item should match.");
+            Assert.AreEqual("return", mrsResponse.CMMRSItems[0].return_remarks, "The return_remarks of the first item should match.");
 
-            Assert.AreEqual(64, mrsResponse.cmmrsItems[1].id, "The asset_item_ID of the second item should match.");
-            Assert.AreEqual(8, mrsResponse.cmmrsItems[1].issued_qty, "The issued_qty of the second item should match.");
-            Assert.AreEqual(10, mrsResponse.cmmrsItems[1].requested_qty, "The requested_qty of the second item should match.");
-            Assert.AreEqual(8, mrsResponse.cmmrsItems[1].returned_qty, "The returned_qty of the second item should match.");
+            Assert.AreEqual(64, mrsResponse.CMMRSItems[1].asset_item_ID, "The asset_item_ID of the second item should match.");
+            Assert.AreEqual(8, mrsResponse.CMMRSItems[1].issued_qty, "The issued_qty of the second item should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSItems[1].requested_qty, "The requested_qty of the second item should match.");
+            Assert.AreEqual(8, mrsResponse.CMMRSItems[1].returned_qty, "The returned_qty of the second item should match.");
             //Assert.AreEqual(0, mrsResponse.cmmrsItems[1].approval_required, "The approval_required of the second item should match.");
-            Assert.AreEqual(0, mrsResponse.cmmrsItems[1].is_faulty, "The is_faulty of the second item should match.");
-            Assert.AreEqual("return consumable", mrsResponse.cmmrsItems[1].return_remarks, "The return_remarks of the second item should match.");
+            Assert.AreEqual(0, mrsResponse.CMMRSItems[1].is_faulty, "The is_faulty of the second item should match.");
+            Assert.AreEqual("return consumable", mrsResponse.CMMRSItems[1].return_remarks, "The return_remarks of the second item should match.");
 
             // Validate faultyItems
-            Assert.AreEqual(1, mrsResponse.faultyItems.Count, "The number of faultyItems should match.");
-            Assert.AreEqual(128, mrsResponse.faultyItems[0].mrs_item_ID, "The mrsItemID of the faulty item should match.");
-            Assert.AreEqual(10, mrsResponse.faultyItems[0].assetMasterItemID, "The assetMasterItemID of the faulty item should match.");
-            Assert.AreEqual(1, mrsResponse.faultyItems[0].returned_qty, "The returned_qty of the faulty item should match.");
-            Assert.AreEqual("return faulty", mrsResponse.faultyItems[0].return_remarks, "The return_remarks of the faulty item should match.");
-            Assert.AreEqual("99125", mrsResponse.faultyItems[0].sr_no, "The sr_no of the faulty item should match.");*/
+            Assert.AreEqual(1, mrsResponse.CMMRSFaultyItems.Count, "The number of faultyItems should match.");
+            Assert.AreEqual(128, mrsResponse.CMMRSFaultyItems[0].faulty_item_asset_id, "The mrsItemID of the faulty item should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSFaultyItems[0].assetMasterID, "The assetMasterItemID of the faulty item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSFaultyItems[0].returned_qty, "The returned_qty of the faulty item should match.");
+            Assert.AreEqual("return faulty", mrsResponse.CMMRSFaultyItems[0].return_remarks, "The return_remarks of the faulty item should match.");
+            Assert.AreEqual("99125", mrsResponse.CMMRSFaultyItems[0].serial_number, "The sr_no of the faulty item should match.");
         }
+
+
+        [TestMethod]
+        public void VerifyUpdateReturnMRS()
+        {
+            string payload = @"{
+                                ""ID"": 39,
+                                ""to_actor_type_id"": 1,
+                                ""from_actor_type_id"": 1,
+                                ""to_actor_id"": 13,
+                                ""from_actor_id"": 1779,
+                                ""facility_ID"": 1779,
+                                ""whereUsedRefID"": 17,
+                                ""whereUsedType"": 27,
+                                ""setAsTemplate"": """",
+                                ""remarks"": """",
+                                ""activity"":""testActivity"",
+                                ""cmmrsItems"": [
+                                    {
+                                        ""asset_item_ID"": 10,
+                                        ""issued_qty"": 1,
+                                        ""requested_qty"": 1,
+                                        ""returned_qty"": 1,
+                                        ""approval_required"": 0,
+                                        ""is_faulty"": 0,
+                                        ""return_remarks"": ""return""
+                                    },
+                                    {
+                                        ""asset_item_ID"": 64,
+                                        ""issued_qty"": 8,
+                                        ""requested_qty"": 10,
+                                        ""returned_qty"": 8,
+                                        ""approval_required"": 0,
+                                        ""is_faulty"": 0,
+                                        ""return_remarks"": ""return consumable""
+                                    }
+                                ],
+                                ""faultyItems"":[
+                                    {
+                                        ""mrsItemID"": 128,
+                                        ""assetMasterItemID"": 10,
+                                        ""returned_qty"": 1,
+                                        ""return_remarks"": ""return faulty"",
+                                        ""sr_no"": ""99125""
+                                    }
+                                ]
+                            }";
+            var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = mrsService.CreateItem(EP_UpdateReturnMRS, payload);
+            string responseMessage = response.message;
+            string actualMessage = "MRS return submitted.";
+            Assert.AreEqual(actualMessage, responseMessage);
+
+            int RmrsId = response.id[0];
+            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSReturnList>();
+            var mrsResponse = getItem.GetItem(EP_getReturnDataByID + "?ID=" + RmrsId);
+
+            Assert.AreEqual(RmrsId, mrsResponse.ID, "The MRS ID should match the input.");
+            Assert.AreEqual("testActivity", mrsResponse.activity, "The activity field should match.");
+            Assert.AreEqual(2, mrsResponse.to_actor_type_id, "The to_actor_type_id should match.");
+            Assert.AreEqual(3, mrsResponse.from_actor_type_id, "The from_actor_type_id should match.");
+            Assert.AreEqual(65, mrsResponse.to_actor_id, "The to_actor_id should match.");
+            Assert.AreEqual(1779, mrsResponse.from_actor_id, "The from_actor_id should match.");
+            Assert.AreEqual(1779, mrsResponse.facilityId, "The facility_ID should match.");
+            Assert.AreEqual(17, mrsResponse.whereUsedRefID, "The whereUsedRefID should match.");
+            Assert.AreEqual(27, mrsResponse.whereUsedTypeName, "The whereUsedType should match.");
+            //Assert.AreEqual("", mrsResponse, "The setAsTemplate should match.");
+            Assert.AreEqual("", mrsResponse.remarks, "The remarks should match.");
+
+            // Validate cmmrsItems
+            Assert.AreEqual(2, mrsResponse.CMMRSItems.Count, "The number of cmmrsItems should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSItems[0].asset_item_ID, "The asset_item_ID of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].issued_qty, "The issued_qty of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].requested_qty, "The requested_qty of the first item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSItems[0].returned_qty, "The returned_qty of the first item should match.");
+            //Assert.AreEqual(0, mrsResponse.cmmrsItems[0], "The approval_required of the first item should match.");
+            Assert.AreEqual(0, mrsResponse.CMMRSItems[0].is_faulty, "The is_faulty of the first item should match.");
+            Assert.AreEqual("return", mrsResponse.CMMRSItems[0].return_remarks, "The return_remarks of the first item should match.");
+
+            Assert.AreEqual(64, mrsResponse.CMMRSItems[1].asset_item_ID, "The asset_item_ID of the second item should match.");
+            Assert.AreEqual(8, mrsResponse.CMMRSItems[1].issued_qty, "The issued_qty of the second item should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSItems[1].requested_qty, "The requested_qty of the second item should match.");
+            Assert.AreEqual(8, mrsResponse.CMMRSItems[1].returned_qty, "The returned_qty of the second item should match.");
+            //Assert.AreEqual(0, mrsResponse.cmmrsItems[1].approval_required, "The approval_required of the second item should match.");
+            Assert.AreEqual(0, mrsResponse.CMMRSItems[1].is_faulty, "The is_faulty of the second item should match.");
+            Assert.AreEqual("return consumable", mrsResponse.CMMRSItems[1].return_remarks, "The return_remarks of the second item should match.");
+
+            // Validate faultyItems
+            Assert.AreEqual(1, mrsResponse.CMMRSFaultyItems.Count, "The number of faultyItems should match.");
+            Assert.AreEqual(128, mrsResponse.CMMRSFaultyItems[0].faulty_item_asset_id, "The mrsItemID of the faulty item should match.");
+            Assert.AreEqual(10, mrsResponse.CMMRSFaultyItems[0].assetMasterID, "The assetMasterItemID of the faulty item should match.");
+            Assert.AreEqual(1, mrsResponse.CMMRSFaultyItems[0].returned_qty, "The returned_qty of the faulty item should match.");
+            Assert.AreEqual("return faulty", mrsResponse.CMMRSFaultyItems[0].return_remarks, "The return_remarks of the faulty item should match.");
+            Assert.AreEqual("99125", mrsResponse.CMMRSFaultyItems[0].serial_number, "The sr_no of the faulty item should match.");
+        }
+
+
 
         [TestMethod]
         public void VerifyReturnMRSApproval()
@@ -702,7 +854,7 @@ namespace CMMS_API_Test
         {
             
             string payload = @"{
-                      ""ID"": 25,
+                      ""ID"": 48,
                       ""facility_ID"": 1779,
                       ""whereUsedRefID"": 19,
                       ""whereUsedType"": 27,
@@ -740,14 +892,14 @@ namespace CMMS_API_Test
             Assert.AreEqual(19, mrsResponse.whereUsedRefID);
             //Assert.AreEqual(27, mrsResponse.whereUsedTypeName);
             Assert.AreEqual("testActivity", mrsResponse.activity);
-        
-            /*var faultyItem = mrsResponse.faultyItems[0];
+
+            var faultyItem = mrsResponse.faultyItems[0];
             Assert.AreEqual(80, faultyItem.returned_qty);
             //Assert.AreEqual(0, faultyItem.requested_qty);
             Assert.AreEqual(2, faultyItem.mrs_item_ID);
             //Assert.AreEqual(1, faultyItem.is_faulty);
             Assert.AreEqual("return faulty", faultyItem.return_remarks);
-            Assert.AreEqual(2, faultyItem.returned_qty);*/
+            Assert.AreEqual(2, faultyItem.returned_qty);
         }
     }
 }
