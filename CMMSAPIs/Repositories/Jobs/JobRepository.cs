@@ -83,7 +83,7 @@ namespace CMMSAPIs.Repositories.Jobs
         }
 
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
-        internal async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytimeZone)
+        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytimeZone)
 
         {
             /*
@@ -121,9 +121,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
                                         "users as user ON user.id = job.assignedId ";
-            if (facility_id > 0)
+            if (!string.IsNullOrEmpty(facility_id))
             {
-                myQuery += " WHERE job.facilityId = " + facility_id;
+                myQuery += $" and job.facilityId IN ({facility_id})";
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;
@@ -137,8 +137,11 @@ namespace CMMSAPIs.Repositories.Jobs
                         myQuery += " AND DATE_FORMAT(job.createdAt,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
                 }
 
-                if (selfView > 0)
-                    myQuery += " AND (user.id = " + userId + " OR created_user.id = " + userId + ")";
+                if (selfView)
+                {
+                    myQuery += " AND (user.id = " + userId + " OR job.createdBy = " + userId + " OR job.assignedId = " + userId + ")";
+                }
+
 
                 if (status?.Length > 0)
                     myQuery += " AND job.status IN (" + status + ")";

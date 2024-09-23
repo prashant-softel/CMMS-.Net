@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.Jobs
 {
     public interface IJobBS
     {
-		Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status,string facilitytime);
+		Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status,string facilitytime);
         Task<List<CMJobList>> GetJobListByPermitId(int permitId, string facilitytime);
         Task<CMJobView> GetJobDetails(int job_id,string facilitytime);
         Task<CMDefaultResponse> CreateNewJob(CMCreateJob request, int userId);
@@ -30,7 +30,7 @@ namespace CMMSAPIs.BS.Jobs
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytime)
+        public async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytime)
         {
             try
             {

@@ -44,20 +44,32 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCTaskList")]
         [HttpGet]
-
-        public async Task<IActionResult> GetMCTaskList(int facility_Id, string startDate, string endDate)
+        public async Task<IActionResult> GeMCTaskList(string facility_Id, string startDate, string endDate, bool selfView)
         {
             try
             {
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_Id)?.timezone;
-                var data = await _CleaningBS.GetTaskList(facility_Id, facilitytimeZone, startDate, endDate);
+                // Split the comma-delimited string into an array of facility IDs (string array)
+                var facilityIds = facility_Id.Split(',');
+
+                // Use the first facility ID from the array and convert it to an integer
+                int firstFacilityId = int.Parse(facilityIds.FirstOrDefault());
+
+                // Get the time zone for the first facility ID
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
+
+                // Pass the first facility ID and its time zone to the business service
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _CleaningBS.GetTaskList(facility_Id, facilitytimeZone, startDate, endDate, selfView, userId);
                 return Ok(data);
             }
             catch (Exception ex)
             {
+                // Optionally log the exception here
                 throw;
             }
         }
+
 
         [Route("GetMCPlanDetails")]
         [HttpGet]

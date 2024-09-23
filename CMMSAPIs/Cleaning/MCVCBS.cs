@@ -14,7 +14,7 @@ namespace CMMSAPIs.BS.Cleaning
 
         //List
         public Task<List<CMMCPlan>> GetPlanList(int facilityId, string facilitytimeZone, string startDate, string endDate); /// DONE ///
-        public Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone, string startDate, string endDate); /// DONE ///
+        public Task<List<CMMCTaskList>> GetTaskList(string facilityId, string facilitytimeZone, string startDate, string endDate, bool selfView, int userId); /// DONE ///
         public Task<CMMCPlan> GetPlanDetails(int planId, string facilitytimeZone);
         // public Task<CMMCPlan> GetPlanDetailsSummary(int planId, CMMCPlanSummary request);
         public Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytimeZone);
@@ -103,13 +103,13 @@ namespace CMMSAPIs.BS.Cleaning
             }
         }
 
-        public async Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone, string startDate, string endDate)
+        public async Task<List<CMMCTaskList>> GetTaskList(string facilityId, string facilitytimeZone, string startDate, string endDate, bool selfView, int userId)
         {
             try
             {
                 using (var repos = new MCVCRepository(getDB, module))
                 {
-                    return await repos.GetTaskList(facilityId, facilitytimeZone, startDate, endDate);
+                    return await repos.GetTaskList(facilityId, facilitytimeZone, startDate, endDate, selfView, userId);
                 }
             }
             catch (Exception ex)

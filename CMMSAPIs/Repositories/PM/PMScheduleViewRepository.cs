@@ -165,7 +165,7 @@ namespace CMMSAPIs.Repositories.PM
 
         }
 
-        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytimeZone)
+        internal async Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -192,9 +192,9 @@ namespace CMMSAPIs.Repositories.PM
             // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
 
             List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList>();
-            if (facility_id > 0)
+            if (!string.IsNullOrEmpty(facility_id))
             {
-                myQuery += $" and pm_task.Facility_id = {facility_id} and pm_task.category_id!=0 ";
+                myQuery += $" and pm_task.Facility_id IN ({facility_id}) and pm_task.category_id!=0 ";
                 if (start_date != null && end_date != null)
                 {
                     string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");

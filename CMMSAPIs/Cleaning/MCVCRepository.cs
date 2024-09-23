@@ -61,6 +61,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED,"Abandoned Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED,"Abandoned Rejected" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_DRAFT, "Draft" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_SUBMITTED, "Waiting for Approval" },
             { (int)CMMS.CMMS_Status.VEG_PLAN_APPROVED, "Approved" },
@@ -80,8 +82,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             { (int)CMMS.CMMS_Status.EQUIP_CLEANED, "Cleaned" },
             { (int)CMMS.CMMS_Status.EQUIP_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, " Abandoned Rejected" },
-            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, " Abandoned Approved" }
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED, "Abandoned Rejected" },
+            { (int)CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED, "Abandoned Approved" }
         };
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan planObj)
         {
@@ -133,79 +135,79 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
-                    retValue = String.Format("MC{0} Scheduled by {1} ", executionObj.executionId, executionObj.updatedBy);
+                    retValue = String.Format("MC{0} Scheduled by {1}", executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue = String.Format("MC{0} Started by {1} ", executionObj.executionId, executionObj.startedBy);
+                    retValue = String.Format("MC{0} Started by {1}", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue = String.Format("MC{0} Closed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue = String.Format("MC{0} Closed by {1}", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue = String.Format("MC{0} Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue = String.Format("MC{0} Abandoned by {1}", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
-                    retValue = String.Format("MC{0} Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonRejectedByName);
+                    retValue = String.Format("MC{0} Abandoned Rejected by {1}", executionObj.executionId, executionObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
-                    retValue = String.Format("MC{0} Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonApprovedByName);
+                    retValue = String.Format("MC{0} Abandoned Approved by {1}", executionObj.executionId, executionObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ENDED:
-                    retValue = String.Format("MC{0} Closed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue = String.Format("MC{0} Closed by {1}", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_REJECTED:
-                    retValue = String.Format("MC{0} Task Rejected by {1} ", executionObj.executionId, executionObj.rejectedbyName);
+                    retValue = String.Format("MC{0} Task Rejected by {1}", executionObj.executionId, executionObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_APPROVED:
-                    retValue = String.Format("MC{0} Task Approved by {1} ", executionObj.executionId, executionObj.approvedbyName);
+                    retValue = String.Format("MC{0} Task Approved by {1}", executionObj.executionId, executionObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
-                    retValue = String.Format("MC{0} End Approved by {1} ", executionObj.executionId, executionObj.endapprovedbyName);
+                    retValue = String.Format("MC{0} End Approved by {1}", executionObj.executionId, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    retValue = String.Format("MC{0} End Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
+                    retValue = String.Format("MC{0} End Rejected by {1}", executionObj.executionId, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
-                    retValue = String.Format("MC{0} Assigned to {1} ", executionObj.executionId, executionObj.assignedTo);
+                    retValue = String.Format("MC{0} Assigned to {1}", executionObj.executionId, executionObj.assignedTo);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_RESCHEDULED:
-                    retValue = String.Format("VE{0} Rescheduled to {1} ", executionObj.executionId, executionObj.assignedTo);
+                    retValue = String.Format("VE{0} Rescheduled to {1}", executionObj.executionId, executionObj.assignedTo);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
-                    retValue = String.Format("VE{0} Scheduled by {1} ", executionObj.executionId, executionObj.updatedBy);
+                    retValue = String.Format("VE{0} Scheduled by {1}", executionObj.executionId, executionObj.updatedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue = String.Format("VE{0} Started by {1} ", executionObj.executionId, executionObj.startedBy);
+                    retValue = String.Format("VE{0} Started by {1}", executionObj.executionId, executionObj.startedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue = String.Format("VE{0} Closed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue = String.Format("VE{0} Closed by {1}", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue = String.Format("VE{0} Abandoned by {1} ", executionObj.executionId, executionObj.abandonedBy);
+                    retValue = String.Format("VE{0} Abandoned by {1}", executionObj.executionId, executionObj.abandonedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
-                    retValue = String.Format("VE{0} Abandoned Rejected by {1} ", executionObj.executionId, executionObj.abandonRejectedByName);
+                    retValue = String.Format("VE{0} Abandoned Rejected by {1}", executionObj.executionId, executionObj.abandonRejectedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
-                    retValue = String.Format("VE{0} Abandoned Approved by {1} ", executionObj.executionId, executionObj.abandonApprovedByName);
+                    retValue = String.Format("VE{0} Abandoned Approved by {1}", executionObj.executionId, executionObj.abandonApprovedByName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ENDED:
-                    retValue = String.Format("VE{0} Task Closed by {1} ", executionObj.executionId, executionObj.endedBy);
+                    retValue = String.Format("VE{0} Task Closed by {1}", executionObj.executionId, executionObj.endedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue = String.Format("VE{0} Task Rejected by {1} ", executionObj.executionId, executionObj.rejectedbyName);
+                    retValue = String.Format("VE{0} Task Rejected by {1}", executionObj.executionId, executionObj.rejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_APPROVED:
-                    retValue = String.Format("VE{0} Task Approved by {1} ", executionObj.executionId, executionObj.approvedbyName);
+                    retValue = String.Format("VE{0} Task Approved by {1}", executionObj.executionId, executionObj.approvedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue = String.Format("VE{0} End Approved by {1} ", executionObj.executionId, executionObj.endapprovedbyName);
+                    retValue = String.Format("VE{0} End Approved by {1}", executionObj.executionId, executionObj.endapprovedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue = String.Format("VE{0} End Rejected by {1} ", executionObj.executionId, executionObj.endrejectedbyName);
+                    retValue = String.Format("VE{0} End Rejected by {1}", executionObj.executionId, executionObj.endrejectedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
-                    retValue = String.Format("VE{0} Assigned to {1} ", executionObj.executionId, executionObj.assignedTo);
+                    retValue = String.Format("VE{0} Assigned to {1}", executionObj.executionId, executionObj.assignedTo);
                     break;
                 default:
                     retValue = String.Format("Unsupported status {0} for VEG {1}", notificationID, executionObj.executionId);
@@ -224,58 +226,58 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.MC_TASK_STARTED:
-                    retValue = String.Format("SCH{0} Started by {1} ", scheduleObj.scheduleId, scheduleObj.startedbyName);
+                    retValue = String.Format("SCH{0} Started by {1}", scheduleObj.scheduleId, scheduleObj.startedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_COMPLETED:
-                    retValue = String.Format("SCH{0} Closed by {1} ", scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    retValue = String.Format("SCH{0} Closed by {1}", scheduleObj.scheduleId, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_ABANDONED:
-                    retValue = String.Format("SCH{0} Abandoned by {1} ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("SCH{0} Abandoned by {1}", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
-                    retValue = String.Format("SCH{0} Close Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue = String.Format("SCH{0} Close Approved by {1}", scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
-                    retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Close Rejected by {1}", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
-                    retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Close Rejected by {1}", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
 
 
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
+                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1}", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
-                    retValue = String.Format("SCH{0} Started by {1} ", scheduleObj.scheduleId, scheduleObj.startedbyName);
+                    retValue = String.Format("SCH{0} Started by {1}", scheduleObj.scheduleId, scheduleObj.startedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
-                    retValue = String.Format("SCH{0} Closed by {1} ", scheduleObj.scheduleId, scheduleObj.endedbyName);
+                    retValue = String.Format("SCH{0} Closed by {1}", scheduleObj.scheduleId, scheduleObj.endedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
-                    retValue = String.Format("SCH{0} Abandoned by {1} ", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
+                    retValue = String.Format("SCH{0} Abandoned by {1}", scheduleObj.scheduleId, scheduleObj.abandonedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_REJECTED:
-                    retValue = String.Format("SCH{0} Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Rejected by {1}", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 /*case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1} ", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
+                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1}", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;*/
                 case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
-                    retValue = String.Format("SCH{0} Close Approved by {1} ", scheduleObj.scheduleId, scheduleObj.approvedBy);
+                    retValue = String.Format("SCH{0} Close Approved by {1}", scheduleObj.scheduleId, scheduleObj.approvedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
-                    retValue = String.Format("SCH{0} Close Rejected by {1} ", scheduleObj.scheduleId, scheduleObj.rejectedBy);
+                    retValue = String.Format("SCH{0} Close Rejected by {1}", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
-                    retValue = String.Format("SCH{0} Scheduled by {1} ", scheduleObj.scheduleId, scheduleObj.updatedbyName);
+                    retValue = String.Format("SCH{0} Scheduled by {1}", scheduleObj.scheduleId, scheduleObj.updatedbyName);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_UPDATED:
-                    retValue = String.Format("SCH{0} Updated by {1} ", scheduleObj.scheduleId, scheduleObj.updatedbyName);
+                    retValue = String.Format("SCH{0} Updated by {1}", scheduleObj.scheduleId, scheduleObj.updatedbyName);
                     break;
 
                 default:
-                    retValue = String.Format("No status for SCH{0} at {1) ", scheduleObj.scheduleId, scheduleObj.facilityidName);
+                    retValue = String.Format("No status for SCH{0} at {1)", scheduleObj.scheduleId, scheduleObj.facilityidName);
                     break;
             }
             return retValue;
@@ -437,7 +439,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
         }
 
-        internal async Task<List<CMMCTaskList>> GetTaskList(int facilityId, string facilitytimeZone, string startDate, string endDate)         //Pending : add date range and status filter
+        internal async Task<List<CMMCTaskList>> GetTaskList(string facilityId, string facilitytimeZone, string startDate, string endDate, bool selfView, int userId)         //Pending : add date range and status filter
         {
             string statusOut = "CASE ";
             //Scheduled Qnty	Actual Qnty	Deviation	Machine type	Time taken	Remarks
@@ -451,7 +453,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             statusOut += $"ELSE 'Invalid Status' END";
 
             string myQuery1 = $"select mc.id as executionId ,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date," +
-                              $" CONCAT(createdBy.firstName, createdBy.lastName) as responsibility , mc.startDate as scheduledDate, mc.endedAt as doneDate, " +
+                              $" CONCAT(assignedToUser.firstName, assignedToUser.lastName) as responsibility , mc.startDate as scheduledDate, mc.endedAt as doneDate, " +
                               $" SUM(css.area) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.area) - sub2.no_of_cleaned)  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend , " +
                               $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonedAt, mc.startDate)  ELSE TIMESTAMPDIFF(MINUTE,mc.endedAt, mc.startDate) END as Time_taken ,  mc.reasonForAbandon as Remark,  " +
                               $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short" +
@@ -459,15 +461,24 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                               $" LEFT JOIN (SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
                               $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
                               $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
-                              $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
+                              $"LEFT JOIN users as assignedToUser ON assignedToUser.id = mc.assignedTo " +
                               $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
                               $" where mc.moduleType = {(int)moduleType} ";
 
 
-            if (facilityId > 0)
+            if (!string.IsNullOrEmpty(facilityId))
             {
-                myQuery1 += $" and mc.facilityId = {facilityId} group by mc.id ";
+                // Assume facilityId is a comma-delimited list like "1,2,3"
+                myQuery1 += $" and mc.facilityId IN ({facilityId}) group by mc.id";
             }
+
+            if (selfView)
+            {
+                // Add assignedToId condition along with user.id and created_user.id
+                myQuery1 += $" AND mc.assignedTo = {userId}";
+            }
+
+
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             foreach (var ViewMCTaskList in _ViewMCTaskList)
             {
@@ -667,7 +678,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate as scheduledDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
                $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
-               $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(endrejectedUser.firstName, ' ', endrejectedUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +
+               $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +
                $" CONCAT(endedByUser.firstName, ' ', endedByUser.lastName) as endedBy, ex.endedAt , ex.abandonApprovedAt, ex.abandonRejectedAt, ex.endedById as endedById, f.name as facilityidName, " +
                $" CONCAT(abandonedUser.firstName,' ', abandonedUser.lastName) as abandonedBy,ex.abandonedAt, ex.abandonedById, ex.end_approved_at, ex.end_rejected_at, " +
                $" CONCAT(updatedByUser.firstName,' ', updatedByUser.lastName) as updatedBy, ex.updatedById as updatedById, " +
@@ -675,7 +686,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $" CONCAT(endrejectedUser.firstName,' ', endrejectedUser.lastName) as endrejectedbyName, ex.end_rejected_id as endrejectedbyId, " +
                $" CONCAT(abandonApprovedUser.firstName,' ', abandonApprovedUser.lastName) as abandonApprovedByName, ex.abandonApprovedBy as abandonApprovedById, " +
                $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById " +
-               $" from cleaning_execution as ex JOIN cleaning_plan as plan on ex.planId = plan.planId " +
+               $" from cleaning_execution as ex LEFT JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
                $" left join facilities as F on F.id = ex.facilityId  " +
                $" LEFT JOIN users as createdBy ON createdBy.id = plan.createdById " +
