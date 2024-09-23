@@ -320,7 +320,7 @@ namespace CMMSAPIs.Models.SM
         public string request_updated_by_name { get; set; }
         public int updated_by_emp_ID { get; set; }
         public string request_rejected_by_name { get; set; }
-        public dynamic rejected_by_emp_ID { get; set; }
+        public int? rejected_by_emp_ID { get; set; }
         public dynamic request_rejected_at { get; set; }
         public string issue_appoved_by_name { get; set; }
         public int issue_approved_by_emp_ID { get; set; }
@@ -342,7 +342,6 @@ namespace CMMSAPIs.Models.SM
         public DateTime? issue_rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
-
 
     public class CMMRSReturnList
     {
@@ -371,6 +370,10 @@ namespace CMMSAPIs.Models.SM
         public int is_splited { get; set; }
         public int is_mrs_return { get; set; }
         public int return_mrs { get; set; }
+        public int from_actor_type_id { get; set; }
+        public int from_actor_id { get; set; }
+        public int to_actor_type_id { get; set; }
+        public int to_actor_id { get; set; }
         public string request_rejected_by_name { get; set; }
         public dynamic rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
