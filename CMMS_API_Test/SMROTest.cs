@@ -182,7 +182,7 @@ namespace CMMS_API_Test
 
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMCreateRequestOrderGET>();
             var updatedRO = getItem.GetItemList(EP_GetRODetailsByID + "?IDs=" + goId);
-            //Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, updatedRO[0].status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMITTED, updatedRO[0].status);
             
             Assert.AreEqual(1, updatedRO[0].facilityID, "FacilityID should be 1");
             Assert.AreEqual("test", updatedRO[0].comment, "Comment should be 'test'");

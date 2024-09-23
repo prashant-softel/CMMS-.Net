@@ -38,7 +38,6 @@ namespace CMMS_API_Test
         string EP_getAssetTypeByItemID = "/api/MRS/getAssetTypeByItemID";
         string EP_CreateReturnMRS = "/api/MRS/CreateReturnMRS";
         string EP_UpdateReturnMRS = "/api/MRS/UpdateReturnMRS";
-        string EP_getMRSReturnItems = "/api/MRS/getMRSReturnItems";
         string EP_getMRSReturnList = "/api/MRS/getMRSReturnList";
         string EP_ApproveMRSReturn = "/api/MRS/ApproveMRSReturn";
         string EP_RejectMRSReturn = "/api/MRS/RejectMRSReturn";
@@ -401,7 +400,7 @@ namespace CMMS_API_Test
 
             Assert.AreEqual(mrsResponse.approver_name, "Admin HFE");
             DateTime expectedGeneratedAt = DateTime.Now;
-            DateTime actualGeneratedAt = (DateTime)mrsResponse.issue_approved_date;
+            DateTime actualGeneratedAt = (DateTime)mrsResponse.approval_date;
 
 
             expectedGeneratedAt = new DateTime(expectedGeneratedAt.Year, expectedGeneratedAt.Month, expectedGeneratedAt.Day, expectedGeneratedAt.Hour, expectedGeneratedAt.Minute, 0);

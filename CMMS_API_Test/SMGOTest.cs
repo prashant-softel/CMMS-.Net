@@ -153,7 +153,6 @@ namespace CMMS_API_Test
                                 ""currencyID"": 69,
                                 ""id"": 0,
                                 ""is_submit"": 1,
-                                
                                 ""go_items"": [
                                     {
                                         ""assetMasterItemID"": 1,
@@ -239,7 +238,7 @@ namespace CMMS_API_Test
                                   ""po_date"": ""2024-09-14"",
                                   ""amount"": 87878,
                                   ""currencyID"": 69,
-                                  ""id"": 157,
+                                  ""id"": 144,
                                   ""is_submit"": 1,
                                   ""go_items"": [
                                       {
@@ -346,39 +345,6 @@ namespace CMMS_API_Test
 
             Assert.AreEqual(goResponse.Id,goId);
         }
-
-        /*[TestMethod]
-        public void VerifyApproveGO()
-        {
-            string payload = @"{
-                                ""id"": 156,
-                                ""comment"": ""test"",
-                                ""facilityId"": 1
-                                 }";
-
-
-            var goService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-
-            var response = goService.CreateItem(EP_GOApproval, payload);
-
-            Assert.AreEqual("Approval Successful.", response.message);
-
-            int goId = response.id[0];
-            var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.CMGOMaster>();
-            var goResponse = getItem.GetItem(EP_GetGODetailsByID + "?ID=" + goId);
-
-            Assert.AreEqual((int)CMMS.CMMS_Status.GO_APPROVED, goResponse.status);
-
-            Assert.AreEqual(goResponse.approved_by_name, "Admin HFE");
-
-            DateTime expectedGeneratedAt = DateTime.Today;
-            DateTime actualGeneratedAt = (DateTime)goResponse.approved_at;
-            expectedGeneratedAt = new DateTime(expectedGeneratedAt.Year, expectedGeneratedAt.Month, expectedGeneratedAt.Day, 0, 0, 0);
-            actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, 0, 0, 0);
-            Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The approved timestamp should be the same");
-
-            Assert.AreEqual(goResponse.Id, response.id[0]);
-        }*/
 
         [TestMethod]
         public void VerifyRejectGO()
