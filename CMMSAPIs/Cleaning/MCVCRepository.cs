@@ -246,7 +246,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
 
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
-                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{1}", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
+                    retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{2}", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
                 case CMMS.CMMS_Status.VEG_TASK_STARTED:
                     retValue = String.Format("SCH{0} Started by {1}", scheduleObj.scheduleId, scheduleObj.startedbyName);
@@ -503,7 +503,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string planQuery = $"select plan.planId,plan.title,plan.startDate ,plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
+            string planQuery = $"select plan.planId,plan.title,plan.startDate , plan.description, plan.frequencyId,plan.assignedTo as assignedToId ,plan.approvedById,plan.createdById,plan.facilityId,f.name as siteName, CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdBy , plan.createdAt,freq.name as frequency, " +
                  $" plan.durationDays as noOfCleaningDays, facility.name, plan.approvedAt as approvedAt, CONCAT(updatedBy.firstName, ' ' ,updatedBy.lastName) as updatedbyName, CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assignedTo,plan.status,{statusOut} as status_short," +
                  $"CONCAT(approvedBy.firstName,' ' , approvedBy.lastName) as approvedbyName ," +
                  $"CONCAT(approvedBy.firstName,' ' ,approvedBy.lastName) as rejectedbyName ," +
@@ -1501,7 +1501,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 if (status != CMMS.CMMS_Status.MC_TASK_RESCHEDULED && status != CMMS.CMMS_Status.MC_PLAN_APPROVED && status != CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW)
                 {
-                    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned ");
+                    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned");
                 }
 
                 string myQuery = "UPDATE cleaning_execution SET " +
@@ -1518,7 +1518,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 if (status != CMMS.CMMS_Status.VEG_TASK_RESCHEDULED && status != CMMS.CMMS_Status.VEG_PLAN_APPROVED && status != CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW)
                 {
-                    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned ");
+                    return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned");
                 }
                 string myQuery = "UPDATE cleaning_execution SET " +
                               $"assignedTo = {assign_to}, " +
@@ -1538,11 +1538,11 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 if (status == CMMS.CMMS_Status.MC_TASK_SCHEDULED)
                 {
-                    response = new CMDefaultResponse(task_id, retCode, $"Vegetation Task Assigned To user Id {assign_to}");
+                    response = new CMDefaultResponse(task_id, retCode, $"MC Task Assigned To user Id {assign_to}");
                 }
                 else
                 {
-                    response = new CMDefaultResponse(task_id, retCode, $"Vegetation Task Reassigned To user Id {assign_to}");
+                    response = new CMDefaultResponse(task_id, retCode, $"MC Task Reassigned To user Id {assign_to}");
                 }
             }
             else if (moduleType == cleaningType.Vegetation)
@@ -1717,7 +1717,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
 
-            CMDefaultResponse response = new CMDefaultResponse(request.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution End Rejected");
             return response;
 
         }
@@ -1910,7 +1910,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 Console.WriteLine($"Failed to send Vegetation Notification: {e.Message}");
             }
 
-            CMDefaultResponse response = new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Execution Schedule Rejected");
             return response;
 
         }
