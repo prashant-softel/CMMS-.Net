@@ -545,17 +545,35 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 Schedules.equipments = new List<CMMCEquipmentDetails>();
                 foreach (CMMCEquipmentDetails equip in _Equipments)
                 {
+
                     if (Schedules.cleaningDay == equip.noOfPlanDay)
                     {
                         Schedules.equipments.Add(equip);
                     }
+
                 }
             }
-            _ViewMCPlan[0].schedules = _Schedules;
+            List<CMMCSchedule> _SchedulesNew = new List<CMMCSchedule>();
+
+            for (int i = 0; i < _Schedules.Count; i++)
+            {
+
+                if (_Schedules[i].equipments.Count == 0)
+                {
+                    int id = _Schedules[i].scheduleId;
+
+                    string deleteQuery = $"DELETE FROM cleaning_plan_schedules WHERE scheduleId = {id};";
+                    await Context.ExecuteNonQry<int>(deleteQuery).ConfigureAwait(false);
+                }
+                else
+                {
+                    _SchedulesNew.Add(_Schedules[i]);
+                }
+            }
+            _ViewMCPlan[0].schedules = _SchedulesNew;
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.VEGETATION_PLAN, _Status_long, _ViewMCPlan[0]);
             _ViewMCPlan[0].status_long = _longStatus;
-
             foreach (var list in _ViewMCPlan)
             {
                 DateTime a = list.startDate;
@@ -565,15 +583,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     list.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.createdAt);
                 if (list != null && list.startDate != null)
                     list.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.startDate);
-            }
-            for (int i = 0; i < _Schedules.Count; i++)
-            {
-                if (_Schedules[i].equipments.Count == 0)
-                {
-                    int id = _Schedules[i].scheduleId;
-                    String deletequry = $"Delete from cleaning_plan_schedules where scheduleId ={id} ;";
-                    await Context.ExecuteNonQry<int>(deletequry).ConfigureAwait(false);
-                }
             }
             return _ViewMCPlan[0];
         }

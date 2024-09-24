@@ -440,7 +440,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime? target_date { get; set; }
         public string action_taken { get; set; }
         public DateTime? closer_date { get; set; }
-        public string cost_type { get; set; }
+        public int cost_type { get; set; }
         public string status { get; set; }
         public int days_remaining { get; set; }
         public string timeline { get; set; }
@@ -625,7 +625,7 @@ namespace CMMSAPIs.Models.Masters
     public class CMObservation
     {
         public int id { get; set; }
-        public int observation_type { get; set; }  // added type of enum 
+        public int check_point_type_id { get; set; }  // added type of enum 
         public int facility_id { get; set; }
         public string contractor_name { get; set; }
         public int risk_type_id { get; set; }

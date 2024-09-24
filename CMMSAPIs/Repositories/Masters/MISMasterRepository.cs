@@ -1355,7 +1355,7 @@ namespace CMMSAPIs.Repositories.Masters
             //
             //remove columns whose data is not required\
             // What is the need of short_Status
-            string myQuery = "SELECT id, facility_id, contractor_name, risk_type_id, cost_type, date_of_observation,MONTHNAME(date_of_observation) AS month_name, " +
+            string myQuery = "SELECT id, facility_id, contractor_name, risk_type_id, cost_type , date_of_observation,MONTHNAME(date_of_observation) AS month_name, " +
                  "type_of_observation, location_of_observation, source_of_observation, target_date, created_at, " +
                  "is_active, status_code, short_Status FROM observations " +
                  "WHERE facility_id in ( " + facility_id + ") AND " +
@@ -1444,7 +1444,6 @@ namespace CMMSAPIs.Repositories.Masters
                         }
 
                     }
-
                     if (item.risk_type_id == 3)
                     {
                         forMonth.createdCount_Moderate++;
@@ -1467,10 +1466,6 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return monthlyObservationSummary.Values.ToList();
         }
-
-
-
-
         internal async Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id)
         {
             string myQuery = $" SELECT s.id,s.name,s.isActive, concat(users.firstName, ' ', users.lastName) Created_by, s.created_At FROM statutorycomliance s\n  left join users on users.id = s.Created_by WHERE s.id = {id} and s.isActive=1";
@@ -1998,7 +1993,7 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
                 " left join users responsible  on responsible.id = observations.assign_to" +
-                " where is_active = 1 and observations.facility_id = " + facility_Id + " or date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
+                " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
 
 
@@ -2017,18 +2012,18 @@ namespace CMMSAPIs.Repositories.Masters
             " left join ir_risktype ON ckp.risk_type = ir_risktype.id left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
             " left join users createdBy on createdBy.id = pm_task.createdById left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
             " left join business on business.id = createdBy.companyId and business.type = 2 " +
-            $" where  pm_task.facility_id = {facility_Id} and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
+            $" where  pm_task.facility_id = {facility_Id} and  pm_execution.Check_Point_Type_id=4   and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
             List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);
 
             foreach (var task in Result)
             {
                 string _shortStatus = Statusof(task.status_code);
                 task.short_status = _shortStatus;
-                task.observation_type = 1;
+                task.check_point_type_id = 1;
             }
             foreach (var task1 in Result1)
             {
-                task1.observation_type = 2;
+                task1.check_point_type_id = 2;
             }
             Result.AddRange(Result1);
 

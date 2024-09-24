@@ -152,10 +152,10 @@ namespace CMMSAPIs.Repositories.JC
             {
                 if (jc.jobid > 0)
                 {
-                     string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
-                              $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
-                              $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {_ViewJobCardList[0].jobid} and job.facilityId IN ({facility_id})";
-            List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
+                    string myQuery2 = $"SELECT asset_cat.id as equipmentCat_id, asset_cat.name as equipmentCat_name,Assets.name as Equipment_name   " +
+                                      $"FROM assetcategories as asset_cat JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id  LEFT JOIN assets as Assets ON Assets.id =mapAssets.assetId " +
+                                      $" JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id = {jc.jobid} and job.facilityId = {facility_id}";
+                    List<equipmentCatList> _equipmentCatList = await Context.GetData<equipmentCatList>(myQuery2).ConfigureAwait(false);
                     _ViewJobCardList[0].LstequipmentCatList = _equipmentCatList;
                 }
             }
@@ -291,7 +291,7 @@ namespace CMMSAPIs.Repositories.JC
              * Users, Assets, AssetCategory, Facility, PermiEmployeeLists, PermitLotoAssets, PermitIsolatedAssetCategories
              * Return all the field listed in JCDetailModel 
             */
-           
+
             //plant details 
             string myQuery1 = $"SELECT distinct(jc.id ) as id , jc.PTW_id as ptwId, job.id as jobid, facilities.id as facility_id, facilities.name as plant_name,fc.name as block_name, " +
                                  $" jc.JC_title as title , jc.JC_Description as description, JC_Date_Stop as JC_Closed_At, " +
@@ -328,7 +328,7 @@ namespace CMMSAPIs.Repositories.JC
                 $"jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time , jc.JC_Date_Stop as Job_closed_on ," +
                 $"CONCAT(user.firstName, user.lastName) as job_assigned_employee_name ,job.createdAt as Job_raised_on,jowt.workTypeName as Type_of_Job, job.description as job_description,CONCAT(apuser.firstName, apuser.lastName) as perform_by,CONCAT(apuser.firstName, apuser.lastName) as Employee_name,apuser.createdBy as Employee_ID ,bus_user.name as Company , " +
                 $" TIMESTAMPDIFF(MINUTE, job.breakdownTime, jc.JC_Date_Stop) AS turnaround_time_minutes," +
-                $" group_concat(distinct workType.workTypeName order by workType.id separator ', ') as work_type " + 
+                $" group_concat(distinct workType.workTypeName order by workType.id separator ', ') as work_type " +
                 $" FROM jobs as job " +
                 $"JOIN jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                 $"JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
