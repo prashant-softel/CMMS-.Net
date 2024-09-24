@@ -291,7 +291,7 @@ namespace CMMSAPIs.Repositories.JC
              * Users, Assets, AssetCategory, Facility, PermiEmployeeLists, PermitLotoAssets, PermitIsolatedAssetCategories
              * Return all the field listed in JCDetailModel 
             */
-
+           
             //plant details 
             string myQuery1 = $"SELECT distinct(jc.id ) as id , jc.PTW_id as ptwId, job.id as jobid, facilities.id as facility_id, facilities.name as plant_name,fc.name as block_name, " +
                                  $" jc.JC_title as title , jc.JC_Description as description, JC_Date_Stop as JC_Closed_At, " +
@@ -319,8 +319,8 @@ namespace CMMSAPIs.Repositories.JC
                                  $"where jc.id = {jc_id}";
 
 
-            List<CMJCDetail> _plantDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
-            if (_plantDetails.Count == 0)
+            List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
+            if (_jcDetails.Count == 0)
                 throw new MissingMemberException($"Job Card with ID {jc_id} not found");
 
             //job details
@@ -328,18 +328,23 @@ namespace CMMSAPIs.Repositories.JC
                 $"jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time , jc.JC_Date_Stop as Job_closed_on ," +
                 $"CONCAT(user.firstName, user.lastName) as job_assigned_employee_name ,job.createdAt as Job_raised_on,jowt.workTypeName as Type_of_Job, job.description as job_description,CONCAT(apuser.firstName, apuser.lastName) as perform_by,CONCAT(apuser.firstName, apuser.lastName) as Employee_name,apuser.createdBy as Employee_ID ,bus_user.name as Company , " +
                 $" TIMESTAMPDIFF(MINUTE, job.breakdownTime, jc.JC_Date_Stop) AS turnaround_time_minutes," +
-                $" workType.workTypeName as work_type FROM jobs as job " +
+                $" group_concat(distinct workType.workTypeName order by workType.id separator ', ') as work_type " + 
+                $" FROM jobs as job " +
                 $"JOIN jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
                 $"JOIN assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
-                $"LEFT JOIN jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id JOIN " +
-                $"facilities as facilities ON job.facilityId = facilities.id " +
+                $"LEFT JOIN jobworktypes as workType ON workType.equipmentCategoryId = asset_cat.id " +
+                $"LEFT JOIN facilities as facilities ON job.facilityId = facilities.id " +
                 $"LEFT JOIN users as user ON user.id = job.assignedId " +
                 $"LEFT JOIN jobworktypes as jowt ON jowt.id = job.JobType " +
                 $"LEFT JOIN users as  apuser ON apuser.id = job.createdBy  " +
                 $"LEFT join  business as bus_user ON bus_user.id = job.createdBy " +
-                $" JOIN jobcards as jc on jc.jobId = job.id where jc.id = {jc_id}";
+                $"JOIN jobcards as jc on jc.jobId = job.id where jc.id = {jc_id}";
 
             List<CMJCJobDetail> _jobDetails = await Context.GetData<CMJCJobDetail>(myQuery2).ConfigureAwait(false);
+
+
+
+
             int id = 0;
             foreach (var job in _jobDetails)
             {
@@ -436,34 +441,32 @@ namespace CMMSAPIs.Repositories.JC
                     $"WHERE  smm.whereUsedRefID={jc_id};";
             List<Materialconsumption> Material = await Context.GetData<Materialconsumption>(Materialconsumptionofjob).ConfigureAwait(false);
 
-
-            _plantDetails[0].LstCMJCJobDetailList = _jobDetails;
-            _plantDetails[0].LstPermitDetailList = _permitDetails;
-            _plantDetails[0].asset_category_name = asset_category_name;
-            _plantDetails[0].LstCMJCIsolatedDetailList = _isolatedDetails;
-            _plantDetails[0].LstCMJCLotoDetailList = _lotoList;
-            _plantDetails[0].LstCMJCEmpList = _empList;
-            _plantDetails[0].file_list = _fileUpload;
-            _plantDetails[0].tool_List = _ToolsLinked;
-            _plantDetails[0].file_listJc = Jc_image;
-            _plantDetails[0].Material_consumption = Material;
-
+            _jcDetails[0].LstCMJCJobDetailList = _jobDetails;
+            _jcDetails[0].LstPermitDetailList = _permitDetails;
+            _jcDetails[0].asset_category_name = asset_category_name;
+            _jcDetails[0].LstCMJCIsolatedDetailList = _isolatedDetails;
+            _jcDetails[0].LstCMJCLotoDetailList = _lotoList;
+            _jcDetails[0].LstCMJCEmpList = _empList;
+            _jcDetails[0].file_list = _fileUpload;
+            _jcDetails[0].tool_List = _ToolsLinked;
+            _jcDetails[0].file_listJc = Jc_image;
+            _jcDetails[0].Material_consumption = Material;
 
 
-            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_plantDetails[0].status);
-            CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(_plantDetails[0].JC_Approved);
+            CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_jcDetails[0].status);
+            CMMS.ApprovalStatus _Approval = (CMMS.ApprovalStatus)(_jcDetails[0].JC_Approved);
             string _shortStatus = getShortStatus(CMMS.CMMS_Modules.JOBCARD, _Status, _Approval);
-            _plantDetails[0].status_short = _shortStatus;
+            _jcDetails[0].status_short = _shortStatus;
 
-            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_plantDetails[0].status);
-            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOBCARD, _Status_long, _plantDetails[0]);
-            _plantDetails[0].status_long = _longStatus;
-            foreach (var data in _plantDetails)
+            CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_jcDetails[0].status);
+            string _longStatus = getLongStatus(CMMS.CMMS_Modules.JOBCARD, _Status_long, _jcDetails[0]);
+            _jcDetails[0].status_long = _longStatus;
+            foreach (var data in _jcDetails)
             {
                 if (data != null && data.JC_Start_At != null)
                     data.JC_Start_At = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, data.JC_Start_At);
             }
-            return _plantDetails;
+            return _jcDetails;
         }
 
         //internal async Task<CMDefaultResponse> CreateJC(int job_id, int userID)
