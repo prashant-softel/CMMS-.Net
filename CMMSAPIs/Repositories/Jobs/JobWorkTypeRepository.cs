@@ -133,12 +133,6 @@ namespace CMMSAPIs.Repositories.Jobs
 
         internal async Task<CMDefaultResponse> CreateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
-            // string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
-            //                   $"VALUES ('{tool_name}', 1, '{UtilsRepository.GetUTCTime()}', {userID});";
-
-            //DataTable dt = 
-            //   int insertedId =await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-            //int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
             string myQuery = $"INSERT INTO worktypemasterassets (assetName,workTypeId,equipmentCategoryId,status, createdAt, createdBy) " +
                                 $"VALUES ('{request.Toolname}',{request.workTypeId},{request.equipmentCategoryId}, 1, '{UtilsRepository.GetUTCTime()}', {userID} );" +
@@ -151,27 +145,6 @@ namespace CMMSAPIs.Repositories.Jobs
             //int insertedId1 = Convert.ToInt32(dt.Rows[0][0]);
             return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
         }
-        /*{   
-            try
-            {
-                string myQuery = $"INSERT INTO worktypemasterassets (assetName, status, createdAt, createdBy) " +
-                                 $"VALUES ('{name}', 1, '{UtilsRepository.GetUTCTime()}', {userID}) SELECT LAST_INSERT_ID();";
-
-                DataTable dt = await Context.FetchData(myQuery).ConfigureAwait(false);
-
-                if (dt.Rows.Count > 0)
-                {
-                    int insertedId = Convert.ToInt32(dt.Rows[0][0]);
-                    return new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Master tool created");
-                }
-            }
-            catch (Exception ex)
-            {
-
-                return ex.Message);
-            }*/
-
-        //s}
         internal async Task<CMDefaultResponse> UpdateMasterTool(CMADDJobWorkTypeTool request, int userID)
         {
             string myQuery = $"UPDATE worktypemasterassets SET  assetName='{request.Toolname}',workTypeId={request.workTypeId},equipmentCategoryId={request.equipmentCategoryId},updatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {userID} WHERE id = {request.id} ";

@@ -551,9 +551,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     }
                 }
             }
-
             _ViewMCPlan[0].schedules = _Schedules;
-
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewMCPlan[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.VEGETATION_PLAN, _Status_long, _ViewMCPlan[0]);
             _ViewMCPlan[0].status_long = _longStatus;
@@ -568,10 +566,17 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 if (list != null && list.startDate != null)
                     list.startDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.startDate);
             }
-
+            for (int i = 0; i < _Schedules.Count; i++)
+            {
+                if (_Schedules[i].equipments.Count == 0)
+                {
+                    int id = _Schedules[i].scheduleId;
+                    String deletequry = $"Delete from cleaning_plan_schedules where scheduleId ={id} ;";
+                    await Context.ExecuteNonQry<int>(deletequry).ConfigureAwait(false);
+                }
+            }
             return _ViewMCPlan[0];
         }
-
         internal virtual async Task<List<CMMCTaskEquipmentList>> GetTaskEquipmentList(int taskId, string facilitytimeZone)
         {
 

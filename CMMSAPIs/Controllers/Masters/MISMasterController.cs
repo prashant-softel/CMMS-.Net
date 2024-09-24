@@ -2325,6 +2325,24 @@ namespace CMMSAPIs.Controllers.Masters
                 return Ok(data);
             }
         }
+        [Route("GetEvaluationPlan")]
+        [HttpDelete]
+        public async Task<IActionResult> GetEvaluationPlan(int id)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetEvaluationPlan(id, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
 
         [Route("ApproveObservation")]
         [HttpPut]

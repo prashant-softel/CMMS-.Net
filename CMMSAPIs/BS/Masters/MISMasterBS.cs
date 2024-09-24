@@ -162,6 +162,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskAssign(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
+        Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -2226,6 +2227,11 @@ namespace CMMSAPIs.BS.MISMasters
         }
 
         public Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID)
         {
             throw new NotImplementedException();
         }

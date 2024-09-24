@@ -2757,42 +2757,41 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
         {
             string updateQry = "";
-            if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
-            {
-                if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
-                {
-                    updateQry = "UPDATE pm_execution SET ";
-                    updateQry += $"Observation_assign_to = {request.assigned_to_id}, ";
-                    updateQry += $"Observation_target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
-                    updateQry += $"Observation_Status = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED} ";
-                }
-                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
-            }
-            else
-            {
-                updateQry = "UPDATE observations SET ";
-                updateQry += $"assign_to = {request.assigned_to_id}, ";
-                updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
-                updateQry += $"status_code = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
-                updateQry += $"contractor_name = '{request.contractor_name}', ";
-                updateQry += $"risk_type_id = {request.risk_type_id}, ";
-                updateQry += $"preventive_action = '{request.preventive_action}', ";
-                updateQry += $"responsible_person = {request.assigned_to_id}, ";
-                updateQry += $"contact_number = '{request.contact_number}', ";
-                updateQry += $"cost_type = {request.cost_type}, ";
-                updateQry += $"date_of_observation = '{request.date_of_observation.ToString("yyyy-MM-dd")}', ";
-                updateQry += $"type_of_observation = {request.type_of_observation}, ";  // Removed extra quotes for int value
-                updateQry += $"location_of_observation = '{request.location_of_observation}', ";
-                updateQry += $"action_taken = '{request.action_taken}', ";
-                updateQry += $"source_of_observation = {request.source_of_observation}, ";
-                //updateQry += $"comment = '{request.comment}', ";
-                updateQry += $"observation_description = '{request.observation_description}', ";
-                updateQry += $"updated_at = '{UtilsRepository.GetUTCTime()}' ";
-                updateQry += $"WHERE id = {request.id};";
-                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
-            }
+            /* if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+             {
+                 if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+                 {
+                     updateQry = "UPDATE pm_execution SET ";
+                     updateQry += $"Observation_assign_to = {request.assigned_to_id}, ";
+                     updateQry += $"Observation_target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
+                     updateQry += $"Observation_Status = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED} ";
+                 }
+                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+             }
+             else*/
+
+            updateQry = "UPDATE observations SET ";
+            updateQry += $"assign_to = {request.assigned_to_id}, ";
+            updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
+            updateQry += $"status_code = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
+            updateQry += $"contractor_name = '{request.contractor_name}', ";
+            updateQry += $"risk_type_id = {request.risk_type_id}, ";
+            updateQry += $"preventive_action = '{request.preventive_action}', ";
+            updateQry += $"responsible_person = {request.assigned_to_id}, ";
+            updateQry += $"contact_number = '{request.contact_number}', ";
+            updateQry += $"cost_type = {request.cost_type}, ";
+            updateQry += $"date_of_observation = '{request.date_of_observation.ToString("yyyy-MM-dd")}', ";
+            updateQry += $"type_of_observation = {request.type_of_observation}, ";  // Removed extra quotes for int value
+            updateQry += $"location_of_observation = '{request.location_of_observation}', ";
+            updateQry += $"action_taken = '{request.action_taken}', ";
+            updateQry += $"source_of_observation = {request.source_of_observation}, ";
+            updateQry += $"observation_description = '{request.observation_description}', ";
+            updateQry += $"updated_at = '{UtilsRepository.GetUTCTime()}' ";
+            updateQry += $"WHERE id = {request.id};";
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
         }
         //EvaluateException
@@ -2827,8 +2826,11 @@ namespace CMMSAPIs.Repositories.Masters
 
             return null;
         }
-
-            internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone)
+        public async Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID)
+        {
+            return null;
+        }
+        internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone)
         {
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.OBSERVATION;
             CMMS.CMMS_Status status = CMMS.CMMS_Status.OBSERVATION_APPROVED;
@@ -2838,7 +2840,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             //ADD REMARK TO HISTORY
             //add db col rejectRemark approveRemark
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Approved", CMMS.CMMS_Status.OBSERVATION_APPROVED, userID); 
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Approved", CMMS.CMMS_Status.OBSERVATION_APPROVED, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Approved");
             return response;
