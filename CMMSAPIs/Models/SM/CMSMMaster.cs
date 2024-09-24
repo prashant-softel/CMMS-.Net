@@ -320,8 +320,8 @@ namespace CMMSAPIs.Models.SM
         public string request_updated_by_name { get; set; }
         public int updated_by_emp_ID { get; set; }
         public string request_rejected_by_name { get; set; }
-        public int? rejected_by_emp_ID { get; set; }
-        public dynamic request_rejected_at { get; set; }
+        public int rejected_by_emp_ID { get; set; }
+        public DateTime? rejected_date { get; set; }
         public string issue_approved_by_name { get; set; }
         public int issue_approved_by_emp_ID { get; set; }
         public string issue_rejected_by_name { get; set; }

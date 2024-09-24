@@ -872,7 +872,7 @@ namespace CMMSAPIs.Repositories.SM
                           "sm.updated_by_emp_ID, " +
                           "CONCAT(updateUser.firstName, ' ', updateUser.lastName) AS request_updated_by_name, " +
                           "sm.rejected_by_emp_ID, " +
-                          "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name, " +
+                          "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name,sm.rejected_date, " +
                           "sm.issue_approved_by_emp_ID, " +
                           "CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) AS issue_approved_by_name, " +
                           "sm.issue_approved_date, " +
@@ -889,7 +889,7 @@ namespace CMMSAPIs.Repositories.SM
                           "LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
                           "LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
                           "WHERE sm.id = " + ID + ";";
-
+            
             _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
@@ -2537,7 +2537,7 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = String.Format("MRS{0} Issue Rejected By {1}", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = String.Format("MRS{0} Issue Approved By {1}", m_MRSObj.ID, m_MRSObj.issue_appoved_by_name);
+                    retValue = String.Format("MRS{0} Issue Approved By {1}", m_MRSObj.ID, m_MRSObj.issue_approved_by_name);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";

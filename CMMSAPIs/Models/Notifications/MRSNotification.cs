@@ -106,7 +106,7 @@ namespace CMMSAPIs.Models.Notifications
             }
             if (!string.IsNullOrEmpty(m_MRSObj.request_rejected_by_name))
             {
-                retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name + " at " + m_MRSObj.request_rejected_at);
+                retValue += String.Format(template, "Request Rejected By", m_MRSObj.request_rejected_by_name + " at " + m_MRSObj.rejected_date);
             }
             if (!string.IsNullOrEmpty(m_MRSObj.approver_name))
             {
