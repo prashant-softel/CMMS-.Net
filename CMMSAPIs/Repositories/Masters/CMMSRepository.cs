@@ -2097,6 +2097,321 @@ namespace CMMSAPIs.Repositories.Masters
 
             return result;
         }
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails_backup(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        {
+
+            List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
+            if (facilityId == null)
+            {
+                return countResult;
+            }
+            CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
+            CMDashboadDetails result = new CMDashboadDetails();
+            switch (moduleID)
+            {
+                case CMMS.CMMS_Modules.JOB:
+                    modulewiseDetail.module_name = "Breakdown Maintenance";
+                    result = await getJobDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    //await SaveDashboardModuleData("Breakdown Maintenance", facilityId, modulewiseDetail, result);
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.PM_PLAN:
+                    modulewiseDetail.module_name = "Preventive Maintenance";
+                    result = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    //await SaveDashboardModuleData("Preventive Maintenance", facilityId, modulewiseDetail, result);
+
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.MC_PLAN:
+                    modulewiseDetail.module_name = "Module Cleaning";
+                    result = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail.CMDashboadDetails = result;
+                    //await SaveDashboardModuleData("Module Cleaning", facilityId, modulewiseDetail, result);
+
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                    modulewiseDetail.module_name = "Incident Report";
+                    result = await getIRDashboardDetails(facilityId, fromDate, toDate);
+                    //await SaveDashboardModuleData("Incident Report", facilityId, modulewiseDetail, result);
+
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                case CMMS.CMMS_Modules.SM_GO:
+                    modulewiseDetail.module_name = "Stock Management";
+                    result = await getSMDashboardDetails(facilityId, fromDate, toDate);
+                    //await SaveDashboardModuleData("Stock Management", facilityId, modulewiseDetail, result);
+
+                    modulewiseDetail.CMDashboadDetails = result;
+                    countResult.Add(modulewiseDetail);
+                    break;
+                default:
+                    CMDashboadModuleWiseList modulewiseDetail_Job = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_job = new CMDashboadDetails();
+                    modulewiseDetail_Job.module_name = "Breakdown Maintenance";
+                    result_job = await getJobDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail_Job.CMDashboadDetails = result_job;
+                    modulewiseDetail_Job.category_total_count = result_job.bm_closed_count + result_job.mc_closed_count + result_job.pm_closed_count;
+                    modulewiseDetail_Job.category_pm_count = result_job.pm_closed_count;
+                    modulewiseDetail_Job.category_mc_count = result_job.mc_closed_count;
+                    modulewiseDetail_Job.category_bm_count = result_job.bm_closed_count;
+                    countResult.Add(modulewiseDetail_Job);
+                    await SaveDashboardModuleData_all("Breakdown Maintenance", modulewiseDetail_Job, facilityId, modulewiseDetail, result_job);
+
+
+                    CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_PM = new CMDashboadDetails();
+                    modulewiseDetail_PM.module_name = "Preventive Maintenance";
+                    result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail_PM.CMDashboadDetails = result_PM;
+                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
+                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
+                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
+                    countResult.Add(modulewiseDetail_PM);
+                    await SaveDashboardModuleData_all("Preventive Maintenance", modulewiseDetail_Job, facilityId, modulewiseDetail, result_PM);
+
+
+                    CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_MC = new CMDashboadDetails();
+                    modulewiseDetail_MC.module_name = "Module Cleaning";
+                    result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail_MC.CMDashboadDetails = result_MC;
+                    modulewiseDetail_MC.category_total_count = result_MC.bm_closed_count + result_MC.mc_closed_count + result_MC.pm_closed_count;
+                    modulewiseDetail_MC.category_pm_count = result_MC.pm_closed_count;
+                    modulewiseDetail_MC.category_mc_count = result_MC.mc_closed_count;
+                    modulewiseDetail_MC.category_bm_count = result_MC.bm_closed_count;
+                    countResult.Add(modulewiseDetail_MC);
+                    await SaveDashboardModuleData_all("Module Cleaning", modulewiseDetail_Job, facilityId, modulewiseDetail, result_MC);
+
+
+                    CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_IR = new CMDashboadDetails();
+                    modulewiseDetail_IR.module_name = "Incident Report";
+                    result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail_IR.CMDashboadDetails = result_IR;
+                    modulewiseDetail_IR.category_total_count = result_IR.bm_closed_count + result_IR.mc_closed_count + result_IR.pm_closed_count;
+                    modulewiseDetail_IR.category_pm_count = result_IR.pm_closed_count;
+                    modulewiseDetail_IR.category_mc_count = result_IR.mc_closed_count;
+                    modulewiseDetail_IR.category_bm_count = result_IR.bm_closed_count;
+                    countResult.Add(modulewiseDetail_IR);
+                    await SaveDashboardModuleData_all("Incident Report", modulewiseDetail_Job, facilityId, modulewiseDetail, result_IR);
+
+
+                    CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
+                    CMDashboadDetails result_SM = new CMDashboadDetails();
+                    modulewiseDetail_SM.module_name = "Stock Management";
+                    result_SM = await getSMDashboardDetails(facilityId, fromDate, toDate);
+                    modulewiseDetail_SM.CMDashboadDetails = result_SM;
+                    countResult.Add(modulewiseDetail_SM);
+                    await SaveDashboardModuleData_all("Stock Management", modulewiseDetail_Job, facilityId, modulewiseDetail, result_SM);
+
+                    break;
+            }
+            return countResult;
+        }
+
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails_optimsed(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        {
+            List<CMDashboadModuleWiseList> dashboardModules = new List<CMDashboadModuleWiseList>();
+
+            string query = @"
+                            SELECT 
+                            dm.ModuleId AS moduleId,
+                            dm.ModuleName AS module_name,
+                            dm.FacilityId AS facilityId,
+                            dm.Total AS total,
+                            dm.Created AS created,
+                            dm.Submitted AS submitted,
+                            dm.Assigned AS assigned,
+                            dm.Rejected AS rejected,
+                            dm.Approved AS approved,
+                            dm.Issued AS issued,
+                            dm.Completed AS completed,
+                            dm.Pending AS pending,
+                            dm.ScheduleComplianceTotal AS schedule_compliance_total,
+                            dm.ScheduleComplianceCompleted AS schedule_compliance_completed,
+                            dm.ScheduleCompliancePending AS schedule_compliance_pending,
+                            dm.WOOnTime AS wo_on_time,
+                            dm.WODelay AS wo_delay,
+                            dm.WOBacklog AS wo_backlog,
+                            dm.LowStockItems AS low_stock_items,
+                            dm.POItemsAwaited AS po_items_awaited,
+                            dm.PMCClosedCount AS pm_closed_count,
+                            dm.BMClosedCount AS bm_closed_count,
+                            dm.MCCClosedCount AS mc_closed_count,
+
+                            di.WO_Number AS wo_number,
+                            di.WO_Description AS wo_decription,
+                            di.AssetName AS asset_name,
+                            di.Status AS status,
+                            di.Status_Long AS status_long,
+                            di.AssetCategory AS asset_category,
+                            di.StartDate AS start_date,
+                            di.EndDate AS end_date,
+                            di.LatestJCStatus AS latest_jc_status,
+                            di.OnTimeStatus AS on_time_status,
+                            di.TotalWaterUsed AS total_water_used
+                            FROM 
+                                DashboardModule dm
+                            LEFT JOIN 
+                                DashboardItem di ON dm.ModuleId = di.ModuleId
+                            WHERE 
+                                dm.FacilityId in (" + facilityId + ") ORDER BY dm.ModuleId;";
+
+
+            List<CMDashboadModuleWiseList_byQuery> result = await Context.GetData<CMDashboadModuleWiseList_byQuery>(query).ConfigureAwait(false);
+            var dashboardModules_Result = result
+     .GroupBy(r => new
+     {
+         r.moduleId,
+         r.module_name,
+         r.facilityId,
+         r.total,
+         r.created,
+         r.submitted,
+         r.assigned,
+         r.rejected,
+         r.approved,
+         r.issued,
+         r.completed,
+         r.pending,
+         r.schedule_compliance_total,
+         r.schedule_compliance_completed,
+         r.schedule_compliance_pending,
+         r.wo_on_time,
+         r.wo_delay,
+         r.wo_backlog,
+         r.low_stock_items,
+         r.po_items_awaited,
+         r.pm_closed_count,
+         r.bm_closed_count,
+         r.mc_closed_count
+     })
+     .Select(g => new CMDashboadModuleWiseList
+     {
+         // Map module-level data
+         module_name = g.Key.module_name,
+         //facilityId = g.Key.facilityId,
+         //total = g.Key.total,
+         //created = g.Key.created,
+         //submitted = g.Key.submitted,
+         //assigned = g.Key.assigned,
+         //rejected = g.Key.rejected,
+         //approved = g.Key.approved,
+         //issued = g.Key.issued,
+         //completed = g.Key.completed,
+         //pending = g.Key.pending,
+         //schedule_compliance_total = g.Key.schedule_compliance_total,
+         //schedule_compliance_completed = g.Key.schedule_compliance_completed,
+         //schedule_compliance_pending = g.Key.schedule_compliance_pending,
+         //wo_on_time = g.Key.wo_on_time,
+         //wo_delay = g.Key.wo_delay,
+         //wo_backlog = g.Key.wo_backlog,
+         //low_stock_items = g.Key.low_stock_items,
+         //po_items_awaited = g.Key.po_items_awaited,
+         //pm_closed_count = g.Key.pm_closed_count,
+         //bm_closed_count = g.Key.bm_closed_count,
+         //mc_closed_count = g.Key.mc_closed_count,
+
+         // Create a list of CMDashboadDetails for each group
+         //CMDashboadDetails = g.Select(r => new CMDashboadDetails
+         //{
+         //    created = r.wo_number
+         //    //wo_decription = r.wo_decription,
+         //    //asset_name = r.asset_name,
+         //    //status = r.status,
+         //    //status_long = r.status_long,
+         //    //asset_category = r.asset_category,
+         //    //start_date = r.start_date,
+         //    //end_date = r.end_date,
+         //    //latest_jc_status = r.latest_jc_status,
+         //    //on_time_status = r.on_time_status,
+         //    //total_water_used = r.total_water_used
+         //}).ToList()
+     })
+     .ToList();
+
+
+
+            return dashboardModules_Result;
+        }
+
+        internal async Task<CMDefaultResponse> SaveDashboardModuleData_all(string moduleName, CMDashboadModuleWiseList modulewiseDetail, string facilityId, CMDashboadModuleWiseList modulewiseDetailJob, CMDashboadDetails result)
+        {
+            // Insert into DashboardModule
+            string insertModuleQuery = $@"
+                           INSERT INTO DashboardModule (
+                               ModuleName, FacilityId, Total, Created, Submitted, Assigned, Rejected, Approved, Issued, Completed, Pending, 
+                               ScheduleComplianceTotal, ScheduleComplianceCompleted, ScheduleCompliancePending, WOOnTime, WODelay, WOBacklog, 
+                               LowStockItems, POItemsAwaited, PMCClosedCount, BMClosedCount, MCCClosedCount
+                           )
+                           VALUES (
+                               '{moduleName}', 
+                               {facilityId}, 
+                               {result.total}, 
+                               {result.created}, 
+                               {result.submitted}, 
+                               {result.assigned}, 
+                               {result.rejected}, 
+                               {result.approved}, 
+                               {result.issued}, 
+                               {result.completed}, 
+                               {result.pending}, 
+                               {result.schedule_compliance_total}, 
+                               {result.schedule_compliance_completed}, 
+                               {result.schedule_compliance_pending}, 
+                               {result.wo_on_time}, 
+                               {result.wo_delay}, 
+                               {result.wo_backlog}, 
+                               {result.low_stock_items}, 
+                               {result.po_items_awaited}, 
+                               {result.pm_closed_count}, 
+                               {result.bm_closed_count}, 
+                               {result.mc_closed_count}
+                           );SELECT LAST_INSERT_ID();";
+            // Execute the insert query for DashboardModule
+            DataTable dt2 = await Context.FetchData(insertModuleQuery).ConfigureAwait(false);
+            long moduleId = Convert.ToInt32(dt2.Rows[0][0]);
+
+            // Insert into DashboardItem if result contains item_list
+            if (result.item_list != null && result.item_list.Count > 0)
+            {
+                foreach (var item in result.item_list)
+                {
+                    string insertItemQuery = $@"
+                             INSERT INTO DashboardItem (
+                                 ModuleId, 
+                                 FacilityId, 
+                                 WO_Number, 
+                                 WO_Description, 
+                                 AssetName, 
+                                 Status, 
+                                 Status_Long, 
+                                 AssetCategory, 
+                                 StartDate, 
+                                 EndDate, 
+                                 LatestJCStatus, 
+                                 OnTimeStatus, 
+                                 TotalWaterUsed
+                             )
+                             VALUES (
+                                 {moduleId}, {facilityId}, {item.wo_number},'{item.wo_decription}', 
+                                 '{item.assetsname}', {item.status},'{item.status_long}','{item.asset_category}', 
+                                 '{item.start_date:yyyy-MM-dd HH:mm:ss}','{item.end_date?.ToString("yyyy-MM-dd HH:mm:ss") ?? "NULL"}', 
+                                 {item.latestJCStatus}, {item.on_time_status}, {item.TotalWaterUsed ?? "NULL"}
+                             );";
+                    await Context.ExecuteNonQry<int>(insertItemQuery).ConfigureAwait(false);
+
+                }
+            }
+            // Since there's no history logging or userID involved, we directly return a success response
+            return new CMDefaultResponse((int)moduleId, CMMS.RETRUNSTATUS.SUCCESS, $"{moduleName} data successfully saved for FacilityId {facilityId}.");
+        }
+
     }
 
 }
