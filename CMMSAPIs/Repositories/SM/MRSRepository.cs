@@ -926,6 +926,15 @@ namespace CMMSAPIs.Repositories.SM
                           "sm.from_actor_type_id, " +
                           "sm.to_actor_id, " +
                           "sm.to_actor_type_id, " +
+                          "smi.asset_item_ID, " +
+                          "smi.issued_qty, " +
+                          "smi.requested_qty, " +
+                          "smi.is_faulty, " +
+                          "smi.faulty_item_asset_id, " +
+                          "smi.ID, " +
+                          "smi.serial_number, " +
+                          "smi.approval_required, " +
+                          "sm.whereUsedType, " +
                           "sm.approval_comment,sm.is_mrs_return as return_mrs, " +
                           "CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, " +
                            "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name, sm.rejected_date, " +
@@ -933,6 +942,7 @@ namespace CMMSAPIs.Repositories.SM
                           "case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
                           "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
                           "LEFT JOIN facilities fc ON fc.id = sm.facility_ID " +
+                          "LEFT JOIN smrsitems smi ON smi.id = sm.ID " +
                           "LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
                           "LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
                           "WHERE sm.ID = " + ID + "  and sm.flag = 2";
