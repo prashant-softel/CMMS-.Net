@@ -580,7 +580,7 @@ namespace CMMSAPIs.Controllers.SM
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 //var result = await _MRSBS.updateUsedQty(request);
-                var data = await _MRSBS.TransactionDetails(request);
+                var data = await _MRSBS.TransactionDetails(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)

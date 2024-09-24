@@ -35,7 +35,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytime);
-        Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request);
+        Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request, int userID);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
         Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id);
@@ -405,7 +405,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> requestList)
+        public async Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> requestList, int userID)
         {
             try
             {
@@ -416,7 +416,7 @@ namespace CMMSAPIs.BS.SM
                     foreach (var request in requestList)
                     {
                         //var result = await repos.TransferMaterialInTransaction(request);
-                        var result = await repos.TransferMaterialInTransaction_dbTransaction(request);
+                        var result = await repos.TransferMaterialInTransaction_dbTransaction(request, userID);
                         
                         //if (result)
                         //{

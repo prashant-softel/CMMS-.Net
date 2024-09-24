@@ -1280,7 +1280,7 @@ namespace CMMSAPIs.Repositories.SM
 
 
         // Transfer material code with database transaction and rollback
-        public async Task<int> TransferMaterialInTransaction_dbTransaction(CMTransferItems request)
+        public async Task<int> TransferMaterialInTransaction_dbTransaction(CMTransferItems request, int userID)
         {
 
             int facilityID = request.facilityID;
@@ -1432,13 +1432,49 @@ namespace CMMSAPIs.Repositories.SM
                                         transaction_id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                                     }
 
-                                    int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
-                                    int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
-
+                                    //int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
+                                    //int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
+                                    /*
                                     bool isValid = await VerifyTransactionDetails(transaction_id, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
                                     if (!isValid)
                                     {
                                         throw new Exception("Transaction details verification failed.");
+                                    }*/
+
+                                    int debitTransactionID = 0;
+                                    string stmtCredit = $"INSERT INTO smtransition (transactionID, facilityID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID, createdBy)  " +
+                                        "VALUES (@transactionID, @facilityID, @fromActorID, @fromActorType, @creditQty, @debitQty, @assetItemID, @mrsID, @userID); SELECT LAST_INSERT_ID();";
+                                    using (var cmd = new MySqlCommand(stmtCredit, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@transactionID", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@fromActorID", MySqlDbType.Int32).Value = fromActorID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@creditQty", MySqlDbType.Int32).Value = 0;
+                                        cmd.Parameters.Add("@debitQty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@userID", MySqlDbType.Int32).Value = userID;
+
+                                        debitTransactionID = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                    }
+
+                                    int creditTransactionID = 0;
+                                    string stmtDebit = $"INSERT INTO smtransition (transactionID, facilityID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID, createdBy)  " +
+                                        "VALUES (@transactionID, @facilityID, @toActorID, @toActorType, @creditQty, @debitQty, @assetItemID, @mrsID, @userID); SELECT LAST_INSERT_ID();";
+                                    using (var cmd = new MySqlCommand(stmtDebit, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@transactionID", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                                        cmd.Parameters.Add("@creditQty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@debitQty", MySqlDbType.Int32).Value = 0;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@userID", MySqlDbType.Int32).Value = userID;
+
+                                        creditTransactionID = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                                     }
                                 }
                                 else
