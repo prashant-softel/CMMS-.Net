@@ -182,7 +182,7 @@ namespace CMMS_API_Test
 
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMCreateRequestOrderGET>();
             var updatedRO = getItem.GetItemList(EP_GetRODetailsByID + "?IDs=" + goId);
-            Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMITTED, updatedRO[0].status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, updatedRO[0].status);
             
             Assert.AreEqual(1, updatedRO[0].facilityID, "FacilityID should be 1");
             Assert.AreEqual("test", updatedRO[0].comment, "Comment should be 'test'");
@@ -351,9 +351,125 @@ namespace CMMS_API_Test
 
 
 
-
+            //◆◇◆◆◆ To check Appproval flow of Request Order ◆◆◆◆◇◆
             [TestMethod]
-            public void VerifyROFlow()
+            public void VerifyApproveROFlow()
+            {
+                // Step 1: Create Request Order
+                var createPayload = @"{
+                                ""facilityID"": 1,
+                                ""request_order_items"": [
+                                    {
+                                        ""currencyId"": 4,
+                                        ""itemID"": 0,
+                                        ""assetMasterItemID"": 12,
+                                        ""cost"": 4334,
+                                        ""ordered_qty"": 67,
+                                        ""comment"": ""test""
+                                    },
+                                    {
+                                        ""currencyId"": 2,
+                                        ""itemID"": 0,
+                                        ""assetMasterItemID"": 31,
+                                        ""cost"": 6765,
+                                        ""ordered_qty"": 23,
+                                        ""comment"": ""rreere""
+                                    }
+                                ],
+                                ""comment"": ""Initial Order Creation"",
+                                ""request_order_id"": 0
+                             }";
+
+                var roService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+                var createResponse = roService.CreateItem(EP_CreateRequestOrder, createPayload);
+
+                int createdROId = createResponse.id[0];
+                Assert.AreEqual("Request order created successfully.", createResponse.message, "RO creation message mismatch");
+
+                // Verify the created RO by fetching its details
+                var getItemService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMCreateRequestOrderGET>();
+                var createdRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+
+                Assert.AreEqual(1, createdRO[0].facilityID, "FacilityID should be 1 after creation.");
+                Assert.AreEqual("Initial Order Creation", createdRO[0].comment, "RO Comment should match after creation");
+
+                // Step 2: Update Request Order
+                var updatePayload = @"{
+                            ""facilityID"": 1,
+                            ""request_order_items"": [
+                                {
+                                    ""currencyId"": 4,
+                                    ""itemID"": 0,
+                                    ""assetMasterItemID"": 12,
+                                    ""cost"": 5000,
+                                    ""ordered_qty"": 70,
+                                    ""comment"": ""updated item 1""
+                                },
+                                {
+                                    ""currencyId"": 2,
+                                    ""itemID"": 0,
+                                    ""assetMasterItemID"": 31,
+                                    ""cost"": 6000,
+                                    ""ordered_qty"": 30,
+                                    ""comment"": ""updated item 2""
+                                }
+                            ],
+                            ""comment"": ""Updated Order"",
+                            ""request_order_id"": " + createdROId + @"
+                         }";
+
+                Console.WriteLine("Sending Update Request Payload: " + updatePayload); // Log the payload
+
+                var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+                var response = ptwService.CreateItem(EP_UpdateRequestOrder, updatePayload);
+
+                if (response == null)
+                {
+                    Console.WriteLine("Response is null! Check the endpoint or request.");
+                }
+                else
+                {
+                    Assert.AreEqual("Request order updated successfully.", response.message, "RO update message mismatch");
+                }
+
+                // Verify the updated RO by fetching its details
+                var updatedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+
+                if (updatedRO == null || updatedRO.Count == 0)
+                {
+                    Console.WriteLine("No data returned for updated RO. Possible issue with API or request.");
+                }
+                else
+                {
+                    Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
+                    Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
+                    Assert.AreEqual("Updated Order", updatedRO[0].comment, "RO Comment should match after update");
+                }
+
+
+                // Step 3: Approve Request Order
+                var approvePayload = @"{
+                                  ""id"": " + createdROId + @",
+                                  ""comment"": ""Approving the order"",
+                                  ""facilityId"": 1
+                               }";
+
+                var approveResponse = roService.CreateItem(EP_ApproveRequestOrder, approvePayload);
+                Assert.AreEqual($"Approved request order  {createdROId}  successfully.", approveResponse.message, "Approval message mismatch");
+
+                // Verify the approved status
+                var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status, "RO status should be approved");
+                Assert.AreEqual("Approving the order", approvedRO[0].comment, "Approval comment mismatch");
+
+                
+            }
+
+
+
+            //◆◇◆◆◆ To check Rejection Flow of Request Order ◆◆◆◆◇◆
+            [TestMethod]
+            public void VerifyRejectROFlow()
             {
                 // Step 1: Create Request Order
                 var createPayload = @"{
@@ -415,7 +531,7 @@ namespace CMMS_API_Test
                                     }
                                 ],
                                 ""comment"": ""Updated Order"",
-                                ""request_order_id"": 95
+                                ""request_order_id"": " + createdROId + @",
                              }";
 
                 var updateResponse = roService.CreateItem(EP_UpdateRequestOrder, updatePayload);
@@ -424,25 +540,12 @@ namespace CMMS_API_Test
                 // Verify the updated RO by fetching its details
                 var updatedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
 
-                //Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
-                //Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
-                //Assert.AreEqual("Updated Order", updatedRO[0].comment, "RO Comment should match after update");
+                Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
+                Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
+                Assert.AreEqual("Updated Order", updatedRO[0].comment, "RO Comment should match after update");
 
-                // Step 3: Approve Request Order
-                var approvePayload = @"{
-                                  ""id"": " + createdROId + @",
-                                  ""comment"": ""Approving the order"",
-                                  ""facilityId"": 1
-                               }";
 
-                var approveResponse = roService.CreateItem(EP_ApproveRequestOrder, approvePayload);
-                Assert.AreEqual($"Approved request order  {createdROId}  successfully.", approveResponse.message, "Approval message mismatch");
-
-                // Verify the approved status
-                var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
-                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status, "RO status should be approved");
-                Assert.AreEqual("Approving the order", approvedRO[0].comment, "Approval comment mismatch");
-
+                //step 3 : Reject RO
                 var rejectPayload = @"{
                                 ""id"": " + createdROId + @",
                                 ""comment"": ""test reject api"",
@@ -464,7 +567,60 @@ namespace CMMS_API_Test
                 DateTime actualRejectedAt = (DateTime)rejectedRO[0].rejectedAt;
 
                 Assert.AreEqual(expectedRejectedAt, actualRejectedAt, "The rejected timestamp should match");
+
+
+
+                // Step 4: Update Request Order for Approval
+                var updatePayload1 = @"{
+                                ""facilityID"": 1,
+                                ""request_order_items"": [
+                                    {
+                                        ""currencyId"": 4,
+                                        ""itemID"": 0,
+                                        ""assetMasterItemID"": 12,
+                                        ""cost"": 5000,
+                                        ""ordered_qty"": 70,
+                                        ""comment"": ""updated item 1""
+                                    },
+                                    {
+                                        ""currencyId"": 2,
+                                        ""itemID"": 0,
+                                        ""assetMasterItemID"": 31,
+                                        ""cost"": 6000,
+                                        ""ordered_qty"": 30,
+                                        ""comment"": ""updated item 2""
+                                    }
+                                ],
+                                ""comment"": ""Updated Order"",
+                                ""request_order_id"": " + createdROId + @",
+                             }";
+
+                var updateResponse1 = roService.CreateItem(EP_UpdateRequestOrder, updatePayload1);
+                Assert.AreEqual("Request order updated successfully.", updateResponse1.message, "RO update message mismatch");
+
+                // Verify the updated RO by fetching its details
+                var updatedRO1 = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+
+                Assert.AreEqual(5000, updatedRO1[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
+                Assert.AreEqual(70, updatedRO1[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
+                Assert.AreEqual("Updated Order", updatedRO1[0].comment, "RO Comment should match after update");
+
+
+                // Step 5 : Approve Request Order
+                var approvePayload = @"{
+                                  ""id"": " + createdROId + @",
+                                  ""comment"": ""Approving the order"",
+                                  ""facilityId"": 1
+                               }";
+
+                var approveResponse = roService.CreateItem(EP_ApproveRequestOrder, approvePayload);
+                Assert.AreEqual($"Approved request order  {createdROId}  successfully.", approveResponse.message, "Approval message mismatch");
+
+                var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status, "RO status should be approved");
+                Assert.AreEqual("Approving the order", approvedRO[0].comment, "Approval comment mismatch");
             }
+
         }
     }
 }

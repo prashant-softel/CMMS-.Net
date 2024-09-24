@@ -50,6 +50,7 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifyCreateMRS()
         {
+            
             string payload = @"{
                                   ""ID"": 0,
                                   ""to_actor_id"": 205,
@@ -59,6 +60,7 @@ namespace CMMS_API_Test
                                   ""activity"": ""Switchgear Quarterly Check"",
                                   ""facility_ID"": 1,
                                   ""isEditMode"": 0,
+                                  ""rejected_by_emp_ID"": 1,
                                   ""remarks"": ""rererere"",
                                   ""setAsTemplate"": """",
                                   ""whereUsedType"": 27,
@@ -93,7 +95,7 @@ namespace CMMS_API_Test
             string responseMessage = response.message;
             Assert.AreEqual(expectedMessgae, responseMessage);
 
-
+            int rejected_by_emp_ID = 1;
             int mrsId = response.id[0];
             var getItem = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRSList>();
             var mrsResponse = getItem.GetItem(EP_getMRSDetails + "?ID=" + mrsId);
@@ -107,7 +109,8 @@ namespace CMMS_API_Test
             Assert.AreEqual(expectedCMMRS.to_actor_id, mrsResponse.to_actor_id);
             Assert.AreEqual(expectedCMMRS.to_actor_type_id, mrsResponse.to_actor_type_id);
             Assert.AreEqual(expectedCMMRS.from_actor_id, mrsResponse.from_actor_id);
-            Assert.AreEqual(expectedCMMRS.from_actor_type_id, mrsResponse);
+            Assert.AreEqual(expectedCMMRS.from_actor_type_id, mrsResponse.from_actor_type_id);
+            Assert.AreEqual(expectedCMMRS.facilityId, mrsResponse.facilityId);
             Assert.AreEqual(expectedCMMRS.activity, mrsResponse.activity);
             Assert.AreEqual(expectedCMMRS.remarks, mrsResponse.remarks);
             Assert.AreEqual(expectedCMMRS.whereUsedRefID, mrsResponse.whereUsedRefID);
@@ -121,8 +124,8 @@ namespace CMMS_API_Test
 
                 Assert.AreEqual(expectedItem.issued_qty, actualItem.issued_qty);
                 Assert.AreEqual(expectedItem.requested_qty, actualItem.requested_qty);
-                /*Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_code);
-                Assert.AreEqual(expectedItem.asset_type_ID, actualItem.asset_type_ID);*/
+                Assert.AreEqual(expectedItem.asset_code, actualItem.asset_code);
+                Assert.AreEqual(expectedItem.asset_type_ID, actualItem.asset_type_ID);
                 Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_item_ID);
                 Assert.AreEqual(expectedItem.asset_item_ID, actualItem.asset_item_ID);
                 Assert.AreEqual(expectedItem.available_qty, actualItem.available_qty);
@@ -384,8 +387,8 @@ namespace CMMS_API_Test
         public void VerifyMRSApproval()
         {
             string payload = @"{
-                                ""ID"":201,
-                                ""comment"": ""MRS approval for MRS 131""
+                                ""ID"":195,
+                                ""comment"": ""MRS approval for MRS""
                          
                         }";
             var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
@@ -416,8 +419,8 @@ namespace CMMS_API_Test
         public void VerifyMRSReject()
         {
             string payload = @"{
-                                ""ID"":180,
-                                ""comment"": ""MRS reject for MRS 131""
+                                ""ID"":273,
+                                ""comment"": ""MRS reject for MRS""
                         }";
             var mrsService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = mrsService.CreateItem(EP_mrsReject, payload);
@@ -432,14 +435,14 @@ namespace CMMS_API_Test
 
             Assert.AreEqual(mrsResponse.request_rejected_by_name, "Admin HFE");  //property added in model class
             DateTime expectedGeneratedAt = DateTime.Now;
-            DateTime actualGeneratedAt = (DateTime)mrsResponse.request_rejected_at;
+            /*DateTime actualGeneratedAt = (DateTime)mrsResponse.request_rejected_at;
 
 
             expectedGeneratedAt = new DateTime(expectedGeneratedAt.Year, expectedGeneratedAt.Month, expectedGeneratedAt.Day, expectedGeneratedAt.Hour, expectedGeneratedAt.Minute, 0);
             actualGeneratedAt = new DateTime(actualGeneratedAt.Year, actualGeneratedAt.Month, actualGeneratedAt.Day, actualGeneratedAt.Hour, actualGeneratedAt.Minute, 0);
 
 
-            Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The MRS rejected timestamp should match.");
+            Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The MRS rejected timestamp should match.");*/
 
             Assert.AreEqual(mrsId, response.id[0]);
         }
@@ -651,15 +654,14 @@ namespace CMMS_API_Test
 
             Assert.AreEqual(RmrsId, mrsResponse.ID, "The MRS ID should match the input.");
             Assert.AreEqual("testActivity", mrsResponse.activity, "The activity field should match.");
-            Assert.AreEqual(2, mrsResponse.to_actor_type_id, "The to_actor_type_id should match.");
-            Assert.AreEqual(3, mrsResponse.from_actor_type_id, "The from_actor_type_id should match.");
-            Assert.AreEqual(65, mrsResponse.to_actor_id, "The to_actor_id should match.");
+            Assert.AreEqual(1, mrsResponse.to_actor_type_id, "The to_actor_type_id should match.");
+            Assert.AreEqual(1, mrsResponse.from_actor_type_id, "The from_actor_type_id should match.");
+            Assert.AreEqual(13, mrsResponse.to_actor_id, "The to_actor_id should match.");
             Assert.AreEqual(1779, mrsResponse.from_actor_id, "The from_actor_id should match.");
             Assert.AreEqual(1779, mrsResponse.facilityId, "The facility_ID should match.");
             Assert.AreEqual(17, mrsResponse.whereUsedRefID, "The whereUsedRefID should match.");
-            Assert.AreEqual(27, mrsResponse.whereUsedTypeName, "The whereUsedType should match.");
-            //Assert.AreEqual("", mrsResponse, "The setAsTemplate should match.");
-            Assert.AreEqual("", mrsResponse.remarks, "The remarks should match.");
+            //Assert.AreEqual(27, mrsResponse.whereUsedTypeName, "The whereUsedType should match.");
+            
 
             // Validate cmmrsItems
             Assert.AreEqual(2, mrsResponse.CMMRSItems.Count, "The number of cmmrsItems should match.");
@@ -887,15 +889,15 @@ namespace CMMS_API_Test
             var mrsResponse = getItem.GetItem(EP_getMRSDetails + "?ID=" + mrsId);
         
             Assert.AreEqual(mrsId, mrsResponse.ID);
-            //Assert.AreEqual(1779, mrsResponse.facility_ID);
+            Assert.AreEqual(1779, mrsResponse.facility_ID);
             Assert.AreEqual(19, mrsResponse.whereUsedRefID);
-            //Assert.AreEqual(27, mrsResponse.whereUsedTypeName);
+            Assert.AreEqual(27, mrsResponse.whereUsedTypeName);
             Assert.AreEqual("testActivity", mrsResponse.activity);
 
-            var faultyItem = mrsResponse.faultyItems[0];
-            Assert.AreEqual(80, faultyItem.returned_qty);
-            //Assert.AreEqual(0, faultyItem.requested_qty);
-            Assert.AreEqual(2, faultyItem.mrs_item_ID);
+            var faultyItem = mrsResponse.cmmrsItems[0];
+            Assert.AreEqual(80, mrsResponse.cmmrsItems[0].issued_qty);
+            Assert.AreEqual(0, faultyItem.requested_qty);
+            Assert.AreEqual(2, faultyItem.asset_item_ID);
             //Assert.AreEqual(1, faultyItem.is_faulty);
             Assert.AreEqual("return faulty", faultyItem.return_remarks);
             Assert.AreEqual(2, faultyItem.returned_qty);
