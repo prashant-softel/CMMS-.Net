@@ -41,7 +41,7 @@ namespace CMMSAPIs.Models.Masters
     }
     public class CMGetAttendence1
     {
-        //  public int id { get; set; }
+        public int attendence_Id { get; set; }
         public int employee_id { get; set; }
         public string name { get; set; }
         public dynamic present { get; set; }
@@ -54,7 +54,7 @@ namespace CMMSAPIs.Models.Masters
 
     public class CMGetCotractor
     {
-        // public int Id { get; set; }
+        public int Id { get; set; }
         public int contractor_id { get; set; }
         public int lessThan35 { get; set; }
         public int between35to50 { get; set; }
@@ -66,7 +66,7 @@ namespace CMMSAPIs.Models.Masters
     public class CMGetCotractor1
     {
 
-        //  public int id { get; set; }
+        public int id { get; set; }
         public int contractor_id { get; set; }
         public int Age_Less_Than35 { get; set; }
         public int Age_Between_35And50 { get; set; }
