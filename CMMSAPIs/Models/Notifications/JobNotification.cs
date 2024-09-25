@@ -20,6 +20,8 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = m_jobObj.id;
             //m_notificationType = notificationType;
         }
+
+        
         override protected string getSubject(params object[] args)
         {
             string retValue = "";
@@ -50,6 +52,11 @@ namespace CMMSAPIs.Models.Notifications
             }
             return retValue;
 
+        }
+
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/job-details/{m_module_ref_id}";
         }
         override protected string getEMSubject(params object[] args)
         {

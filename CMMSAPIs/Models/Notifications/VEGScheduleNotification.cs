@@ -56,7 +56,13 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
 
         }
-    
+
+
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/veg-execution-details/{m_module_ref_id}";
+        }
+
         override protected string getSubject(params object[] args)
         {
 

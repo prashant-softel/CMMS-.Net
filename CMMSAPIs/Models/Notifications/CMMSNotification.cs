@@ -91,10 +91,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             return m_module_ref_id;
         }
-        protected virtual string getURL(params object[] args)
-        {
-            return $"{m_baseURL}/{(int)m_moduleID}/{m_module_ref_id}";
-        }
+        protected abstract string getURL(params object[] args);
 
         protected virtual string getModuleName(params object[] args)
         {
@@ -171,8 +168,9 @@ namespace CMMSAPIs.Models.Notifications
 
             Body += HTMLBody;
             string url = getURL(args);
-            //string disclaimer = "Information contained in this email is strictly confidential, proprietary of Hero Future Energies and intended solely for the use of the addressee. If you are not the intended recipient, please notify the sender, delete this mail from your system immediately and do not disseminate, distribute, or copy this e-mail/its contents.";
+            string disclaimer = "Information contained in this email is strictly confidential, proprietary of Hero Future Energies and intended solely for the use of the addressee. If you are not the intended recipient, please notify the sender, delete this mail from your system immediately and do not disseminate, distribute, or copy this e-mail/its contents.";
             //Body += "</div><br><div><p style='text-align:center;'>visit:<a href=" + url + "> click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
+            Body += "</div><br><div><p style='text-align:center;'>Click here to view: <a href=" + url + "> Click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
 
             CMMailRequest request = new CMMailRequest();
 

@@ -183,6 +183,11 @@ namespace CMMSAPIs.Models.Notifications
 
         }
 
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/vegetation-plan-details/{m_module_ref_id}";
+        }
+
         override protected string getHTMLBody(params object[] args)
         {
             string retValue = "";

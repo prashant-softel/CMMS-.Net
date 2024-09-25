@@ -21,6 +21,11 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = m_pmExecutionObj.id;
         }
 
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+        }
+
         public PMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail pmObj) : base(moduleID, notificationID)
         {
             m_pmPlanObj = pmObj;

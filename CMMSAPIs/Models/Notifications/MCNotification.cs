@@ -30,7 +30,10 @@ namespace CMMSAPIs.Models.Notifications
         }
 
 
-
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/mc-planning-details/{m_module_ref_id}";
+        }
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";

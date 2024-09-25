@@ -15,7 +15,7 @@ namespace CMMSAPIs.Models.Notifications
             calibObj = CaliObj;
             m_module_ref_id = CaliObj.calibration_id;
         }
-
+        
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCLATION : ";
@@ -70,6 +70,13 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
 
         }
+
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/calibration-details/{m_module_ref_id}";
+        }
+
+
         override protected string getSubject(params object[] args)
         {
 

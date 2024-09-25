@@ -17,6 +17,10 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = m_RMRSObj.ID;
         }
 
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/mrs-details/{m_module_ref_id}";
+        }
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";

@@ -18,7 +18,7 @@ namespace CMMSAPIs.Models.Notifications
             m_AuditPlanObj = AuditPlanObj;
             m_module_ref_id = m_AuditPlanObj.plan_id;
         }
-
+        
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";
@@ -41,6 +41,11 @@ namespace CMMSAPIs.Models.Notifications
             }
             retValue += $" for {m_delayDays} days";
             return retValue;
+        }
+
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
         }
 
         override protected string getSubject(params object[] args)

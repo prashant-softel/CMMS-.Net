@@ -120,6 +120,11 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
         }
 
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+        }
+
 
 
         override protected string getHTMLBody(params object[] args)

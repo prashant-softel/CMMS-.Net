@@ -47,6 +47,11 @@ namespace CMMSAPIs.Models.Notifications
 
         }
 
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+        }
+
         override protected string getSubject(params object[] args)
         {
 
