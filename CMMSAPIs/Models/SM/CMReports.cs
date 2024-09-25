@@ -281,4 +281,42 @@ namespace CMMSAPIs.Models.SM
 
 
     }
+
+    public class CMSMConsuptionReport
+    {
+        public int ID { get; set; }
+        public int mrs_ID { get; set; }
+        public string asset_code { get; set; }
+        public int facility_ID { get; set; }
+        public string facility_Name { get; set; }
+        public string material_Category { get; set; }
+        public int asset_Item_ID { get; set; }
+        public string asset_name { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public decimal comsumed_qty { get; set; }
+        public DateTime comsumption_date { get; set; }
+        public decimal per_item_cost { get; set; }
+        public int min_available_qty { get; set; }
+        public decimal act_available_qty { get; set; }
+    }
+    public class CMSMAvailibilityReport
+    {
+        public int ID { get; set; }
+        public int mrs_ID { get; set; }
+        public string asset_code { get; set; }
+        public int facility_ID { get; set; }
+        public string facility_Name { get; set; }
+        public string material_Category { get; set; }
+        public int asset_Item_ID { get; set; }
+        public string asset_name { get; set; }
+        public int asset_type_ID { get; set; }
+        public string asset_type { get; set; }
+        public decimal per_item_cost { get; set; }
+        public decimal Opening { get; set; }
+        public decimal inward { get; set; }
+        public decimal outward { get; set; }
+        public int min_available_qty { get; set; }
+        public decimal act_available_qty { get; set; }
+    }
 }

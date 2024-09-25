@@ -228,5 +228,44 @@ namespace CMMSAPIs.Controllers.SM
                 return Ok(item);
             }
         }
+
+        [Route("GetSMConsuptionReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetSMConsuptionReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                int facility_IDs = facility_ID.ToInt();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
+                var data = await _SMReportsBS.GetSMConsuptionReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
+        [Route("GetSMAvailibilityReport")]
+        [HttpGet]
+        public async Task<IActionResult> GetSMAvailibilityReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                int facility_IDs = facility_ID.ToInt();
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
+                var data = await _SMReportsBS.GetSMAvailibilityReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
+            }
+        }
     }
 }
