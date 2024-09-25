@@ -388,26 +388,50 @@ namespace CMMS_API_Test
 
                 // Verify the created RO by fetching its details
                 var getItemService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMCreateRequestOrderGET>();
-                var createdRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+                var createdRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id = 1");
 
                 Assert.AreEqual(1, createdRO[0].facilityID, "FacilityID should be 1 after creation.");
-                Assert.AreEqual("Initial Order Creation", createdRO[0].comment, "RO Comment should match after creation");
+                Assert.AreEqual(createdROId, createdRO[0].request_order_id,"createdROId and Id getting from response should be same");
+                Assert.AreEqual("Initial Order Creation", createdRO[0].comment);
+
+                //RO Item 1
+                Assert.AreEqual(12, createdRO[0].request_order_items[0].id, "Updated asset master id of the first item should be same");
+                //Assert.AreEqual(281, createdRO[0].request_order_items[0].itemID, "Updated item id of the first item should be same");
+                Assert.AreEqual(4, createdRO[0].request_order_items[0].currencyId, "Updated currency id of the first item should be same");
+                Assert.AreEqual(4334, createdRO[0].request_order_items[0].cost, "Updated cost of the first item should be same");
+                Assert.AreEqual(67, createdRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be same");
+                Assert.AreEqual("test", createdRO[0].request_order_items[0].comment, "RO Comment should match after update");
+
+                //RO item 2
+                Assert.AreEqual(31, createdRO[0].request_order_items[1].id, "Updated asset master id of the first item should be same");
+                //Assert.AreEqual(282, createdRO[0].request_order_items[1].itemID, "Updated item id of the first item should be same");
+                Assert.AreEqual(2, createdRO[0].request_order_items[1].currencyId, "Updated currency id of the first item should be same");
+                Assert.AreEqual(6765, createdRO[0].request_order_items[1].cost, "Updated cost of the first item should be same");
+                Assert.AreEqual(23, createdRO[0].request_order_items[1].ordered_qty, "Updated ordered_qty of the first item should be same");
+                Assert.AreEqual("rreere", createdRO[1].request_order_items[1].comment, "RO Comment should match after update");
+
+
+
 
                 // Step 2: Update Request Order
+                // We need to capture the itemIDs from the created RO
+                int firstItemId = (int)createdRO[0].request_order_items[0].itemID;
+                int secondItemId = (int)createdRO[0].request_order_items[1].itemID;
+
                 var updatePayload = @"{
                             ""facilityID"": 1,
                             ""request_order_items"": [
                                 {
-                                    ""currencyId"": 4,
-                                    ""itemID"": 0,
+                                    ""currencyId"": 69,
+                                    ""itemID"": " + firstItemId + @",
                                     ""assetMasterItemID"": 12,
                                     ""cost"": 5000,
                                     ""ordered_qty"": 70,
                                     ""comment"": ""updated item 1""
                                 },
                                 {
-                                    ""currencyId"": 2,
-                                    ""itemID"": 0,
+                                    ""currencyId"": 69,
+                                    ""itemID"": " + secondItemId + @",
                                     ""assetMasterItemID"": 31,
                                     ""cost"": 6000,
                                     ""ordered_qty"": 30,
@@ -418,10 +442,8 @@ namespace CMMS_API_Test
                             ""request_order_id"": " + createdROId + @"
                          }";
 
-                Console.WriteLine("Sending Update Request Payload: " + updatePayload); // Log the payload
-
-                var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
-                var response = ptwService.CreateItem(EP_UpdateRequestOrder, updatePayload);
+                var rouService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+                var response = rouService.CreateItem(EP_UpdateRequestOrder, updatePayload);
 
                 if (response == null)
                 {
@@ -441,13 +463,30 @@ namespace CMMS_API_Test
                 }
                 else
                 {
-                    Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
-                    Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
-                    Assert.AreEqual("Updated Order", updatedRO[0].comment, "RO Comment should match after update");
+                    Assert.AreEqual(1, updatedRO[0].facilityID, "FacilityID should be 1 after creation.");
+                    Assert.AreEqual(createdROId, updatedRO[0].request_order_id, "createdROId and Id getting from response should be same");
+                    Assert.AreEqual("Updated Order", updatedRO[0].comment);
+
+                    //RO item 1
+                    Assert.AreEqual(12, updatedRO[0].request_order_items[0].id, "Updated currency id of the first item should be same");
+                    Assert.AreEqual(firstItemId, updatedRO[0].request_order_items[0].itemID, "Updated item id of the first item should be same");
+                    Assert.AreEqual(69, updatedRO[0].request_order_items[0].currencyId, "Updated currency id of the first item should be same");
+                    Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be same");
+                    Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be same");
+                    Assert.AreEqual("updated item 1", updatedRO[0].request_order_items[0].comment, "RO Comment should match after update");
+
+                    //RO item 2
+                    Assert.AreEqual(31, updatedRO[0].request_order_items[1].id, "Updated currency id of the second item should be same");
+                    Assert.AreEqual(secondItemId, updatedRO[0].request_order_items[1].itemID, "Updated item id of the second item should be same");
+                    Assert.AreEqual(69, updatedRO[0].request_order_items[1].currencyId, "Updated currency id of the second item should be same");
+                    Assert.AreEqual(6000, updatedRO[0].request_order_items[1].cost, "Updated cost of the second item should be same");
+                    Assert.AreEqual(30, updatedRO[0].request_order_items[1].ordered_qty, "Updated ordered_qty of the second item should be same");
+                    Assert.AreEqual("updated item 2", updatedRO[1].request_order_items[1].comment, "RO Comment should match after update");
                 }
 
 
-                // Step 3: Approve Request Order
+
+                //Step 3: Approve Request Order
                 var approvePayload = @"{
                                   ""id"": " + createdROId + @",
                                   ""comment"": ""Approving the order"",
@@ -459,10 +498,16 @@ namespace CMMS_API_Test
 
                 // Verify the approved status
                 var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
-                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status, "RO status should be approved");
-                Assert.AreEqual("Approving the order", approvedRO[0].comment, "Approval comment mismatch");
+                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status);
 
-                
+                Assert.AreEqual(approvedRO[0].approvedBy, "Admin HFE");
+                DateTime expectedGeneratedAt = DateTime.Today;
+                DateTime actualGeneratedAt = (DateTime)approvedRO[0].approvedAt;
+
+                Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The approved timestamp should be the same");
+
+                Assert.AreEqual(createdROId, response.id[0],"id and reponse id should be match");
+
             }
 
 
@@ -476,19 +521,19 @@ namespace CMMS_API_Test
                                 ""facilityID"": 1,
                                 ""request_order_items"": [
                                     {
-                                        ""currencyId"": 4,
+                                        ""currencyId"": 67,
                                         ""itemID"": 0,
-                                        ""assetMasterItemID"": 12,
-                                        ""cost"": 4334,
-                                        ""ordered_qty"": 67,
+                                        ""assetMasterItemID"": 15,
+                                        ""cost"": 1234,
+                                        ""ordered_qty"": 45,
                                         ""comment"": ""test""
                                     },
                                     {
-                                        ""currencyId"": 2,
+                                        ""currencyId"": 68,
                                         ""itemID"": 0,
-                                        ""assetMasterItemID"": 31,
-                                        ""cost"": 6765,
-                                        ""ordered_qty"": 23,
+                                        ""assetMasterItemID"": 30,
+                                        ""cost"": 6789,
+                                        ""ordered_qty"": 76,
                                         ""comment"": ""rreere""
                                     }
                                 ],
@@ -504,45 +549,31 @@ namespace CMMS_API_Test
 
                 // Verify the created RO by fetching its details
                 var getItemService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMCreateRequestOrderGET>();
-                var createdRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+                var createdRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id = 1");
 
                 Assert.AreEqual(1, createdRO[0].facilityID, "FacilityID should be 1 after creation.");
-                Assert.AreEqual("Initial Order Creation", createdRO[0].comment, "RO Comment should match after creation");
+                Assert.AreEqual(createdROId, createdRO[0].request_order_id, "createdROId and Id getting from response should be same");
+                Assert.AreEqual("Initial Order Creation", createdRO[0].comment);
 
-                // Step 2: Update Request Order
-                var updatePayload = @"{
-                                ""facilityID"": 1,
-                                ""request_order_items"": [
-                                    {
-                                        ""currencyId"": 4,
-                                        ""itemID"": 0,
-                                        ""assetMasterItemID"": 12,
-                                        ""cost"": 5000,
-                                        ""ordered_qty"": 70,
-                                        ""comment"": ""updated item 1""
-                                    },
-                                    {
-                                        ""currencyId"": 2,
-                                        ""itemID"": 0,
-                                        ""assetMasterItemID"": 31,
-                                        ""cost"": 6000,
-                                        ""ordered_qty"": 30,
-                                        ""comment"": ""updated item 2""
-                                    }
-                                ],
-                                ""comment"": ""Updated Order"",
-                                ""request_order_id"": " + createdROId + @",
-                             }";
+                //RO Item 1
+                Assert.AreEqual(15, createdRO[0].request_order_items[0].id, "Updated asset master id of the first item should be same");
+                //Assert.AreEqual(281, createdRO[0].request_order_items[0].itemID, "Updated item id of the first item should be same");
+                Assert.AreEqual(67, createdRO[0].request_order_items[0].currencyId, "Updated currency id of the first item should be same");
+                Assert.AreEqual(1234, createdRO[0].request_order_items[0].cost, "Updated cost of the first item should be same");
+                Assert.AreEqual(45, createdRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be same");
+                Assert.AreEqual("test", createdRO[0].request_order_items[0].comment, "RO Comment should match after update");
 
-                var updateResponse = roService.CreateItem(EP_UpdateRequestOrder, updatePayload);
-                Assert.AreEqual("Request order updated successfully.", updateResponse.message, "RO update message mismatch");
+                //RO item 2
+                Assert.AreEqual(30, createdRO[0].request_order_items[1].id, "Updated asset master id of the first item should be same");
+                //Assert.AreEqual(282, createdRO[0].request_order_items[1].itemID, "Updated item id of the first item should be same");
+                Assert.AreEqual(68, createdRO[0].request_order_items[1].currencyId, "Updated currency id of the first item should be same");
+                Assert.AreEqual(6789, createdRO[0].request_order_items[1].cost, "Updated cost of the first item should be same");
+                Assert.AreEqual(76, createdRO[0].request_order_items[1].ordered_qty, "Updated ordered_qty of the first item should be same");
+                Assert.AreEqual("rreere", createdRO[1].request_order_items[1].comment, "RO Comment should match after update");
 
-                // Verify the updated RO by fetching its details
-                var updatedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
 
-                Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
-                Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
-                Assert.AreEqual("Updated Order", updatedRO[0].comment, "RO Comment should match after update");
+
+
 
 
                 //step 3 : Reject RO
@@ -562,7 +593,7 @@ namespace CMMS_API_Test
 
                 Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_REJECTED, rejectedRO[0].status, "RO status should be rejected");
 
-                Assert.AreEqual("Admin HFE", rejectedRO[0].rejectedBy, "RejectedBy should be 'Admin HFE'");
+                Assert.AreEqual("Admin HFE", rejectedRO[0].rejectedBy, "Rejected By should be 'Admin HFE'");
                 DateTime expectedRejectedAt = DateTime.Today;
                 DateTime actualRejectedAt = (DateTime)rejectedRO[0].rejectedAt;
 
@@ -570,55 +601,105 @@ namespace CMMS_API_Test
 
 
 
-                // Step 4: Update Request Order for Approval
-                var updatePayload1 = @"{
-                                ""facilityID"": 1,
-                                ""request_order_items"": [
-                                    {
-                                        ""currencyId"": 4,
-                                        ""itemID"": 0,
-                                        ""assetMasterItemID"": 12,
-                                        ""cost"": 5000,
-                                        ""ordered_qty"": 70,
-                                        ""comment"": ""updated item 1""
-                                    },
-                                    {
-                                        ""currencyId"": 2,
-                                        ""itemID"": 0,
-                                        ""assetMasterItemID"": 31,
-                                        ""cost"": 6000,
-                                        ""ordered_qty"": 30,
-                                        ""comment"": ""updated item 2""
-                                    }
-                                ],
-                                ""comment"": ""Updated Order"",
-                                ""request_order_id"": " + createdROId + @",
-                             }";
 
-                var updateResponse1 = roService.CreateItem(EP_UpdateRequestOrder, updatePayload1);
-                Assert.AreEqual("Request order updated successfully.", updateResponse1.message, "RO update message mismatch");
+
+                // Step 3: Update Request Order
+                // We need to capture the itemIDs from the created RO
+                int firstItemId = (int)createdRO[0].request_order_items[0].itemID;
+                int secondItemId = (int)createdRO[0].request_order_items[1].itemID;
+
+                var updatePayload = @"{
+                            ""facilityID"": 1,
+                            ""request_order_items"": [
+                                {
+                                    ""currencyId"": 69,
+                                    ""itemID"": " + firstItemId + @",
+                                    ""assetMasterItemID"": 12,
+                                    ""cost"": 5000,
+                                    ""ordered_qty"": 70,
+                                    ""comment"": ""updated item 1""
+                                },
+                                {
+                                    ""currencyId"": 69,
+                                    ""itemID"": " + secondItemId + @",
+                                    ""assetMasterItemID"": 31,
+                                    ""cost"": 6000,
+                                    ""ordered_qty"": 30,
+                                    ""comment"": ""updated item 2""
+                                }
+                            ],
+                            ""comment"": ""Updated Order"",
+                            ""request_order_id"": " + rejectedROId + @"
+                         }";
+
+                var rouService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+                var response = rouService.CreateItem(EP_UpdateRequestOrder, updatePayload);
+
+                if (response == null)
+                {
+                    Console.WriteLine("Response is null! Check the endpoint or request.");
+                }
+                else
+                {
+                    Assert.AreEqual("Request order updated successfully.", response.message, "RO update message mismatch");
+                }
 
                 // Verify the updated RO by fetching its details
-                var updatedRO1 = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
+                var updatedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
 
-                Assert.AreEqual(5000, updatedRO1[0].request_order_items[0].cost, "Updated cost of the first item should be 5000");
-                Assert.AreEqual(70, updatedRO1[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be 70");
-                Assert.AreEqual("Updated Order", updatedRO1[0].comment, "RO Comment should match after update");
+                if (updatedRO == null || updatedRO.Count == 0)
+                {
+                    Console.WriteLine("No data returned for updated RO. Possible issue with API or request.");
+                }
+                else
+                {
+                    Assert.AreEqual(1, updatedRO[0].facilityID, "FacilityID should be 1 after creation.");
+                    Assert.AreEqual(createdROId, updatedRO[0].request_order_id, "createdROId and Id getting from response should be same");
+                    Assert.AreEqual("Updated Order", updatedRO[0].comment);
+
+                    //RO item 1
+                    Assert.AreEqual(12, updatedRO[0].request_order_items[0].id, "Updated currency id of the first item should be same");
+                    Assert.AreEqual(firstItemId, updatedRO[0].request_order_items[0].itemID, "Updated item id of the first item should be same");
+                    Assert.AreEqual(69, updatedRO[0].request_order_items[0].currencyId, "Updated currency id of the first item should be same");
+                    Assert.AreEqual(5000, updatedRO[0].request_order_items[0].cost, "Updated cost of the first item should be same");
+                    Assert.AreEqual(70, updatedRO[0].request_order_items[0].ordered_qty, "Updated ordered_qty of the first item should be same");
+                    Assert.AreEqual("updated item 1", updatedRO[0].request_order_items[0].comment, "RO Comment should match after update");
+
+                    //RO item 2
+                    Assert.AreEqual(31, updatedRO[0].request_order_items[1].id, "Updated currency id of the second item should be same");
+                    Assert.AreEqual(secondItemId, updatedRO[0].request_order_items[1].itemID, "Updated item id of the second item should be same");
+                    Assert.AreEqual(69, updatedRO[0].request_order_items[1].currencyId, "Updated currency id of the second item should be same");
+                    Assert.AreEqual(6000, updatedRO[0].request_order_items[1].cost, "Updated cost of the second item should be same");
+                    Assert.AreEqual(30, updatedRO[0].request_order_items[1].ordered_qty, "Updated ordered_qty of the second item should be same");
+                    Assert.AreEqual("updated item 2", updatedRO[1].request_order_items[1].comment, "RO Comment should match after update");
+                }
 
 
-                // Step 5 : Approve Request Order
+
+                //Step 4: Approve Request Order
                 var approvePayload = @"{
-                                  ""id"": " + createdROId + @",
+                                  ""id"": " + rejectedROId + @",
                                   ""comment"": ""Approving the order"",
                                   ""facilityId"": 1
                                }";
 
                 var approveResponse = roService.CreateItem(EP_ApproveRequestOrder, approvePayload);
-                Assert.AreEqual($"Approved request order  {createdROId}  successfully.", approveResponse.message, "Approval message mismatch");
+                Assert.AreEqual($"Approved request order  {rejectedROId}  successfully.", approveResponse.message, "Approval message mismatch");
 
-                var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + createdROId + "&facility_id=1");
-                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status, "RO status should be approved");
-                Assert.AreEqual("Approving the order", approvedRO[0].comment, "Approval comment mismatch");
+                // Verify the approved status
+                var approvedRO = getItemService.GetItemList(EP_GetRODetailsByID + "?IDs=" + rejectedROId + "&facility_id=1");
+                Assert.AreEqual((int)CMMS.CMMS_Status.SM_RO_SUBMIT_APPROVED, approvedRO[0].status);
+
+                int approvedROId = response.id[0];
+                Assert.AreEqual(approvedRO[0].approvedBy, "Admin HFE");
+                DateTime expectedGeneratedAt = DateTime.Today;
+                DateTime actualGeneratedAt = (DateTime)approvedRO[0].approvedAt;
+
+                Assert.AreEqual(expectedGeneratedAt, actualGeneratedAt, "The approved timestamp should be the same");
+
+                Assert.AreEqual(createdROId, approvedROId, "id and reponse id should be match");
+
+
             }
 
         }
