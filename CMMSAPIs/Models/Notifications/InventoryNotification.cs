@@ -19,10 +19,7 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = InvObj.id;
         }
 
-        protected override string getURL(params object[] args)
-        {
-            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
-        }
+        
         override protected string getEMSubject(params object[] args)
         {
             string retValue = "ESCALATION : ";
@@ -49,7 +46,10 @@ namespace CMMSAPIs.Models.Notifications
 
         }
 
-
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/view-add-inventory-screen/{m_module_ref_id}";
+        }
         override protected string getSubject(params object[] args)
         {
 
@@ -79,7 +79,7 @@ namespace CMMSAPIs.Models.Notifications
         {
             string retValue = "";
 
-            retValue = String.Format("<h3><b style='color:#31576D'>Status:</b>{0}</h3><br>", m_InvObj.status_long + " at " + m_InvObj.facilityName);
+            retValue = String.Format("<table style='width: 50%; margin: 0 auto; border-collapse: collapse; border-spacing: 10px'><tr><td style='white-space: nowrap;'><h3><b style='color:#31576D'>Status : </b>{0}</h3></td></tr></table>", m_InvObj.status_long + " at " + m_InvObj.facilityName);
 
             if (m_notificationID != CMMS.CMMS_Status.INVENTORY_IMPORTED)
             {
@@ -124,6 +124,7 @@ namespace CMMSAPIs.Models.Notifications
 
             retValue += "</table><br><br>";
 
+            retValue += "<div style='text-align:center;'>";
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.INVENTORY_IMPORTED:

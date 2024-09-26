@@ -60,7 +60,7 @@ namespace CMMSAPIs.Models.Notifications
 
         protected override string getURL(params object[] args)
         {
-            return $"{m_baseURL}/veg-execution-details/{m_module_ref_id}";
+            return $"{m_baseURL}/veg-execution-details/{m_module_ref_id}/0";
         }
 
         override protected string getSubject(params object[] args)
