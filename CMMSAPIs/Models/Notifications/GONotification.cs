@@ -96,7 +96,7 @@ namespace CMMSAPIs.Models.Notifications
 
         protected override string getURL(params object[] args)
         {
-            return $"{m_baseURL}/goods-orders-req-details/{m_module_ref_id}";
+            return $"{m_baseURL}/goods-orders-details/{m_module_ref_id}/1";
         }
         override protected string getHTMLBody(params object[] args)
         {

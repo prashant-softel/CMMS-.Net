@@ -15,7 +15,7 @@ namespace CMMSAPIs.Models.Notifications
         public VEGNotificationTask(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecution vegTaskObj) : base(moduleID, notificationID)
         {
             taskObj = vegTaskObj;
-
+            m_module_ref_id = vegTaskObj.executionId;
         }
 
 
@@ -122,9 +122,8 @@ namespace CMMSAPIs.Models.Notifications
 
         protected override string getURL(params object[] args)
         {
-            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+            return $"{m_baseURL}/veg-execution-details/{m_module_ref_id}/2";
         }
-
 
 
         override protected string getHTMLBody(params object[] args)

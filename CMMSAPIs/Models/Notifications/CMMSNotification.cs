@@ -53,7 +53,7 @@ namespace CMMSAPIs.Models.Notifications
         protected int m_delayDays = 0;
         protected int m_module_ref_id = 0;
         protected int m_role = 0;
-        protected string m_baseURL = "http://172.20.43.9:82/#/cmms-screen/";
+        protected string m_baseURL = "http://172.20.43.9:82/#";
 
 
         public string template = "<tr><td style=' text-align: left; padding:0.5rem; background-color:#31576D;color:#ffffff;width:35%' ><b>&nbsp;&nbsp;{0}</b></td><td style='text-align: left; padding:0.5rem;'>&nbsp;&nbsp;{1}</td></tr>";
@@ -170,7 +170,7 @@ namespace CMMSAPIs.Models.Notifications
             string url = getURL(args);
             string disclaimer = "Information contained in this email is strictly confidential, proprietary of Hero Future Energies and intended solely for the use of the addressee. If you are not the intended recipient, please notify the sender, delete this mail from your system immediately and do not disseminate, distribute, or copy this e-mail/its contents.";
             //Body += "</div><br><div><p style='text-align:center;'>visit:<a href=" + url + "> click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
-            Body += "</div><br><div><p style='text-align:center;'>Click here to view: <a href=" + url + "> Click here </a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
+            Body += "</div><br><div><p style='text-align:center;'><a href=" + url + ">Click here to view</a></p></div><br><p style='padding:0.5rem; '><b>Disclaimer:</b> " + disclaimer + " </p>";
 
             CMMailRequest request = new CMMailRequest();
 

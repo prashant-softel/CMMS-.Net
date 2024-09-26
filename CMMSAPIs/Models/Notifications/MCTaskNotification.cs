@@ -15,12 +15,12 @@ namespace CMMSAPIs.Models.Notifications
         public MCNotificationTask(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecution mcTaskObj) : base(moduleID, notificationID)
         {
             taskObj = mcTaskObj;
-
+            m_module_ref_id = mcTaskObj.executionId;
         }
 
         protected override string getURL(params object[] args)
         {
-            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+            return $"{m_baseURL}/add-module-cleaning-execution/{m_module_ref_id}";
         }
 
         override protected string getEMSubject(params object[] args)

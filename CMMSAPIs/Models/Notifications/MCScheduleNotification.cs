@@ -14,13 +14,13 @@ namespace CMMSAPIs.Models.Notifications
         public MCScheduleNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecutionSchedule mcScheduleObj) : base(moduleID, notificationID)
         {
             scheduleObj = mcScheduleObj;
-
+            m_module_ref_id = mcScheduleObj.executionId;
         }
 
 
         protected override string getURL(params object[] args)
         {
-            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
+            return $"{m_baseURL}/add-module-cleaning-execution/{m_module_ref_id}";
         }
         override protected string getEMSubject(params object[] args)
         {

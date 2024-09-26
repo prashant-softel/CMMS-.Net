@@ -14,7 +14,7 @@ namespace CMMSAPIs.Models.Notifications
         public VegetationNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan vegPlanObj) : base(moduleID, notificationID)
         {
             planObj = vegPlanObj;
-           
+            m_module_ref_id = vegPlanObj.planId;
         }
 
         public VegetationNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecution vegTaskObj) : base(moduleID, notificationID)

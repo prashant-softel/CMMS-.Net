@@ -16,6 +16,7 @@ namespace CMMSAPIs.Models.Notifications
         public MCNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCPlan mcPlanObj) : base(moduleID, notificationID)
         {
             planObj = mcPlanObj;
+            m_module_ref_id = mcPlanObj.planId;
 
         }
 

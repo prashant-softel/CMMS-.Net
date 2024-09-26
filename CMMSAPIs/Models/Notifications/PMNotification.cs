@@ -21,11 +21,6 @@ namespace CMMSAPIs.Models.Notifications
             m_module_ref_id = m_pmExecutionObj.id;
         }
 
-        protected override string getURL(params object[] args)
-        {
-            return $"{m_baseURL}/purchaseGoodsorder-detail/{m_module_ref_id}";
-        }
-
         public PMNotification(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMPlanDetail pmObj) : base(moduleID, notificationID)
         {
             m_pmPlanObj = pmObj;
@@ -66,9 +61,6 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_PLAN_REJECTED:
                     retValue = String.Format("{0} PM{1} Rejected by {2}", m_pmPlanObj.facilityidbyName, m_pmPlanObj.plan_id, m_pmPlanObj.rejected_by_name);
                     break;
-
-
-
                 case CMMS.CMMS_Status.PM_LINKED_TO_PTW:     //Closed
                     retValue = String.Format("{0} PTW{1} Linked by {2}", m_pmExecutionObj.facilityidbyName, m_pmExecutionObj.permit_id, m_pmExecutionObj.status_updated_by_name);
                     break;
@@ -102,9 +94,6 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_TASK_UPDATED:     //Created                  
                     retValue = String.Format("{0} PM{1} Updated  By {2}", m_pmExecutionObj.facilityidbyName, m_pmExecutionObj.id, m_pmExecutionObj.updated_by_name);
                     break;
-
-
-
                 case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
                     retValue = String.Format("{0} PMs{1} Updated by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
                     break;
@@ -137,6 +126,12 @@ namespace CMMSAPIs.Models.Notifications
             return retValue;
 
         }
+
+        protected override string getURL(params object[] args)
+        {
+            return $"{m_baseURL}/pm-task-details/{m_module_ref_id}";
+        }
+
         override protected string getSubject(params object[] args)
         {
 
