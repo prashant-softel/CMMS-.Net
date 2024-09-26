@@ -95,23 +95,19 @@ namespace CMMSAPIs.Models.Notifications
             }
             if (!string.IsNullOrEmpty(m_InvObj.Imported_by))
             {
-                retValue += String.Format(template, "Imported By", m_InvObj.Imported_by);
-                retValue += String.Format(template, "Imported At", m_InvObj.Imported_at);
+                retValue += String.Format(template, "Imported By", m_InvObj.Imported_by + " at " + m_InvObj.Imported_at);
             }
             if (!string.IsNullOrEmpty(m_InvObj.added_by_name))
             {
-                retValue += String.Format(template, "Added By", m_InvObj.added_by_name);
-                retValue += String.Format(template, "Added At", m_InvObj.createdAt);
+                retValue += String.Format(template, "Added By", m_InvObj.added_by_name + " at " + m_InvObj.createdAt);
             }
             if (!string.IsNullOrEmpty(m_InvObj.updated_by_name))
             {
-                retValue += String.Format(template, "Updated By", m_InvObj.updated_by_name);
-                retValue += String.Format(template, "Updated At", m_InvObj.updatedAt);
+                retValue += String.Format(template, "Updated By", m_InvObj.updated_by_name + " at " + m_InvObj.updatedAt);
             }
             if (!string.IsNullOrEmpty(m_InvObj.deleted_by))
             {
-                retValue += String.Format(template, "Deleted By", m_InvObj.deleted_by);
-                retValue += String.Format(template, "Deleted At", m_InvObj.deleted_at);
+                retValue += String.Format(template, "Deleted By", m_InvObj.deleted_by + " at " + m_InvObj.deleted_at);
             }
             if (m_InvObj.warrantyId > 0)
             {
