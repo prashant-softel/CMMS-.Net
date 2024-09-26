@@ -288,7 +288,8 @@ namespace CMMSAPIs.Helper
             MARK_ATTENDENCE,
             EXECUTE_SCHEDULE,
             STATUTORY,
-            OBSERVATION
+            OBSERVATION,
+            EVAL_PLAN
         }
 
         public enum INCIDENT_RISK_LEVEL
@@ -625,7 +626,27 @@ namespace CMMSAPIs.Helper
             VEG_TASK_END_APPROVED,
             VEG_TASK_END_REJECTED,
             VEG_TASK_UPDATED,
-            VEG_TASK_ASSIGNED
+            VEG_TASK_ASSIGNED,
+
+            EVAL_PLAN_CREATED = 800,
+            EVAL_PLAN_APPROVED,
+            EVAL_PLAN_REJECTED,
+            EVAL_PLAN_UPDATED,              //Only for notification purpose
+            EVAL_PLAN_DELETED,
+            EVAL_SCHEDULED,
+            EVAL_ASSIGNED,
+            EVAL_REJECTED,
+            EVAL_APPROVED,
+            //EVAL_LINKED_TO_PTW,
+            EVAL_START,
+            EVAL_CLOSED,
+            EVAL_CLOSE_REJECTED,
+            EVAL_CLOSE_APPROVED,
+            EVAL_CANCELLED,
+            EVAL_CANCELLED_REJECTED,
+            EVAL_CANCELLED_APPROVED,
+            EVAL_DELETED,
+            EVAL_UPDATED,
         }
 
         public enum ApprovalStatus

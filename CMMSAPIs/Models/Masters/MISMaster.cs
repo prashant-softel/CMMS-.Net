@@ -849,5 +849,67 @@ namespace CMMSAPIs.Models.Masters
         public dynamic ClosedOnTimeCreate { get; set; }
 
     }
+
+
+    public class CMEvaluationUpdate : CMEvaluationCreate
+    {
+        public int id { get; set; }
+    }
+
+    public class CMEvaluationCreate
+    {
+        public string plan_name { get; set; }
+        public int facility_id { get; set; }
+        public int frequency_id { get; set; }
+        public DateTime plan_date { get; set; }
+        public int assigned_to { get; set; }
+        public string remarks { get; set; }
+        //List of Auditids
+        public List<CMEvaluationAudit> audit_list { get; set; }
+    }
+
+    public class CMEvaluationAudit
+    {
+        public int id { get; set; }
+        public int audit_id { get; set; }
+        public decimal weightage { get; set; }
+        public string comment { get; set; }
+
+    }
+
+    public class CMEvaluation
+    {
+        public int id { get; set; }
+        public string plan_name { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int frequency_id { get; set; }
+        public string frequency_name { get; set; }
+        public DateTime plan_date { get; set; }
+        public int assigned_to { get; set; }
+        public string assigned_to_name { get; set; }
+        public int createdById { get; set; }
+        public int updatedById { get; set; }
+        public int approvedById { get; set; }
+        public int rejectedById { get; set; }
+        public int deletedById { get; set; }
+        public string createdByName { get; set; }
+        public string updatedByName { get; set; }
+        public string approvedByName { get; set; }
+        public string rejectedByName { get; set; }
+        public string deletedByName { get; set; }
+        public DateTime? updated_at { get; set; }
+        public DateTime? approved_at { get; set; }
+        public DateTime? rejected_at { get; set; }
+        public DateTime? deleted_at { get; set; }
+        public string audit_details { get; set; }
+
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public List<CMEvaluationAudit> audit_list { get; set; }
+
+
+    }
 }
 
