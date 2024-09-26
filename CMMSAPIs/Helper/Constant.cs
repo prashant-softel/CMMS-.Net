@@ -621,7 +621,8 @@ namespace CMMSAPIs.Helper
             OBSERVATION_ASSIGNED,
             OBSERVATION_CLOSED,
             OBSERVATION_DELETED,
-            OBSERVATION_UPDATED,
+            OBSERVATION_REJECTED,
+            OBSERVATION_APPROVED,
 
 
             VEG_PLAN_DRAFT = 701,

@@ -1,4 +1,3 @@
-using CMMSAPIs.BS.Mails;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Calibration;
 using CMMSAPIs.Models.EM;
@@ -185,7 +184,7 @@ namespace CMMSAPIs.Models.Notifications
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             string strMessage = "mail with subject <" + subject + "> sent";
-            try
+            /*try
             {
                 var res = MailService.SendEmailAsync(request, _settings);
 
@@ -208,7 +207,7 @@ namespace CMMSAPIs.Models.Notifications
             catch (Exception e)
             {
                 strMessage = e.Message;
-            }
+            }*/
             CMDefaultResponse retValue = new CMDefaultResponse(1, retCode, strMessage);
 
             return retValue;

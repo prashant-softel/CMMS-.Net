@@ -114,14 +114,11 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view, string facilitytimeZone)
+        internal async Task<List<CMJCList>> GetJCList(string facility_id, int userID, bool self_view, string facilitytimeZone)
         {
             /* Return all field mentioned in JCListModel model
             *  tables are JobCards, Jobs, Permit, Users
             */
-            var checkFilter = 0;
-
-            /*Your code goes here*/
             string myQuery1 = $"select jc.id as jobCardId,jc.JC_Status as status ,jc.JC_Approved as approvedStatus, jc.JC_Date_Start as job_card_date, " +
                 $"jc.JC_Date_Start as start_time,jc.JC_Date_Stop as end_time, job.id as jobid, job.title as description, " +
                 $"CONCAT(user.firstName, user.lastName) as job_assinged_to,  ptw.id as permit_id, ptw.code as permit_no,  JC_Status as current_status ,  " +
@@ -136,13 +133,13 @@ namespace CMMSAPIs.Repositories.JC
             //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
             //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
 
-            if (facility_id > 0)
+            //if (facility_id > 0)
+            if (!string.IsNullOrEmpty(facility_id))
             {
-                myQuery1 += $"WHERE job.facilityId = {facility_id} ";
-                checkFilter = 1;
+                myQuery1 += $"WHERE job.facilityId IN ({facility_id}) ";
 
                 if (self_view)
-                    myQuery1 += $"AND ( job.assignedId = {userID}  ) ";
+                    myQuery1 += $"AND ( jc.JC_Added_by = {userID} OR job.assignedId = {userID}  ) ";
             }
             else
             {

@@ -32,6 +32,21 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
+        [Route("UpdateAttendance")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateAttendance(CMCreateAttendence requset)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _attendeceBS.UpdateAttendance(requset, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         [Route("GetAttendanceList")]
         [HttpGet]
         public async Task<IActionResult> GetAttendanceList(int facility_id, int year)

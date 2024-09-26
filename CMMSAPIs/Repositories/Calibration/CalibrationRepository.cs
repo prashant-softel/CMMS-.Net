@@ -344,7 +344,7 @@ namespace CMMSAPIs.Repositories.Calibration
             string facilityq = $"SELECT reschedule FROM calibration  WHERE  id= {request.id};";
             DataTable dt12 = await Context.FetchData(facilityq).ConfigureAwait(false);
             int res = 0;
-            if (dt12.Rows.Count > 0)
+            if (dt12.Rows.Count > 0 && dt12.Rows[0][0] != DBNull.Value)
             {
                 res = Convert.ToInt32(dt12.Rows[0][0]);
             }
