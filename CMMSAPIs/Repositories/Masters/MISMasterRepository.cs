@@ -2042,7 +2042,7 @@ namespace CMMSAPIs.Repositories.Masters
                       "left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
                       " left join users createdBy on createdBy.id = ckp.created_by left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
                       " left join business on business.id = createdBy.companyId and business.type = 2  " +
-                      $" where  pm_execution.facility_id ={facility_Id} and  ckp.type_id=4  and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
+                      $" where  pm_task.facility_id ={facility_Id} and  ckp.type_id=4  and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
 
             List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);
             foreach (var task in Result)
@@ -2885,5 +2885,64 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Rejected");
             return response;
         }
+
+        internal async Task<List<ProjectDetails>> GetMisSummary(string year, int userID)
+        {
+            string facility = "Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where parentId=0 group by f.id;";
+            List<ProjectDetails> data = await Context.GetData<ProjectDetails>(facility).ConfigureAwait(false);
+
+            string hfedat = "SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth,      COUNT( e.employee_id) AS AvgHFEEmployee,      COUNT(e.employee_id) AS ManDaysHFEEmployee,      COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee,     COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM      employee_attendance AS e LEFT JOIN      facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1  GROUP BY      f.id,  YEAR(e.Date), MONTH(e.Date);";
+            List<ManPowerData> hfedata = await Context.GetData<ManPowerData>(hfedat).ConfigureAwait(false);
+
+            string occupationaldata = "select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata group by month_id; ";
+            List<OccupationalHealthData> occupational_Helath = await Context.GetData<OccupationalHealthData>(occupationaldata).ConfigureAwait(false);
+
+            string visitnotice = "SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices group by month_id;";
+            List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
+
+            List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
+
+            foreach (var item in data)
+            {
+                ProjectDetails projectDetail = new ProjectDetails
+                {
+                    SpvName = item.SpvName,
+                    sitename = item.sitename,
+                    State = item.State,
+                    District = item.District,
+                    ContractorName = item.ContractorName,
+                    ContractorSiteInChargeName = item.ContractorSiteInChargeName,
+                    MonthlyData = hfedata,
+                    healthDatas = occupational_Helath,
+                    visitsAndNotices = Regulatory_visit_notice
+                };
+                projectDetailsList.Add(projectDetail);
+            }
+            return projectDetailsList;
+        }
+        internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID)
+        {
+            string facility = "Select name as facilty_name from facilities where  parentId=0 group by id;";
+            List<EnviromentalSummary> data = await Context.GetData<EnviromentalSummary>(facility).ConfigureAwait(false);
+            string occupationaldata = "select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata group by month_id; ";
+            List<OccupationalHealthData> occupational_Helath = await Context.GetData<OccupationalHealthData>(occupationaldata).ConfigureAwait(false);
+
+            string visitnotice = "SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices group by month_id;";
+            List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
+
+            List<EnviromentalSummary> projectDetailsList = new List<EnviromentalSummary>();
+
+            foreach (var item in data)
+            {
+                EnviromentalSummary projectDetail = new EnviromentalSummary
+                {
+                    healthDatas = occupational_Helath,
+                    visitsAndNotices = Regulatory_visit_notice
+                };
+                projectDetailsList.Add(projectDetail);
+            }
+            return projectDetailsList;
+        }
+
     }
 }

@@ -2377,6 +2377,42 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
+        [Route("GetMisSummary")]
+        [HttpGet]
+        public async Task<IActionResult> GetMisSummary(string year)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GetMisSummary(year, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
+        [Route("GeEnvironmentalSummary")]
+        [HttpGet]
+        public async Task<IActionResult> GeEnvironmentalSummary(string year)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.GeEnvironmentalSummary(year, userID);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                ExceptionResponse data = new ExceptionResponse();
+                data.Status = 200;
+                data.Message = ex.Message;
+                return Ok(data);
+            }
+        }
     }
 }
 

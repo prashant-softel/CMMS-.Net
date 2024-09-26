@@ -314,6 +314,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 myQuery += $" WHERE check_list_id = {checklist_id} ";
             }
+
             else
             {
                 throw new ArgumentException("Invalid checklist_id");

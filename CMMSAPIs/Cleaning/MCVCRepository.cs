@@ -1058,6 +1058,10 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
                                 await Context.GetData<CMMCPlan>(equipmentQry).ConfigureAwait(false);
                             }
+                            if (schedule_Id > 0)
+                            {
+                                useid.Add(schedule_Id);
+                            }
                         }
                     }
                     if (useid.Count > 0)

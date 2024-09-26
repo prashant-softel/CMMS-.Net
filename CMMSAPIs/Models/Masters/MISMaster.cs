@@ -943,7 +943,106 @@ namespace CMMSAPIs.Models.Masters
         public DateTime updated_at { get; set; }
     }
 
+    public class ProjectDetails
+    {
+        public string SpvName { get; set; }
+        public string sitename { get; set; }
+        public string State { get; set; }
+        public string District { get; set; }
+        public string TalukMandal { get; set; }
+        public string ContractorName { get; set; }
+        public string ContractorSiteInChargeName { get; set; }
+        public string HfeSiteInChargeName { get; set; }
+        public string CapacityAC { get; set; }
+        public string TotalLandArea { get; set; }
+        public string LengthOfInternalTransmissionLineKm { get; set; }
+        public string NoOfWTGs { get; set; }
+        public string NoOfInternalPoles { get; set; }
+        public string LengthOfExternalTransmissionLineKm { get; set; }
+        public string RatingOfPSS { get; set; }
+        public string NoOfPowerTransformerInPSS { get; set; }
+        public string TransformerCapacity { get; set; }
+        public List<ManPowerData> MonthlyData { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
 
 
+    }
+
+    /*public class MonthlyData
+    {
+        public string Month { get; set; }
+
+        public ManPowerData ManPowerData { get; set; }
+        public IncidentAccidentData IncidentAccidentData { get; set; }
+        public HseTrainingData HseTrainingData { get; set; }
+        public HseInspectionAuditData HseInspectionAuditData { get; set; }
+        public ReportChecklistData ReportChecklistData { get; set; }
+        public GrievanceData GrievanceData { get; set; }
+        public OccupationalHealthData healthData { get; set; }
+    }*/
+
+    public class ManPowerData
+    {
+        public dynamic AvgHFEEmployee { get; set; }
+        public dynamic ManDaysHFEEmployee { get; set; }
+        public dynamic ManHoursWorkedHFEEmployee { get; set; }
+        public dynamic AvgContractorWorkers { get; set; }
+        public dynamic ManHoursWorked { get; set; }
+        public dynamic TotalManHours { get; set; }
+    }
+
+    public class IncidentAccidentData
+    {
+        public int FatalIncidents { get; set; }
+        public int LostTimeInjuries { get; set; }
+        public int MedicalTreatmentInjuries { get; set; }
+        public int FirstAidIncidents { get; set; }
+        public int FireIncidents { get; set; }
+        public int NearMisses { get; set; }
+        public int ManDaysLost { get; set; }
+        public decimal CostOfAccidents { get; set; }
+    }
+
+    public class HseTrainingData
+    {
+        public int TotalTrainings { get; set; }
+        public int TrainingManHours { get; set; }
+        public int MockDrillsConducted { get; set; }
+        public int SpecialTrainingsConducted { get; set; }
+    }
+
+    public class HseInspectionAuditData
+    {
+        public int ObservationsRaised { get; set; }
+        public int ObservationsClosed { get; set; }
+        public int MajorObservationsRaised { get; set; }
+        public int MajorObservationsClosed { get; set; }
+        public int UnsafeActsRecorded { get; set; }
+        public int UnsafeConditionsRecorded { get; set; }
+    }
+
+    public class ReportChecklistData
+    {
+        public int ReportsToBeInspected { get; set; }
+        public int ReportsInspectedInMonth { get; set; }
+        public int ReportsNotInspected { get; set; }
+    }
+
+    public class GrievanceData
+    {
+        public int TotalGrievancesRaised { get; set; }
+        public int GrievancesResolved { get; set; }
+        public int WorkforceGrievancesPending { get; set; }
+        public int LocalCommunityGrievancesResolved { get; set; }
+    }
+
+    public class EnviromentalSummary
+    {
+        public int facility_id { get; set; }
+        public string facilty_name { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
+    }
 }
 

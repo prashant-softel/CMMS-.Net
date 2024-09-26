@@ -163,6 +163,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
         Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
+        Task<List<ProjectDetails>> GetMisSummary(string year, int userID);
+        Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -2234,6 +2236,36 @@ namespace CMMSAPIs.BS.MISMasters
         public Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<List<ProjectDetails>> GetMisSummary(string year, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetMisSummary(year, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GeEnvironmentalSummary(year, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

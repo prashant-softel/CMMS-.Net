@@ -28,7 +28,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic present { get; set; }
         public string? InTime { get; set; }
         public string? OutTime { get; set; }
-        public int Attendance_Id { get; set; }
+        public int Attendence_Id { get; set; }
         public int facility_id { get; set; }
 
         public int employee_id { get; set; }

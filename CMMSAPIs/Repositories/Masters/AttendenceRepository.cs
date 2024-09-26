@@ -39,7 +39,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
 
                 string AttenQuery = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"({request.Attendence_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(AttenQuery).ConfigureAwait(false);
                 employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
@@ -67,7 +67,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
-                if (request.Attendance_Id > 0)
+                if (request.Attendence_Id > 0)
                 {
                     string AttenUpdateQuery = $"UPDATE employee_attendance SET " +
                           $"facility_id = {requests.facility_id}, " +
@@ -78,16 +78,8 @@ namespace CMMSAPIs.Repositories.Masters
                           $"Date = '{date}', " +
                           $"UpdatedAt = '{UtilsRepository.GetUTCTime()}', " +
                           $"UpdatedBy = {userID} " +
-                          $"WHERE attendance_id = {request.Attendance_Id};";
+                          $"WHERE id = {request.Attendence_Id};";
                     await Context.ExecuteNonQry<int>(AttenUpdateQuery).ConfigureAwait(false);
-                }
-                else
-                {
-                    string AttenQuery = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-                                        $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
-                                        $"SELECT LAST_INSERT_ID();";
-                    DataTable dt2 = await Context.FetchData(AttenQuery).ConfigureAwait(false);
-                    employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
                 }
             }
             response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Mark successfully.");
