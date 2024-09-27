@@ -731,7 +731,8 @@ namespace CMMSAPIs.Repositories.SM
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
                 $" left join assetcategories on assetcategories.id = a_master.item_category_ID " +
                 $" where actorType={(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_ID}')  " +
-                $"group by a_master.asset_code;";
+                $"    and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}' " +
+                $"  group by a_master.asset_code;";
             result = await Context.GetData<CMSMConsuptionReport>(query).ConfigureAwait(false);
 
             return result;
@@ -764,7 +765,8 @@ namespace CMMSAPIs.Repositories.SM
                 $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
                 $" left join assetcategories on assetcategories.id = a_master.item_category_ID " +
                 $" where actorType={(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_ID}')  " +
-                $"group by a_master.asset_code;";
+                $" and date_format(sm_trans.lastModifiedDate, '%Y-%m-%d')  BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}' " +
+                $" group by a_master.asset_code;";
             result = await Context.GetData<CMSMAvailibilityReport>(query).ConfigureAwait(false);
 
             return result;

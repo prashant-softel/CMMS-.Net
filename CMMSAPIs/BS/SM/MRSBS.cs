@@ -35,7 +35,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> RejectMRSIssue(CMApproval request, int userId, string facilitytimeZone);
         Task<List<CMMRSList>> GetMRSReturnList(int facility_ID, bool self_view, int userID, string facilitytime);
-        Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> request, int userID);
+        Task<List<CMDefaultResponse>> TransactionDetails(List<CMTransferItems> request, int userID);
         Task<CMDefaultResponse> updateUsedQty(List<CMTransferItems> request);
         Task<CMIssuedAssetItems> getIssuedAssetItems(int id);
         Task<List<CMPlantStockOpeningResponse_MRSRetrun>> getMRSReturnStockItems(int mrs_id);
@@ -405,95 +405,15 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> TransactionDetails(List<CMTransferItems> requestList, int userID)
+        public async Task<List<CMDefaultResponse>> TransactionDetails(List<CMTransferItems> requestList, int userID)
         {
             try
             {
                 using (var repos = new MRSRepository(getDB))
                 {
 
-                    CMDefaultResponse response = new CMDefaultResponse();
-                    foreach (var request in requestList)
-                    {
-                        //var result = await repos.TransferMaterialInTransaction(request);
-                        var result = await repos.TransferMaterialInTransaction_dbTransaction(request, userID);
-
-                        //if (result)
-                        //{
-                        //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
-                        //}
-                        //else
-                        //{
-                        //    response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item failed to transfer.");
-                        //}
-                        switch (result)
-                        {
-                            case 0:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
-                                break;
-                            case 1:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
-                                break;
-                            case 2:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id ( " + request.mrsItemID + " ) not found.");
-                                break;
-                            case 3:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Exception occurred during quantity updation.");
-                                break;
-                            case 4:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id is 0.");
-                                break;
-                            case 5:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Issued quantity 0.");
-                                break;
-                            case 6:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Existing qty same as updating quantity.");
-                                break;
-                            case 7:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "No old transaction. 0 quantity not updated.");
-                                break;
-                            default:
-                                response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Unknown error code <" + result + ">. Please contact tech team.");
-                                break;
-                        }
-                        /*
-                        if (result == 0)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.SUCCESS, "Item transferred.");
-                        }
-                        else if (result == 1)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Item requesting more than available quantity.");
-                        }
-                        else if (result == 2)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRSItemId ( " + request.mrsItemID + " ) not found.");
-                        }
-                        else if (result == 3)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Exception occured during quantity updation.");
-                        }
-                        else if (result == 4)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "MRS Id is 0.");
-                        }
-                        else if (result == 5)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Issued qantity 0.");
-                        }
-                        else if (result == 6)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Existing qty same as updating quantity.");
-                        }
-                        else if (result == 7)
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "No old transaction. 0 quantity not updated.");
-                        }
-                        else
-                        {
-                            response = new CMDefaultResponse(request.mrsID, CMMS.RETRUNSTATUS.FAILURE, "Unknown error code <" + result + ">. Pl contact tech team.");
-                        }*/
-                    }
+                    List<CMDefaultResponse> response = new List<CMDefaultResponse>();
+                    response = await repos.TransferMaterialInTransaction_dbTransaction(requestList, userID);
                     return response;
                 }
             }

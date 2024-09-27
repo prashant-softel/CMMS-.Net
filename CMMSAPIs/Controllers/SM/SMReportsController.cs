@@ -231,15 +231,15 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("GetSMConsuptionReport")]
         [HttpGet]
-        public async Task<IActionResult> GetSMConsuptionReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetSMConsuptionReport(string facilityID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                int facility_IDs = facility_ID.ToInt();
+                int facility_IDs = facilityID.ToInt();
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
 
 
-                var data = await _SMReportsBS.GetSMConsuptionReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
+                var data = await _SMReportsBS.GetSMConsuptionReport(facilityID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -252,15 +252,15 @@ namespace CMMSAPIs.Controllers.SM
         }
         [Route("GetSMAvailibilityReport")]
         [HttpGet]
-        public async Task<IActionResult> GetSMAvailibilityReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetSMAvailibilityReport(string facilityID, string smassetCategoryID, DateTime fromDate, DateTime toDate)
         {
             try
             {
-                int facility_IDs = facility_ID.ToInt();
+                int facility_IDs = facilityID.ToInt();
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_IDs)?.timezone;
 
 
-                var data = await _SMReportsBS.GetSMAvailibilityReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
+                var data = await _SMReportsBS.GetSMAvailibilityReport(facilityID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
