@@ -1617,11 +1617,11 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetObservationById")]
         [HttpGet]
-        public async Task<IActionResult> GetObservationById(int observation_id)
+        public async Task<IActionResult> GetObservationById(int observation_id, int check_point_type_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetObservationById(observation_id);
+                var data = await _IMISMasterBS.GetObservationById(observation_id, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -664,13 +664,13 @@ namespace CMMSAPIs.Models.Masters
         public string comment { get; set; }
 
     }
-    public class CMObservationByIdList
+    public class CMObservationDetails
     {
         public int id { get; set; }
         public int facility_id { get; set; }
-        public string contractor_name { get; set; }
+        public string operator_name { get; set; }
         public int risk_type_id { get; set; }
-        public string risk_type_name { get; set; }
+        public string risk_type { get; set; }
         public string preventive_action { get; set; }
         public int assigned_to_id { get; set; }
         public string assigned_to_name { get; set; }
@@ -690,9 +690,9 @@ namespace CMMSAPIs.Models.Masters
         public string observation_description { get; set; }
         public DateTime? created_at { get; set; }
         public string created_by { get; set; }
+        public int createdid { get; set; }
         public DateTime? updated_at { get; set; }
         public string updated_by { get; set; }
-        public int createdid { get; set; }
         public int updateid { get; set; }
         public dynamic month_of_observation { get; set; }
         public string action_taken { get; set; }
@@ -896,7 +896,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public int id { get; set; }
         public int user_id { get; set; }
-        public int type_of_observation { get; set; }
+        public int check_point_type_id { get; set; }
         public DateTime target_date { get; set; }
         public string comment { get; set; }
         public int assigned_to_id { get; set; }
