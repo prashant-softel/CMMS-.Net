@@ -1094,11 +1094,11 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
                 if (moduleType == cleaningType.ModuleCleaning)
                 {
-                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_DRAFT, userId);
+                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_UPDATED, userId);
                 }
                 else if (moduleType == cleaningType.Vegetation)
                 {
-                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
+                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_UPDATED, userId);
                 }
                 try
                 {
@@ -1517,6 +1517,10 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
+            string getStatusQuery = $"SELECT status FROM cleaning_execution WHERE id = {task_id}";
+            DataTable dt2 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            int todetermineStatus = (int)(CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+
             //prndong. write common code
             if (moduleType == cleaningType.ModuleCleaning)
             {
@@ -1524,10 +1528,13 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 {
                     return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned");
                 }
+/*                string getStatusQuery = $"SELECT status FROM cleaning_execution WHERE id = {task_id}";
+                retVal = await Context.ExecuteNonQry<int>(getStatusQuery).ConfigureAwait(false);
+                int intretVal = Int32.Parse(retVal.ToString());*/
 
                 string myQuery = "UPDATE cleaning_execution SET " +
                                $"assignedTo = {assign_to}, " +
-                               $"status = {(int)CMMS.CMMS_Status.MC_TASK_ASSIGNED}, " +
+                               $"status = {(todetermineStatus == (int)CMMS_Status.MC_TASK_STARTED ? (int)CMMS_Status.MC_TASK_ASSIGNED : todetermineStatus)}, " +
                                $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                                $"updatedById = {userID}, " +
                                $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
@@ -1543,7 +1550,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 }
                 string myQuery = "UPDATE cleaning_execution SET " +
                               $"assignedTo = {assign_to}, " +
-                              $"status = {(int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED}, " +
+                              $"status = {(todetermineStatus == (int)CMMS_Status.VEG_TASK_STARTED ? (int)CMMS_Status.VEG_TASK_ASSIGNED : todetermineStatus)}, " +
                               $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
                               $"updatedById = {userID},  " +
                               $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
