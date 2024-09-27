@@ -113,7 +113,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<MISTypeObservation>> GetDocument();
         Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID);
         Task<CMDefaultResponse> DeleteDocument(int id, int userID);
-        Task<CMObservationByIdList> GetObservationById(int observation_id);
+        Task<CMObservationDetails> GetObservationById(int observation_id, int check_point_type_id);
         Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment);
         Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
@@ -1723,13 +1723,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMObservationByIdList> GetObservationById(int observation_id)
+        public async Task<CMObservationDetails> GetObservationById(int observation_id, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetObservationById(observation_id);
+                    return await repos.GetObservationById(observation_id, check_point_type_id);
 
                 }
             }

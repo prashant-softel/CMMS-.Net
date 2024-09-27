@@ -569,7 +569,19 @@ namespace CMMSAPIs.Repositories.Jobs
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}, updatedBy = {updatedBy} where id = {job_id} ";
+
+            string getstatusqry = $"select status from jobs where id = {job_id} ";
+            int status = await Context.ExecuteNonQry<int>(getstatusqry).ConfigureAwait(false);
+
+            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {updatedBy}";
+
+            if (status == (int)CMMS.CMMS_Status.JOB_CREATED)
+            {
+                updateQry += $", status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED} ";
+            }
+
+            updateQry += $" where id = {job_id}";
+
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -577,8 +589,6 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-
-
 
             CMJobView _ViewJobList = await GetJobDetails(job_id, "");
 
