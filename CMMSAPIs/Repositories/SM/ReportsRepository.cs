@@ -703,6 +703,72 @@ namespace CMMSAPIs.Repositories.SM
             return groupedResult;
         }
 
+        internal async Task<List<CMSMConsuptionReport>> GetSMConsuptionReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        {
+
+            List<CMSMConsuptionReport> result = new List<CMSMConsuptionReport>();
+
+            string query = $"SELECT sm_trans.id as ID,sm_trans.mrsID as mrs_ID,a_master.asset_code, sm_trans.facilityID as facility_ID, fc.name as facility_Name,assetcategories.name as material_Category, " +
+                $"sm_trans.assetItemID as asset_Item_ID, a_master.asset_name,  a_master.asset_type_ID, AST.asset_type, " +
+                $"(select sum(used_qty) from smrsitems where mrs_ID =  sm_trans.mrsID and is_splited=1) comsumed_qty,  " +
+                $" (select lastmodifieddate from smrsitems where mrs_ID =  sm_trans.mrsID and is_splited=1 LIMIT 1) as  comsumption_date, " +
+                $" (select sum(cost) from smgoodsorderdetails where assetItemID=sm_trans.assetItemID and is_splited=1 ) as per_item_cost, " +
+                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = 1  " +
+                $" and smt.assetItemID = sm_trans.assetItemID and smt.toActorType = {(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) -  IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  " +
+                $" where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer})" +
+                $" and smt1.toActorType = {(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as Opening,    IFNULL((select SUM(smt.qty) from smtransactiondetails smt " +
+                $" where date_format(smt.lastInsetedDateTime, '%Y-%m-%d')  BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor} " +
+                $" and smt.assetItemID = sm_trans.assetItemID and smt.toActorType = {(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) as inward, " +
+                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d')  " +
+                $" BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) " +
+                $" and smt1.toActorType = {(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as outward," +
+                $" a_master.min_qty as min_available_qty," +
+                $" (SELECT  ifnull(SUM(creditQty),0) - ifnull(SUM(debitQty),0) FROM  " +
+                $" smtransition WHERE assetItemID =  sm_trans.assetItemID AND actorType IN ({(int)CMMS.SM_Actor_Types.Store},{(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) AND facilityID = sm_trans.facilityID) as act_available_qty " +
+                $" FROM smtransition as sm_trans  " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID" +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
+                $" left join assetcategories on assetcategories.id = a_master.item_category_ID " +
+                $" where actorType={(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_ID}')  " +
+                $"group by a_master.asset_code;";
+            result = await Context.GetData<CMSMConsuptionReport>(query).ConfigureAwait(false);
+
+            return result;
+        }
+
+        internal async Task<List<CMSMAvailibilityReport>> GetSMAvailibilityReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        {
+            List<CMSMAvailibilityReport> result = new List<CMSMAvailibilityReport>();
+
+            string query = $"SELECT sm_trans.id as ID,sm_trans.mrsID as mrs_ID,a_master.asset_code, sm_trans.facilityID as facility_ID, fc.name as facility_Name,assetcategories.name as material_Category, " +
+                $"sm_trans.assetItemID as asset_Item_ID, a_master.asset_name,  a_master.asset_type_ID, AST.asset_type, " +
+                $"(select sum(used_qty) from smrsitems where mrs_ID =  sm_trans.mrsID and is_splited=1) comsumed_qty,  " +
+                $" (select lastmodifieddate from smrsitems where mrs_ID =  sm_trans.mrsID and is_splited=1 LIMIT 1) as  comsumption_date, " +
+                $" (select sum(cost) from smgoodsorderdetails where assetItemID=sm_trans.assetItemID and is_splited=1 ) as per_item_cost, " +
+                $" IFNULL((select SUM(smt.qty) from smtransactiondetails smt where date_format(smt.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = 1  " +
+                $" and smt.assetItemID = sm_trans.assetItemID and smt.toActorType = {(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) -  IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  " +
+                $" where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') < '{fromDate.ToString("yyyy-MM-dd")}' and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer})" +
+                $" and smt1.toActorType = {(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as Opening,    IFNULL((select SUM(smt.qty) from smtransactiondetails smt " +
+                $" where date_format(smt.lastInsetedDateTime, '%Y-%m-%d')  BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor} " +
+                $" and smt.assetItemID = sm_trans.assetItemID and smt.toActorType = {(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ('{facility_ID}') ),0) as inward, " +
+                $" IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d')  " +
+                $" BETWEEN '{fromDate.ToString("yyyy-MM-dd")}' AND '{toDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) " +
+                $" and smt1.toActorType = {(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ('{facility_ID}')),0) as outward," +
+                $" a_master.min_qty as min_available_qty," +
+                $" (SELECT  ifnull(SUM(creditQty),0) - ifnull(SUM(debitQty),0) FROM  " +
+                $" smtransition WHERE assetItemID =  sm_trans.assetItemID AND actorType IN ({(int)CMMS.SM_Actor_Types.Store},{(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) AND facilityID = sm_trans.facilityID) as act_available_qty " +
+                $" FROM smtransition as sm_trans  " +
+                $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID" +
+                $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+                $" Left join smassettypes AST on AST.id = a_master.asset_type_ID  " +
+                $" left join assetcategories on assetcategories.id = a_master.item_category_ID " +
+                $" where actorType={(int)CMMS.SM_Actor_Types.Inventory} and sm_trans.facilityID in ('{facility_ID}')  " +
+                $"group by a_master.asset_code;";
+            result = await Context.GetData<CMSMAvailibilityReport>(query).ConfigureAwait(false);
+
+            return result;
+        }
 
     }
 }

@@ -25,6 +25,8 @@ namespace CMMSAPIs.BS.SM
         //Changes
        Task<List<CMTaskStockItems>> GetpmTaskStock(int facility_ID, int emp_id);
        Task<List<CMItemWiseTransaction>> GetAssetItemTransactionReport(string facility_ID, int assetItemId, DateTime fromDate, DateTime toDate, string facilitytimeZone);
+        Task<List<CMSMConsuptionReport>> GetSMConsuptionReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone);
+        Task<List<CMSMAvailibilityReport>> GetSMAvailibilityReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone);
 
 
     }
@@ -191,6 +193,38 @@ namespace CMMSAPIs.BS.SM
                 using (var repos = new ReportsRepository(getDB))
                 {
                     return await repos.GetStockReport(facility_id, actorTypeID, actorID, StartDate, EndDate, assetMasterIDs);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMSMConsuptionReport>> GetSMConsuptionReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetSMConsuptionReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<CMSMAvailibilityReport>> GetSMAvailibilityReport(string facility_ID, string smassetCategoryID, DateTime fromDate, DateTime toDate, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new ReportsRepository(getDB))
+                {
+                    return await repos.GetSMAvailibilityReport(facility_ID, smassetCategoryID, fromDate, toDate, facilitytimeZone);
 
                 }
             }
