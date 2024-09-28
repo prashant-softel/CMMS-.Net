@@ -178,13 +178,21 @@ namespace CMMSAPIs.Repositories.JC
 
 
             /*Your code goes here*/
-            string myQuery1 = $"select jc.id as jobCardId,jc.JC_code as jobCardNo, jc.JC_Date_Start as jobCardDate,jc.JC_Date_Stop as endTime, job.id as jobId, CONCAT(user.firstName, user.lastName) as jobAssingedTo,  ptw.id as permitId, ptw.status as permitStatus, ptw.code as permitNo,JC_Status as status, JC_Approved as approvedStatus from jobcards as jc LEFT JOIN jobs as job ON JC.jobid = job.id LEFT JOIN permits as ptw ON JC.PTW_id = PTW.ID LEFT JOIN users as user ON user.id = job.assignedId ";
+            string myQuery1 = $"SELECT jc.id as jobCardId, jc.JC_code as jobCardNo, jc.JC_Date_Start as jobCardDate, jc.JC_Date_Stop as endTime, " +
+                  $"job.id as jobId, CONCAT(user.firstName, ' ', user.lastName) as jobAssignedTo, ptw.id as permitId, ptw.status as permitStatus, " +
+                  $"ptw.code as permitNo, JC_Status as status, JC_Approved as approvedStatus, " +
+                  $"CASE WHEN ptw.endDate < '{UtilsRepository.GetUTCTime()}' AND ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
+                  $"FROM jobcards as jc " +
+                  $"LEFT JOIN jobs as job ON jc.jobid = job.id " +
+                  $"LEFT JOIN permits as ptw ON jc.PTW_id = ptw.id " +
+                  $"LEFT JOIN users as user ON user.id = job.assignedId";
+
             //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
             //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
 
             if (jobId > 0)
             {
-                myQuery1 += $"WHERE JC.jobid = {jobId} ";
+                myQuery1 += $" WHERE JC.jobid = {jobId} ";
             }
             else
             {

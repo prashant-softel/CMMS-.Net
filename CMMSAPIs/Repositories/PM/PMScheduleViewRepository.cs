@@ -356,7 +356,8 @@ namespace CMMSAPIs.Repositories.PM
                                " CONCAT(statusBy.firstName,' ',statusBy.lastName)  as status_updated_by_name, " +
                                " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  title.plan_name AS title, category.name AS categoryName, " +
                                "facility.name AS facilityidbyName, CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, " +
-                               "CONCAT(updatedBy.firstName,' ',updatedBy.lastName)  as updated_by_name, CONCAT(closeapprovedBy.firstName,' ',closeapprovedBy.lastName)  as closedApprovedByName,  CONCAT(statusBy.firstName,' ', statusBy.lastName) AS status_updated_by_name " +
+                               "CONCAT(updatedBy.firstName,' ',updatedBy.lastName)  as updated_by_name, CONCAT(closeapprovedBy.firstName,' ',closeapprovedBy.lastName)  as closedApprovedByName,  CONCAT(statusBy.firstName,' ', statusBy.lastName) AS status_updated_by_name, " +
+                               $"CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
@@ -390,6 +391,7 @@ namespace CMMSAPIs.Repositories.PM
 
 
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
+
             string Materialconsumption = "SELECT sam.ID as Material_ID,sam.asset_name as  Material_name,smi.asset_item_ID as Equipment_ID, " +
                     "smtype.asset_type as  Material_type, smi.used_qty,smi.issued_qty" +
                     " FROM smassetmasters sam LEFT JOIN smrsitems smi ON sam.ID = smi.mrs_ID " +

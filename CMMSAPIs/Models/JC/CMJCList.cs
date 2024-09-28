@@ -45,7 +45,7 @@ namespace CMMSAPIs.Models.JC
         public int status { get; set; }
         public int approvedStatus { get; set; }
         public string status_short { get; set; }
-
+        public Int64 isExpired { get; set; }
 
     }
 

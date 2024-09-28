@@ -296,6 +296,7 @@ namespace CMMSAPIs.Models.MC
 
         public int facility_id { get; set; }
         public string facilityidName { get; set; }
+        public Int64 isExpired { get; set; }
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }
