@@ -181,11 +181,15 @@ namespace CMMSAPIs.Repositories.JC
             string myQuery1 = $"SELECT jc.id as jobCardId, jc.JC_code as jobCardNo, jc.JC_Date_Start as jobCardDate, jc.JC_Date_Stop as endTime, " +
                   $"job.id as jobId, CONCAT(user.firstName, ' ', user.lastName) as jobAssignedTo, ptw.id as permitId, ptw.status as permitStatus, " +
                   $"ptw.code as permitNo, JC_Status as status, JC_Approved as approvedStatus, " +
+                  $"CONCAT(userTBT.firstName, ' ', userTBT.lastName) as TBT_Done_By, TBT_Done_By as TBT_Done_By_id, " +
+                  $"case when TBT_Done_At = '0000-00-00 00:00:00' then null else TBT_Done_At end as TBT_Done_At, " +
                   $"CASE WHEN ptw.endDate < '{UtilsRepository.GetUTCTime()}' AND ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
                   $"FROM jobcards as jc " +
                   $"LEFT JOIN jobs as job ON jc.jobid = job.id " +
                   $"LEFT JOIN permits as ptw ON jc.PTW_id = ptw.id " +
+                  $"LEFT JOIN users as userTBT ON userTBT.id = ptw.TBT_Done_By " +
                   $"LEFT JOIN users as user ON user.id = job.assignedId";
+
 
             //$"LEFT JOIN  users as user2 ON user2.id = jc.JC_Added_by " +
             //$"LEFT JOIN  users as user3 ON user3.id = jc.JC_Start_By_id " ;
@@ -369,7 +373,7 @@ namespace CMMSAPIs.Repositories.JC
             //permit details
             string myQuery3 = $"SELECT ptw.id as permit_id,ptw.status as status, ptw.permitNumber as site_permit_no,CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start, " +
                 "passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name," +
-                "ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
+                "ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time,ptw.endDate endDate_time, " +
                 $"permitType.title as permit_type, ptw.description as permit_description,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken, " +
                 $"CONCAT(user.firstName, user.lastName) as job_created_by_name,CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name, " +
                 $"CONCAT(user1.firstName , ' ' , user1.lastName) as permit_issued_by_name, " +

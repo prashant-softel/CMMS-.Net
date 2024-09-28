@@ -1848,10 +1848,10 @@ namespace CMMSAPIs.Repositories.Masters
             try
             {
                 string insertQuery = $"INSERT INTO observations(" +
-                                     $"facility_id, contractor_name, risk_type_id, preventive_action, responsible_person, contact_number, cost_type, " +
+                                     $"facility_id, risk_type_id, preventive_action, responsible_person, contact_number, cost_type, " +
                                      $"date_of_observation, type_of_observation, location_of_observation, source_of_observation, target_date, " +
                                      $"observation_description, created_at, created_by, is_active,status_code,action_taken) VALUES " +
-                                     $"({request.facility_id},'{request.contractor_name}', {request.risk_type_id}, '{request.preventive_action}', {request.assigned_to_id}, '{request.contact_number}', " +
+                                     $"({request.facility_id},{request.risk_type_id}, '{request.preventive_action}', {request.assigned_to_id}, '{request.contact_number}', " +
                                      $"{request.cost_type}, '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', {request.type_of_observation}, '{request.location_of_observation}', " +
                                      $"{request.source_of_observation}, '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
                                      $"'{UtilsRepository.GetUTCTime()}', {UserID}, 1,{(int)CMMS.CMMS_Status.OBSERVATION_CREATED},'{request.action_taken}'); " +
@@ -1887,7 +1887,7 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
+        internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID, int check_point_type_id)
         {
             CMDefaultResponse response = null;
             List<string> errors = new List<string>();
@@ -1906,7 +1906,36 @@ namespace CMMSAPIs.Repositories.Masters
             }
             try
             {
-                string updateQuery = $"UPDATE observations SET " +
+
+                if (check_point_type_id == 2)
+                {
+
+
+                    return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "cant update for check_point_type_id 2.");
+                    /*string updateQuery = $"UPDATE pm_execution SET " +
+                                     //$"contractor_name = '{request.contractor_name}', " +
+                                     //$"risk_type_id = {request.risk_type_id}, " +
+                                     $"preventive_action = '{request.preventive_action}', " +
+                                     //$"responsible_person = {request.assigned_to_id}, " +
+                                     //$"contact_number = '{request.contact_number}', " +
+                                     //$"cost_type = {request.cost_type}, " +
+                                     $"PM_Schedule_Observation_add_date = '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', " +
+                                     $"Check_Point_Type_id = '{request.check_point_type_id}', " +
+                                     $"location_of_observation = '{request.location_of_observation}', " +
+                                     $"action_taken = '{request.action_taken}', " +
+                                     $"source_of_observation = '{request.source_of_observation}', " +
+                                     $"comment = '{request.comment}', " +
+                                     $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
+                                     $"observation_description = '{request.observation_description}', " +
+                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
+                                     $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                                     $"updated_by = {UserID} " +
+                                     $"WHERE id = {request.id};";
+                    await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);*/
+                }
+                else if (check_point_type_id == 1)
+                {
+                    string updateQuery = $"UPDATE observations SET " +
                                      $"contractor_name = '{request.contractor_name}', " +
                                      $"risk_type_id = {request.risk_type_id}, " +
                                      $"preventive_action = '{request.preventive_action}', " +
@@ -1925,8 +1954,12 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
-                await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
-
+                    await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid Observation Type");
+                }
                 if (request.uploadfileIds.Count > 0)
                 {
                     foreach (int data in request.uploadfileIds)
@@ -2059,14 +2092,14 @@ namespace CMMSAPIs.Repositories.Masters
 
             return Result;
         }
-        internal async Task<CMObservationDetails> GetObservationById(int observation_id, int check_point_type_id)
+        internal async Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id)
         {
             List<CMObservationDetails> Result = null;
 
             if (check_point_type_id == 1)
             {
                 string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                    " contractor_name, risk_type_id,ir_risktype.risktype as risk_type_name, preventive_action, responsible_person, contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
+                    " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
                     " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
                     " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, updated_by as updateid, created_by as createdid ," +
                     " observations.preventive_action as corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
@@ -2787,28 +2820,15 @@ namespace CMMSAPIs.Repositories.Masters
             return null;
 
         }
-        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId)
+        internal async Task<CMDefaultResponse> CloseObservation(CMApproval request, int userId, int check_point_type_id)
         {
             string deleteQry = "";
-            string deleteQry1 = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
-            await Context.ExecuteNonQry<int>(deleteQry1).ConfigureAwait(false);
             System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
             if (request.comment.Length > 0)
 
-                if (request.type == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
+                if (check_point_type_id == 1)
                 {
 
-                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
-                    await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
-                    sb = new System.Text.StringBuilder("Observation Updated");
-                    if (request.comment.Length > 0)
-                    {
-                        sb.Append(": " + request.comment);
-                    }
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
-                }
-                else
-                {
                     sb.Append(": " + request.comment);
                     deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
 
@@ -2820,46 +2840,58 @@ namespace CMMSAPIs.Repositories.Masters
                         sb.Append(": " + request.comment);
                     }
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+
+
+                    
                 }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+                else if (check_point_type_id == 2)
+                {
+                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
+                    await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
+                    sb = new System.Text.StringBuilder("Observation Updated");
+                    if (request.comment.Length > 0)
+                    {
+                        sb.Append(": " + request.comment);
+                    }
+                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid Observation Type");
+                }
+            
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
-        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request,int check_point_type_id, int userId)
         {
             string updateQry = "";
-            /* if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
-             {
-                 if (request.type_of_observation == (int)CMMS.OBSERVATION_TYPE.PM_EXECUTION)
-                 {
-                     updateQry = "UPDATE pm_execution SET ";
-                     updateQry += $"Observation_assign_to = {request.assigned_to_id}, ";
-                     updateQry += $"Observation_target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
-                     updateQry += $"Observation_Status = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED} ";
-                 }
-                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_EXECUTION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
-             }
-             else*/
+            
+            if (check_point_type_id == 2)
+            {
+                updateQry = "UPDATE pm_execution SET ";
+                updateQry += $"Observation_assign_to = {request.assigned_to_id}, ";
+                updateQry += $"Observation_Status = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
+                updateQry += $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}', ";
+                updateQry += $"PM_Schedule_Observation_update_by = '{userId}' ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
-            updateQry = "UPDATE observations SET ";
-            updateQry += $"assign_to = {request.assigned_to_id}, ";
-            updateQry += $"target_date = '{request.target_date.ToString("yyyy-MM-dd")}', ";
-            updateQry += $"status_code = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
-            updateQry += $"contractor_name = '{request.contractor_name}', ";
-            updateQry += $"risk_type_id = {request.risk_type_id}, ";
-            updateQry += $"preventive_action = '{request.preventive_action}', ";
-            updateQry += $"responsible_person = {request.assigned_to_id}, ";
-            updateQry += $"contact_number = '{request.contact_number}', ";
-            updateQry += $"cost_type = {request.cost_type}, ";
-            updateQry += $"date_of_observation = '{request.date_of_observation.ToString("yyyy-MM-dd")}', ";
-            updateQry += $"type_of_observation = {request.check_point_type_id}, ";  // Removed extra quotes for int value
-            updateQry += $"location_of_observation = '{request.location_of_observation}', ";
-            updateQry += $"action_taken = '{request.action_taken}', ";
-            updateQry += $"source_of_observation = {request.source_of_observation}, ";
-            updateQry += $"observation_description = '{request.observation_description}', ";
-            updateQry += $"updated_at = '{UtilsRepository.GetUTCTime()}' ";
-            updateQry += $"WHERE id = {request.id};";
-            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            }
+            else if (check_point_type_id == 1)
+            {
+                updateQry = "UPDATE observations SET ";
+                updateQry += $"assign_to = {request.assigned_to_id}, ";
+                updateQry += $"status_code = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
+                updateQry += $"updated_at = '{UtilsRepository.GetUTCTime()}', ";
+                updateQry += $"updated_by = '{userId}' ";
+                updateQry += $"WHERE id = {request.id};";
+                await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            }
+
+            else
+            {
+                throw new ArgumentException("Invalid Observation Type");
+            }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
 
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
@@ -2900,13 +2932,25 @@ namespace CMMSAPIs.Repositories.Masters
         {
             return null;
         }
-        internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone)
+        internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone, int check_point_type_id)
         {
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.OBSERVATION;
             CMMS.CMMS_Status status = CMMS.CMMS_Status.OBSERVATION_APPROVED;
+            if (check_point_type_id == 1)
+            {
 
-            string approveQuery = $"Update observations set status_code= {(int)status} ,approvedById={userID}, approveRemark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
-            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+                string approveQuery = $"Update observations set status_code= {(int)status} ,approvedById={userID}, approveRemark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+                await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            }
+            else if (check_point_type_id == 2)
+            {
+                string approveQuery = $"Update pm_execution set Observation_Status= {(int)status} ,approvedById={userID}, approveRemark='{request.comment}', approvedAt='{UtilsRepository.GetUTCTime()}', PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+                await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid Observation Type");
+            }
 
             //ADD REMARK TO HISTORY
             //add db col rejectRemark approveRemark
@@ -2916,16 +2960,27 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userID, string facilitytimeZone)
+        internal async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userID, string facilitytimeZone, int check_point_type_id)
         {
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.OBSERVATION;
             CMMS.CMMS_Status status = CMMS.CMMS_Status.OBSERVATION_REJECTED;
 
-            string approveQuery = $"Update observations set status_code= {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
-            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
-
-            //ADD REMARK TO HISTORY
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Rejected", CMMS.CMMS_Status.OBSERVATION_REJECTED, userID);
+            if (check_point_type_id == 1)
+            {
+                string approveQuery = $"Update observations set status_code= {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+                await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            }
+            else if(check_point_type_id == 2)
+            {
+                string approveQuery = $"Update pm_execution set Observation_Status = {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
+                await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid Observation Type");
+            }
+                //ADD REMARK TO HISTORY
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Rejected", CMMS.CMMS_Status.OBSERVATION_REJECTED, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Rejected");
             return response;

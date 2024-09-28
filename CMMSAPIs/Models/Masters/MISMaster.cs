@@ -914,6 +914,7 @@ namespace CMMSAPIs.Models.Masters
         public int status_code { get; set; }  // status_code
         public DateTime updated_at { get; set; }  // updated_at
         public int updated_by { get; set; }  // updated_by
+        public int type_of_observation { get; set; }
     }
     public class CMEvaluationCreate
     {

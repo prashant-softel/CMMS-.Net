@@ -699,8 +699,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $" CONCAT(endapprovedUser.firstName,' ', endapprovedUser.lastName) as endapprovedbyName, ex.end_approved_id as endapprovedbyId, " +
                $" CONCAT(endrejectedUser.firstName,' ', endrejectedUser.lastName) as endrejectedbyName, ex.end_rejected_id as endrejectedbyId, " +
                $" CONCAT(abandonApprovedUser.firstName,' ', abandonApprovedUser.lastName) as abandonApprovedByName, ex.abandonApprovedBy as abandonApprovedById, " +
-               $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById, " +
-               $" CASE WHEN ptw.endDate < '{UtilsRepository.GetUTCTime()}' AND ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
+               $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById " +
                $" from cleaning_execution as ex LEFT JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
                $" left join facilities as F on F.id = ex.facilityId  " +
@@ -715,7 +714,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $" LEFT JOIN users as abandonedUser ON abandonedUser.id = ex.abandonedById" +
                $" LEFT JOIN users as abandonApprovedUser ON abandonApprovedUser.id = ex.abandonApprovedBy " +
                $" LEFT JOIN users as abandonRejectedUser ON abandonRejectedUser.id = ex.abandonRejectedBy " +
-               $"LEFT JOIN permits as ptw ON ex.PTW_id = ptw.id " +
+               
                $" LEFT JOIN users as assignedToUser ON assignedToUser.id = ex.assignedTo where ex.id={excutionId};";
 
 
@@ -723,6 +722,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date, permit.startDate as startDate, CASE when permit.startDate <  now() then 1 else 0 END as tbt_start, " +
                                   $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
+                                  $" CASE WHEN ptw.endDate < '{UtilsRepository.GetUTCTime()}' AND ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired, " +
                                   $" permit.id as permit_id,permit.code as  permit_code, schedule.rejectedById, CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) as rejectedBy, schedule.rejectedAt,schedule.approvedById, CONCAT(approvedByUser.firstName, approvedByUser.lastName) as approvedBy, schedule.approvedAt, " +
                                   $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
                                   $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
@@ -731,6 +731,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                                   $" left join permits as permit on permit.id = schedule.ptw_id " +
                                   $" LEFT JOIN users as rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
                                   $" LEFT JOIN users as approvedByUser ON approvedByUser.id = schedule.approvedById " +
+                                  $" LEFT JOIN permits as ptw ON schedule.PTW_id = ptw.id " +
                                   $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
                                   $" where schedule.executionId = {excutionId} group by schedule.scheduleId;";
 

@@ -203,6 +203,7 @@ namespace CMMSAPIs.Models.MC
         public string updatedbyName { get; set; }
         public DateTime? updatedAt { get; set; }
         public string facilityidbyName { get; set; }
+        public Int64 isExpired { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
     }
     public class CMMCGetScheduleExecution
@@ -296,7 +297,6 @@ namespace CMMSAPIs.Models.MC
 
         public int facility_id { get; set; }
         public string facilityidName { get; set; }
-        public Int64 isExpired { get; set; }
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }
