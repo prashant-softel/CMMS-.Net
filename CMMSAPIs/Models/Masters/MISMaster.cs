@@ -915,32 +915,71 @@ namespace CMMSAPIs.Models.Masters
         public DateTime updated_at { get; set; }  // updated_at
         public int updated_by { get; set; }  // updated_by
     }
-    public class CMEvaluationCreate
+
+
+    public class CMEvaluationUpdate : CMEvaluationCreate
     {
         public int id { get; set; }
+    }
+
+    public class CMEvaluationCreate
+    {
         public string plan_name { get; set; }
         public int facility_id { get; set; }
         public int frequency_id { get; set; }
         public DateTime plan_date { get; set; }
-        public string assigned_to { get; set; }
-        public string status { get; set; }
-        public int created_by { get; set; }
-        public int updated_by { get; set; }
-        public int approved_by { get; set; }
-        public int rejected_by { get; set; }
+        public int assigned_to { get; set; }
         public string remarks { get; set; }
+        //List of Auditids
+        public List<CMEvaluationAudit> audit_list { get; set; }
     }
-    public class MapAuditlist
+
+    public class CMEvaluationAudit
     {
         public int id { get; set; }
         public int evalution_id { get; set; }
         public int audit_id { get; set; }
         public decimal weightage { get; set; }
-        public string comments { get; set; }
-        public int created_by { get; set; }
+        public string comment { get; set; }
+
         public DateTime created_at { get; set; }
         public int updated_by { get; set; }
         public DateTime updated_at { get; set; }
+    }
+
+    public class CMEvaluation
+    {
+        public int id { get; set; }
+        public string plan_name { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public int frequency_id { get; set; }
+        public string frequency_name { get; set; }
+        public DateTime plan_date { get; set; }
+        public int assigned_to { get; set; }
+        public string assigned_to_name { get; set; }
+        public int createdById { get; set; }
+        public int updatedById { get; set; }
+        public int approvedById { get; set; }
+        public int rejectedById { get; set; }
+        public int deletedById { get; set; }
+        public string createdByName { get; set; }
+        public string updatedByName { get; set; }
+        public string approvedByName { get; set; }
+        public string rejectedByName { get; set; }
+        public string deletedByName { get; set; }
+        public DateTime? updated_at { get; set; }
+        public DateTime? approved_at { get; set; }
+        public DateTime? rejected_at { get; set; }
+        public DateTime? deleted_at { get; set; }
+        public string audit_details { get; set; }
+
+        public int status { get; set; }
+        public string status_short { get; set; }
+        public string status_long { get; set; }
+        public List<CMEvaluationAudit> audit_list { get; set; }
+
+
     }
 
     public class ProjectDetails
@@ -969,20 +1008,22 @@ namespace CMMSAPIs.Models.Masters
 
     }
 
-    /*public class MonthlyData
-    {
-        public string Month { get; set; }
 
-        public ManPowerData ManPowerData { get; set; }
-        public IncidentAccidentData IncidentAccidentData { get; set; }
-        public HseTrainingData HseTrainingData { get; set; }
-        public HseInspectionAuditData HseInspectionAuditData { get; set; }
-        public ReportChecklistData ReportChecklistData { get; set; }
-        public GrievanceData GrievanceData { get; set; }
-        public OccupationalHealthData healthData { get; set; }
-    }*/
-
-    public class ManPowerData
+    /*
+    public class MapAuditlist
+        {
+            public int id { get; set; }
+            public int evalution_id { get; set; }
+            public int audit_id { get; set; }
+            public decimal weightage { get; set; }
+            public string comments { get; set; }
+            public int created_by { get; set; }
+            public DateTime created_at { get; set; }
+            public int updated_by { get; set; }
+            public DateTime updated_at { get; set; }
+        }
+    */
+public class ManPowerData
     {
         public dynamic AvgHFEEmployee { get; set; }
         public dynamic ManDaysHFEEmployee { get; set; }
@@ -1044,5 +1085,6 @@ namespace CMMSAPIs.Models.Masters
         public List<OccupationalHealthData> healthDatas { get; set; }
         public List<VisitsAndNotices> visitsAndNotices { get; set; }
     }
+
 }
 
