@@ -699,8 +699,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $" CONCAT(endapprovedUser.firstName,' ', endapprovedUser.lastName) as endapprovedbyName, ex.end_approved_id as endapprovedbyId, " +
                $" CONCAT(endrejectedUser.firstName,' ', endrejectedUser.lastName) as endrejectedbyName, ex.end_rejected_id as endrejectedbyId, " +
                $" CONCAT(abandonApprovedUser.firstName,' ', abandonApprovedUser.lastName) as abandonApprovedByName, ex.abandonApprovedBy as abandonApprovedById, " +
-               $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById, " +
-               $" CASE WHEN ptw.endDate < '{UtilsRepository.GetUTCTime()}' AND ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
+               $" CONCAT(abandonRejectedUser.firstName,' ', abandonRejectedUser.lastName) as abandonRejectedByName, ex.abandonRejectedBy as abandonRejectedById " +
                $" from cleaning_execution as ex LEFT JOIN cleaning_plan as plan on ex.planId = plan.planId " +
                $" LEFT JOIN Frequency as freq on freq.id = plan.frequencyId " +
                $" left join facilities as F on F.id = ex.facilityId  " +
@@ -715,7 +714,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $" LEFT JOIN users as abandonedUser ON abandonedUser.id = ex.abandonedById" +
                $" LEFT JOIN users as abandonApprovedUser ON abandonApprovedUser.id = ex.abandonApprovedBy " +
                $" LEFT JOIN users as abandonRejectedUser ON abandonRejectedUser.id = ex.abandonRejectedBy " +
-               $"LEFT JOIN permits as ptw ON ex.PTW_id = ptw.id " +
                $" LEFT JOIN users as assignedToUser ON assignedToUser.id = ex.assignedTo where ex.id={excutionId};";
 
 
@@ -735,6 +733,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                $"WHEN cp.cleaningType = 3 THEN 'Robotic' " +
                $"ELSE 'Wet' END AS cleaningTypeName, " +
                $"SUM(moduleQuantity) AS scheduled, " +
+               $" CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired, " +
                $"permit.id AS permit_id, " +
                $"permit.code AS permit_code, " +
                $"schedule.rejectedById, " +

@@ -1231,12 +1231,12 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("CloseObservation")]
         [HttpPost]
-        public async Task<IActionResult> CloseObservation(CMApproval request)
+        public async Task<IActionResult> CloseObservation(CMApproval request, int check_point_type_id)
         {
             try
             {
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.CloseObservation(request, userId);
+                var data = await _IMISMasterBS.CloseObservation(request, userId, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1615,13 +1615,13 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-        [Route("GetObservationById")]
+        [Route("GetObservationDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetObservationById(int observation_id, int check_point_type_id)
+        public async Task<IActionResult> GetObservationDetails(int observation_id, int check_point_type_id)
         {
             try
             {
-                var data = await _IMISMasterBS.GetObservationById(observation_id, check_point_type_id);
+                var data = await _IMISMasterBS.GetObservationDetails(observation_id, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -1646,12 +1646,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("UpdateObservation")]
         [HttpPost]
-        public async Task<IActionResult> UpdateObservation(CMObservation request)
+        public async Task<IActionResult> UpdateObservation(CMObservation request, int check_point_type_id)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.UpdateObservation(request, userID);
+                var data = await _IMISMasterBS.UpdateObservation(request, userID, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -2015,11 +2015,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("AssingtoObservation")]
         [HttpPost]
-        public async Task<IActionResult> AssingtoObservation(AssignToObservation request)
+        public async Task<IActionResult> AssingtoObservation(AssignToObservation request, int check_point_type_id)
         {
             try
             {
-                var data = await _IMISMasterBS.AssingtoObservation(request);
+                int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await _IMISMasterBS.AssingtoObservation(request, check_point_type_id, userId);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -2346,13 +2347,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("ApproveObservation")]
         [HttpPut]
-        public async Task<IActionResult> ApproveObservation(CMApproval request, int facilityId)
+        public async Task<IActionResult> ApproveObservation(CMApproval request, int facilityId, int check_point_type_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.ApproveObservation(request, userId, facilitytimeZone);
+                var data = await _IMISMasterBS.ApproveObservation(request, userId, facilitytimeZone, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -2363,13 +2364,13 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("RejectObservation")]
         [HttpPut]
-        public async Task<IActionResult> RejectObservation(CMApproval request, int facilityId)
+        public async Task<IActionResult> RejectObservation(CMApproval request, int facilityId, int check_point_type_id)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
                 int userId = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.RejectObservation(request, userId, facilitytimeZone);
+                var data = await _IMISMasterBS.RejectObservation(request, userId, facilitytimeZone, check_point_type_id);
                 return Ok(data);
             }
             catch (Exception ex)
