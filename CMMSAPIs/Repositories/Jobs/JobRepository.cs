@@ -571,13 +571,13 @@ namespace CMMSAPIs.Repositories.Jobs
              * return boolean true/false*/
 
             string getstatusqry = $"select status from jobs where id = {job_id} ";
-            int status = await Context.ExecuteNonQry<int>(getstatusqry).ConfigureAwait(false);
+            List<CMJobView> status = await Context.GetData<CMJobView>(getstatusqry).ConfigureAwait(false);
 
             string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {updatedBy}";
 
-            if (status == (int)CMMS.CMMS_Status.JOB_CREATED)
+            if (status[0].status == (int)CMMS.CMMS_Status.JOB_CREATED)
             {
-                updateQry += $", status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED} ";
+                updateQry += $", status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}";
             }
 
             updateQry += $" where id = {job_id}";

@@ -152,6 +152,7 @@ namespace CMMSAPIs.Models.PM
         public string skip_approved_by_name { get; set; }
         public DateTime? skip_approved_at { get; set; }
         public string facility_name { get; set; }
+        public Int64 isExpired { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
