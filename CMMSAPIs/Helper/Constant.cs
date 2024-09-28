@@ -425,7 +425,7 @@ namespace CMMSAPIs.Helper
             PM_UPDATED,
             PM_TASK_UPDATED,//Only for notification purpose
             PM_TASK_DELETED,
-            PM_SUBMIT,
+            //PM_SUBMIT,
             /*
                         MC_EXECUTION_STARTED,
                         MC_EXECUTION_CLOSED,

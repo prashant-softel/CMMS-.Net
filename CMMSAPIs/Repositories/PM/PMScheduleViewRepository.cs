@@ -33,7 +33,7 @@ namespace CMMSAPIs.Repositories.PM
         }
         Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
         {
-            { CMMS.CMMS_Status.PM_SUBMIT, "PM Submitted" },
+            { CMMS.CMMS_Status.PM_SCHEDULED, "PM Scheduled" },
             { CMMS.CMMS_Status.PM_LINKED_TO_PTW, "PM Linked to PTW" },
             { CMMS.CMMS_Status.PM_START, "PM Started" },
             { CMMS.CMMS_Status.PM_CLOSED, "PM Closed" },
@@ -93,10 +93,6 @@ namespace CMMSAPIs.Repositories.PM
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
                     retValue += String.Format("PM{0} Schedule </p>", Obj.schedule_id); break;
-
-                case CMMS.CMMS_Status.PM_SUBMIT:
-                    retValue = String.Format("PM{0} Submitted by {1} at {2} ", Obj.schedule_id, Obj.submittedByName, Obj.facilityidbyName);
-                    break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = String.Format("PM{0} Started by {1} at {2} ", Obj.schedule_id, Obj.startedbyName, Obj.facilityidbyName);
                     break;
@@ -2085,10 +2081,10 @@ namespace CMMSAPIs.Repositories.PM
                                $"('{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', '{frequency[0].name}', {frequency[0].id}, 'FRC{frequency[0].id}', " +
                                $"{facility[0].id}, '{facility[0].name}', 'FAC{facility[0].id + 1000}', {blockId}, 'BLOCK{blockId}', {category[0].id}, 'AC{category[0].id + 1000}', '{category[0].name}', " +
                                $"{asset[0].id}, 'INV{asset[0].id}', '{asset[0].name}', {user[0].id}, '{user[0].full_name}', {user[0].id}, '{user[0].full_name}', {userID}, " +
-                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SUBMIT}, '{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
+                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SCHEDULED}, '{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
                             int id = Convert.ToInt32(dt2.Rows[0][0]);
-                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SUBMIT, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SCHEDULED, userID);
                             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "PM Schedule data inserted successfully");
                             responseList.Add(response);
                         }
@@ -2114,7 +2110,7 @@ namespace CMMSAPIs.Repositories.PM
             try
             {
                 CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(task_id, schedule_id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_SUBMIT, new[] { userID }, PMTaskSchedule);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_SCHEDULED, new[] { userID }, PMTaskSchedule);
             }
             catch (Exception ex)
             {
