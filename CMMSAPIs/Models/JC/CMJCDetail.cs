@@ -132,7 +132,7 @@ public class CMJCPermitDetail
     public int Status_PTW { get; set; }
     public dynamic tbt_start { get; set; }
     public int TBT_Done_Check { get; set; }
-
+    public DateTime? endDate { get; set; }
 }
 public class CMJCIsolatedDetail
 {

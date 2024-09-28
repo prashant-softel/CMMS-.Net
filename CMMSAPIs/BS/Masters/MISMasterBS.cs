@@ -16,8 +16,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> AddSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> UpdateSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId);
-        Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone);
-        Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone);
+        Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id);
+        Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id);
         Task<MISTypeObservation> GetTypeOfObservation(int id);
         Task<List<MISTypeObservation>> GetTypeOfObservationList();
         Task<CMDefaultResponse> AddTypeOfObservation(MISTypeObservation request, int userId);
@@ -92,7 +92,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate);
-        Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId);
+        Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId, int check_point_type_id);
         Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id);
         Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList();
         Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
@@ -113,10 +113,10 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<MISTypeObservation>> GetDocument();
         Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID);
         Task<CMDefaultResponse> DeleteDocument(int id, int userID);
-        Task<CMObservationDetails> GetObservationById(int observation_id, int check_point_type_id);
+        Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id);
         Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment);
-        Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
+        Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID,int check_point_type_id);
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
 
         Task<GetChecklistInspection> GetChecklistInspection();
@@ -144,7 +144,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteKaizensData(int id);
         Task<List<KaizensData>> GetKaizensData();
         Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date);
-        Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request);
+        Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request, int check_point_type_id, int userId);
         //Evaution
         Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int userID);
         Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID);
@@ -258,13 +258,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone)
+        public async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.ApproveObservation(request, userId, facilitytimeZone);
+                    return await repos.ApproveObservation(request, userId, facilitytimeZone, check_point_type_id);
                 }
             }
             catch (Exception ex)
@@ -273,13 +273,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone)
+        public async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.RejectObservation(request, userId, facilitytimeZone);
+                    return await repos.RejectObservation(request, userId, facilitytimeZone,check_point_type_id);
                 }
             }
             catch (Exception ex)
@@ -1337,13 +1337,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId)
+        public async Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.CloseObservation(requset, userId);
+                    return await repos.CloseObservation(requset, userId, check_point_type_id);
 
                 }
             }
@@ -1678,13 +1678,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
+        public async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.UpdateObservation(request, UserID);
+                    return await repos.UpdateObservation(request, UserID, check_point_type_id);
 
                 }
             }
@@ -1723,13 +1723,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMObservationDetails> GetObservationById(int observation_id, int check_point_type_id)
+        public async Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetObservationById(observation_id, check_point_type_id);
+                    return await repos.GetObservationDetails(observation_id, check_point_type_id);
 
                 }
             }
@@ -2119,13 +2119,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request)
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request, int check_point_type_id, int userId)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.AssingtoObservation(request);
+                    return await repos.AssingtoObservation(request, check_point_type_id, userId);
                 }
             }
             catch (Exception ex)
