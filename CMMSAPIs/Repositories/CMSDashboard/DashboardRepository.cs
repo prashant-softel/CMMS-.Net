@@ -173,7 +173,7 @@ namespace CMMSAPIs.Repositories.Dashboard
                 e.PR_estimated AS EstimatedPOA             
             FROM 
                 cms_daily_actual_data d
-            LEFT JOIN cms_daily_estimation_data e ON d.plant_id = e.plant_id
+            LEFT JOIN cms_estimation_daily_data e ON d.plant_id = e.plant_id
             WHERE 
                 d.dateid ='{ConvertToDateId(PlantId, Date)}'
             ORDER BY d.update_date ASC;

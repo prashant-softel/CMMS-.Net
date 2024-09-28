@@ -21,9 +21,11 @@ using CMMSAPIs.BS.Permits;
 using CMMSAPIs.BS.PM;
 using CMMSAPIs.BS.Portfolio;
 using CMMSAPIs.BS.SM;
+using CMMSAPIs.BS.SMB;
 using CMMSAPIs.BS.Users;
 using CMMSAPIs.BS.Utils;
 using CMMSAPIs.BS.WC;
+using CMMSAPIs.BS.WMS;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Middlewares;
 using CMMSAPIs.Models.Mails;
@@ -125,6 +127,8 @@ namespace CMMSAPIs
             services.AddScoped<IDashboardBS, DashboardBS>();
             services.AddScoped<IInverterBS, InverterBS>();
             services.AddScoped<IMFMBS, MFMBS>();
+            services.AddScoped<IWMSBS, WMSBS>();
+            services.AddScoped<ISMBBS, SMBBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

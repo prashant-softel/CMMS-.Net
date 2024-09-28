@@ -60,6 +60,7 @@ namespace CMMSAPIs.Repositories.MFM
 
             string query = $@"
             SELECT 
+                    m.M_id as MFMId,
                     m.today_date AS DateTime,
                     m.AC_Power AS ActivePower, 
                     m.Reactive_Power AS ReactivePower, 
