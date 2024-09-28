@@ -103,8 +103,8 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
                     retValue = String.Format("{0} PMs{1} Updated by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
                     break;
-                case CMMS.CMMS_Status.PM_SUBMIT:     //Linked
-                    retValue = String.Format("{0} PMS{1} Submitted by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
+                case CMMS.CMMS_Status.PM_SCHEDULED:     //Linked
+                    retValue = String.Format("{0} PMS{1} Scheduled by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
                     break;
                 /*case CMMS.CMMS_Status.PM_SCHEDULED:     //Cancelled
                     retValue = String.Format("PMS<{0}> Scheduled By <{1}> ", m_pmscheduleObj.schedule_id, m_pmscheduleObj.createdbyName);
@@ -200,8 +200,8 @@ namespace CMMSAPIs.Models.Notifications
                 case CMMS.CMMS_Status.PM_UPDATED:     //Assigned
                     retValue = String.Format("{0} PM{1} Updated by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.updatedbyName);
                     break;
-                case CMMS.CMMS_Status.PM_SUBMIT:     //Linked
-                    retValue = String.Format("{0} PM{1} Submitted by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
+                case CMMS.CMMS_Status.PM_SCHEDULED:     //Linked
+                    retValue = String.Format("{0} PM{1} Scheduled by {2}", m_pmscheduleObj.facilityidbyName, m_pmscheduleObj.schedule_id, m_pmscheduleObj.submittedByName);
                     break;
 
                 case CMMS.CMMS_Status.PM_DELETED:     //Cancelled
@@ -436,9 +436,6 @@ namespace CMMSAPIs.Models.Notifications
                         break;
                     case CMMS.CMMS_Status.PM_START:
                         retValue += String.Format(templateEnd, "PM Schedule Started By ", m_pmscheduleObj.PM_Execution_Started_by_name);
-                        break;
-                    case CMMS.CMMS_Status.PM_SUBMIT:
-                        retValue += String.Format(templateEnd, "PM Schedule Submitted By ", m_pmscheduleObj.submittedByName);
                         break;
                     default:
                         break;

@@ -721,18 +721,91 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             List<CMMCExecution> _ViewExecution = await Context.GetData<CMMCExecution>(executionQuery).ConfigureAwait(false);
 
-            string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date, permit.startDate as startDate, CASE when permit.startDate <  now() then 1 else 0 END as tbt_start, " +
-                                  $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
-                                  $" permit.id as permit_id,permit.code as  permit_code, schedule.rejectedById, CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) as rejectedBy, schedule.rejectedAt,schedule.approvedById, CONCAT(approvedByUser.firstName, approvedByUser.lastName) as approvedBy, schedule.approvedAt, " +
-                                  $" Case when permit.TBT_Done_By is null or permit.TBT_Done_By = 0 then 0 else 1 end ptw_tbt_done,permit.status as ptw_status ," +
-                                  $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_CLEANED} THEN {measure} ELSE 0 END) as cleaned , SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_ABANDONED} THEN {measure} ELSE 0 END) as abandoned , " +
-                                  $" SUM(CASE WHEN item.status = {(int)CMMS.CMMS_Status.EQUIP_SCHEDULED} THEN {measure} ELSE 0 END) as pending ,schedule.remark_of_schedule as remark_of_schedule ,schedule.waterUsed, schedule.remark as remark ,{statusSc} as status_short from cleaning_execution_schedules as schedule " +
-                                  $" left join cleaning_execution_items as item on schedule.scheduleId = item.scheduleId " +
-                                  $" left join permits as permit on permit.id = schedule.ptw_id " +
-                                  $" LEFT JOIN users as rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
-                                  $" LEFT JOIN users as approvedByUser ON approvedByUser.id = schedule.approvedById " +
-                                  $" left join cleaning_plan as cp on schedule.planId= cp.planId " +
-                                  $" where schedule.executionId = {excutionId} group by schedule.scheduleId;";
+            string scheduleQuery =  $"SELECT schedule.scheduleId AS scheduleId, " +
+               $"schedule.status, " +
+               $"schedule.executionId, " +
+               $"schedule.actualDay AS cleaningDay, " +
+               $"schedule.startedAt AS start_date, " +
+               $"schedule.endedAt AS end_date, " +
+               $"permit.startDate AS startDate, " +
+               $"CASE WHEN permit.startDate < NOW() THEN 1 ELSE 0 END AS tbt_start, " +
+               $"cp.cleaningType, " +
+               $"CASE WHEN cp.cleaningType = 1 THEN 'Wet' " +
+               $"WHEN cp.cleaningType = 2 THEN 'Dry' " +
+               $"WHEN cp.cleaningType = 3 THEN 'Robotic' " +
+               $"ELSE 'Wet' END AS cleaningTypeName, " +
+               $"SUM(moduleQuantity) AS scheduled, " +
+               $"permit.id AS permit_id, " +
+               $"permit.code AS permit_code, " +
+               $"schedule.rejectedById, " +
+               $"CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) AS rejectedBy, " +
+               $"schedule.rejectedAt, " +
+               $"schedule.approvedById, " +
+               $"CONCAT(approvedByUser.firstName, approvedByUser.lastName) AS approvedBy, " +
+               $"schedule.approvedAt, " +
+               $"CASE WHEN permit.TBT_Done_By IS NULL OR permit.TBT_Done_By = 0 THEN 0 ELSE 1 END AS ptw_tbt_done, " +
+               $"permit.status AS ptw_status, " +
+               $"(SELECT COALESCE(SUM(item2.moduleQuantity), 0) " +
+               $"FROM cleaning_execution_items item2 " +
+               $"WHERE item2.executionDay = schedule.actualDay " +
+               $"AND item2.status = 408 " +
+               $"AND item2.executionId = 1) AS cleaned, " +
+               $"SUM(CASE WHEN item.status = 409 THEN moduleQuantity ELSE 0 END) AS abandoned, " +
+               $"SUM(CASE WHEN item.status = 407 THEN moduleQuantity ELSE 0 END) AS pending, " +
+               $"schedule.remark_of_schedule AS remark_of_schedule, " +
+               $"schedule.waterUsed, " +
+               $"schedule.remark, " +
+               $"CASE " +
+               $"WHEN schedule.status = 350 THEN 'Draft' " +
+               $"WHEN schedule.status = 351 THEN 'Waiting for Approval' " +
+               $"WHEN schedule.status = 353 THEN 'Approved' " +
+               $"WHEN schedule.status = 352 THEN 'Rejected' " +
+               $"WHEN schedule.status = 354 THEN 'Deleted' " +
+               $"WHEN schedule.status = 360 THEN 'Scheduled' " +
+               $"WHEN schedule.status = 361 THEN 'In Progress' " +
+               $"WHEN schedule.status = 363 THEN 'Completed' " +
+               $"WHEN schedule.status = 364 THEN 'Abandoned' " +
+               $"WHEN schedule.status = 365 THEN 'Approved' " +
+               $"WHEN schedule.status = 366 THEN 'Rejected' " +
+               $"WHEN schedule.status = 370 THEN 'PTW_Linked' " +
+               $"WHEN schedule.status = 381 THEN 'Approved' " +
+               $"WHEN schedule.status = 382 THEN 'Reject' " +
+               $"WHEN schedule.status = 383 THEN 'Approved' " +
+               $"WHEN schedule.status = 384 THEN 'Reject' " +
+               $"WHEN schedule.status = 385 THEN 'Reschedule' " +
+               $"WHEN schedule.status = 369 THEN 'Abandoned Approved' " +
+               $"WHEN schedule.status = 368 THEN 'Abandoned Rejected' " +
+               $"WHEN schedule.status = 701 THEN 'Draft' " +
+               $"WHEN schedule.status = 702 THEN 'Waiting for Approval' " +
+               $"WHEN schedule.status = 704 THEN 'Approved' " +
+               $"WHEN schedule.status = 703 THEN 'Rejected' " +
+               $"WHEN schedule.status = 705 THEN 'Deleted' " +
+               $"WHEN schedule.status = 721 THEN 'Scheduled' " +
+               $"WHEN schedule.status = 722 THEN 'Started' " +
+               $"WHEN schedule.status = 724 THEN 'Close - Waiting for Approval' " +
+               $"WHEN schedule.status = 725 THEN 'Abandon - Waiting for Approval' " +
+               $"WHEN schedule.status = 728 THEN 'Approved' " +
+               $"WHEN schedule.status = 729 THEN 'Rejected' " +
+               $"WHEN schedule.status = 730 THEN 'PTW Linked' " +
+               $"WHEN schedule.status = 731 THEN 'Schedule - Approved' " +
+               $"WHEN schedule.status = 732 THEN 'Schedule - Reject' " +
+               $"WHEN schedule.status = 733 THEN 'Updated' " +
+               $"WHEN schedule.status = 734 THEN 'Reassigned' " +
+               $"WHEN schedule.status = 408 THEN 'Cleaned' " +
+               $"WHEN schedule.status = 409 THEN 'Abandoned' " +
+               $"WHEN schedule.status = 407 THEN 'Scheduled' " +
+               $"WHEN schedule.status = 726 THEN 'Abandoned Rejected' " +
+               $"WHEN schedule.status = 727 THEN 'Abandoned Approved' " +
+               $"ELSE 'Invalid Status' END AS status_short " +
+               $"FROM cleaning_execution_schedules AS schedule " +
+               $"LEFT JOIN cleaning_execution_items AS item ON schedule.scheduleId = item.scheduleId " +
+               $"LEFT JOIN permits AS permit ON permit.id = schedule.ptw_id " +
+               $"LEFT JOIN users AS rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
+               $"LEFT JOIN users AS approvedByUser ON approvedByUser.id = schedule.approvedById " +
+               $"LEFT JOIN cleaning_plan AS cp ON schedule.planId = cp.planId " +
+               $"WHERE schedule.executionId = 1 " +
+               $"GROUP BY schedule.scheduleId;";
+
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
@@ -1096,11 +1169,11 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
                 if (moduleType == cleaningType.ModuleCleaning)
                 {
-                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_DRAFT, userId);
+                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.MC_PLAN_UPDATED, userId);
                 }
                 else if (moduleType == cleaningType.Vegetation)
                 {
-                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_DRAFT, userId);
+                    await _utilsRepo.AddHistoryLog(module, request.planId, 0, 0, "Plan Updated", CMMS.CMMS_Status.VEG_PLAN_UPDATED, userId);
                 }
                 try
                 {
@@ -1499,11 +1572,10 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             CMMS.CMMS_Modules module;
             int theStatus;
             int retVal = 0;
-
-
             module = CMMS.CMMS_Modules.MC_TASK;
             theStatus = (int)CMMS.CMMS_Status.MC_TASK_ASSIGNED;
-            //CMMS.CMMS_Status taskStatus = CMMS.CMMS_Status.MC_TASK_SCHEDULED;
+
+
             CMDefaultResponse response;
 
             // Determine status and module based on moduleType
@@ -1511,15 +1583,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             {
                 module = CMMS.CMMS_Modules.VEGETATION_TASK;
                 theStatus = (int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED;
-                //CMMS.CMMS_Status taskStatus = CMMS.CMMS_Status.VEG_TASK_SCHEDULED;
             }
-
+            int statusToBeUpdated = theStatus;
 
             string statusQry = $"SELECT status FROM cleaning_execution WHERE id = {task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-
-            
 
             //prndong. write common code
             if (moduleType == cleaningType.ModuleCleaning)
@@ -1528,35 +1597,26 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 {
                     return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned");
                 }
-/*                string getStatusQuery = $"SELECT status FROM cleaning_execution WHERE id = {task_id}";
-                retVal = await Context.ExecuteNonQry<int>(getStatusQuery).ConfigureAwait(false);
-                int intretVal = Int32.Parse(retVal.ToString());*/
-
-                string myQuery = "UPDATE cleaning_execution SET " +
-                               $"assignedTo = {assign_to}, " +
-                               $"status = {(int)CMMS.CMMS_Status.MC_TASK_ASSIGNED}, " +
-                               $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
-                               $"updatedById = {userID}, " +
-                               $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
-                               $"WHERE id = {task_id} ;";
-                retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+                statusToBeUpdated = (status == CMMS_Status.MC_TASK_SCHEDULED ? (int)CMMS_Status.MC_TASK_ASSIGNED : (int)status);
             }
-
             else if (moduleType == cleaningType.Vegetation)
             {
                 if (status != CMMS.CMMS_Status.VEG_TASK_RESCHEDULED && status != CMMS.CMMS_Status.VEG_PLAN_APPROVED && status != CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW)
                 {
                     return new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "Only Scheduled Tasks can be assigned");
                 }
-                string myQuery = "UPDATE cleaning_execution SET " +
-                              $"assignedTo = {assign_to}, " +
-                             $"status = {(int)CMMS.CMMS_Status.VEG_TASK_ASSIGNED}, " +
-                              $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
-                              $"updatedById = {userID},  " +
-                              $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
-                              $"WHERE id = {task_id} ;";
-                retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+                statusToBeUpdated = (status == CMMS_Status.VEG_TASK_SCHEDULED ? (int)CMMS_Status.VEG_TASK_ASSIGNED : (int)status);
             }
+
+            string myQuery = "UPDATE cleaning_execution SET " +
+                            $"assignedTo = {assign_to}, " +
+                            $"status = {statusToBeUpdated}, " +
+                            $"updatedAt = '{UtilsRepository.GetUTCTime()}', " +
+                            $"updatedById = {userID}, " +
+                            $"status_updated_at = '{UtilsRepository.GetUTCTime()}' " +
+                            $"WHERE id = {task_id} ;";
+            retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
+            
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
