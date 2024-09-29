@@ -1,3 +1,4 @@
+using CMMSAPIs.Models.Masters;
 using System;
 using System.Collections.Generic;
 
@@ -25,7 +26,8 @@ namespace CMMSAPIs.Models.Audit
 
     public class CMCreateAuditPlan : CMAuditPlan
     {
-
+        public int task_id { get; set; }
+        public List<CMEvaluationAudit> map_checklist { get; set; }
     }
 
     public class CMAuditPlanList
@@ -53,5 +55,6 @@ namespace CMMSAPIs.Models.Audit
         public string assignedTo { get; set; }
         public string Employees { get; set; }
         public string is_PTW { get; set; }
+        public List<CMEvaluationAuditList> map_checklist { get; set; }
     }
 }

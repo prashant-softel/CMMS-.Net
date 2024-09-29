@@ -289,7 +289,8 @@ namespace CMMSAPIs.Helper
             EXECUTE_SCHEDULE,
             STATUTORY,
             OBSERVATION,
-            OBSERVATION_ASSIGNED
+            OBSERVATION_ASSIGNED,
+            EVAL_PLAN
         }
 
         public enum INCIDENT_RISK_LEVEL
@@ -685,7 +686,8 @@ namespace CMMSAPIs.Helper
             PM = 1,
             HOTO,
             Audit,
-            MIS
+            MIS,
+            Evaluation
         }
         public enum SM_OrderByType
         {
