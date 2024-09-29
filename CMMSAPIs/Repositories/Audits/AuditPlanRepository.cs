@@ -248,7 +248,7 @@ namespace CMMSAPIs.Repositories.Audits
                 {
                     response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " deleted.");
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, 0, 0, " Evaluation plan deleted ", CMMS.CMMS_Status.EVAL_PLAN_DELETED);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_PLAN_DELETED, new[] { userId }, _AuditList);
+                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_PLAN_DELETED, new[] { userId }, _AuditList);
                 }
                 else
                 {
@@ -315,16 +315,22 @@ namespace CMMSAPIs.Repositories.Audits
                     retValue = String.Format("EVAL Created");
                     break;
                 case CMMS.CMMS_Status.EVAL_PLAN_UPDATED:
-                    retValue = String.Format("EVAL{0} Updated");
+                    retValue = String.Format("EVAL Updated");
                     break;
                 case CMMS.CMMS_Status.EVAL_PLAN_APPROVED:
-                    retValue = String.Format("EVAL{0} Approved");
+                    retValue = String.Format("EVAL Approved");
                     break;
                 case CMMS.CMMS_Status.EVAL_PLAN_REJECTED:
-                    retValue = String.Format("EVAL{0} Rejected");
+                    retValue = String.Format("EVAL Rejected");
                     break;
                 case CMMS.CMMS_Status.EVAL_PLAN_DELETED:
-                    retValue = String.Format("EVAL{0} Deleted");
+                    retValue = String.Format("EVAL Deleted");
+                    break;
+                case CMMS.CMMS_Status.EVAL_APPROVED:
+                    retValue = String.Format("EVAL Approved");
+                    break;
+                case CMMS.CMMS_Status.EVAL_REJECTED:
+                    retValue = String.Format("EVAL Rejected");
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -365,7 +371,7 @@ namespace CMMSAPIs.Repositories.Audits
                     response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Evaluation plan with plan number : " + auditPlanList[0].plan_number + " approved successfully.");
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, CMMS.CMMS_Modules.EVAL_PLAN, 0, request.comment, CMMS.CMMS_Status.EVAL_APPROVED);
                     CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_APPROVED, new[] { userId }, _AuditList);
+                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_APPROVED, new[] { userId }, _AuditList);
 
                 }
                 else
@@ -437,7 +443,7 @@ namespace CMMSAPIs.Repositories.Audits
                     response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Evalutaion plan with plan number : " + auditPlanList[0].plan_number + " rejected successfully.");
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.EVAL_REJECTED);
                     CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_REJECTED, new[] { userId }, _AuditList);
+                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_REJECTED, new[] { userId }, _AuditList);
                 }
                 else
                 {
