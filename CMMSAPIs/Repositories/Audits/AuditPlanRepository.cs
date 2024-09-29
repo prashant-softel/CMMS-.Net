@@ -2068,7 +2068,7 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> CreateSubTaskForEvaluation(int task_id, List<CMCreateAuditPlan> auditPlanList, int userID)
+        internal async Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id, List<CMCreateAuditPlan> auditPlanList, int userID)
         {
             CMDefaultResponse response = new CMDefaultResponse();
             string getParamsQry = "SELECT checklist_id, pm_schedule.task_id , pm_schedule.id as schedule_id, plan.frequency_id as frequency_id, plan.facility_id as facility_id, assets.categoryId as category_id, Asset_id as asset_id, PM_Schedule_date as schedule_date " +
