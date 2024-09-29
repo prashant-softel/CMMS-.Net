@@ -931,13 +931,15 @@ namespace CMMSAPIs.Models.Masters
         public int assigned_to { get; set; }
         public string remarks { get; set; }
         //List of Auditids
-        public List<CMEvaluationAudit> audit_list { get; set; }
+        public List<CMEvaluationAudit> map_checklist { get; set; }
+  
     }
 
     public class CMEvaluationAudit
     {
         public int id { get; set; }
         public int evalution_id { get; set; }
+        public int checklist_id { get; set; }
         public int audit_id { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
@@ -946,6 +948,20 @@ namespace CMMSAPIs.Models.Masters
         public int updated_by { get; set; }
         public DateTime updated_at { get; set; }
     }
+    public class CMEvaluationAuditList
+    {
+        public int id { get; set; }
+        public int evalution_plan_id { get; set; }
+        public int checklist_id { get; set; }
+        public decimal weightage { get; set; }
+        public string comments { get; set; }
+
+        public string created_by_name { get; set; }
+        public DateTime created_at { get; set; }
+        public string updated_by_name { get; set; }
+        public DateTime updated_at { get; set; }
+    }
+
 
     public class CMEvaluation
     {

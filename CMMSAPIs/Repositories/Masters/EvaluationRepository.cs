@@ -1,5 +1,7 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
+using CMMSAPIs.Models.Notifications;
+using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
@@ -79,21 +81,20 @@ namespace CMMSAPIs.Repositories.Masters
             DataTable dt3 = await Context.FetchData(addPlanQry).ConfigureAwait(false);
             int evaluationPlanId = Convert.ToInt32(dt3.Rows[0][0]);
 
-            string auditListQry = "INSERT INTO evalution_auditmap(evalution_id, audit_id, weightage, created_by, created_at, comments) VALUES ";
-
-            foreach (CMEvaluationAudit audit in request.audit_list)
+            string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id, checklist_id, weightage,comments,created_by,created_at) VALUES ";
+            foreach (var map in request.map_checklist)
             {
-                auditListQry += $"({evaluationPlanId}, {audit.audit_id}, {audit.weightage}, {user_id}, '{UtilsRepository.GetUTCTime()}', '{audit.comment?.Replace("'", "''") ?? ""}'), ";
+                mapChecklistQry += $"({evaluationPlanId}, {map.checklist_id}, {map.weightage},'{map.comment}',{user_id},'{UtilsRepository.GetUTCTime()}'), ";
             }
 
             // Remove the trailing comma and space, and append the semicolon
-            if (auditListQry.Length > 0)
+            if (mapChecklistQry.Length > 0)
             {
-                auditListQry = auditListQry.TrimEnd(',', ' ') + ";";
+                mapChecklistQry = mapChecklistQry.TrimEnd(',', ' ') + ";";
             }
 
             // Execute the query
-            await Context.ExecuteNonQry<int>(auditListQry).ConfigureAwait(false);
+            await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
 
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, evaluationPlanId, 0, 0, "Eval Plan added", CMMS.CMMS_Status.EVAL_PLAN_CREATED, user_id);
@@ -209,9 +210,9 @@ namespace CMMSAPIs.Repositories.Masters
 
 
                 string auditListQry = $"UPDATE evalution_auditmap SET ";
-                if (request.audit_list != null && request.audit_list.Count > 0)
+                if (request.map_checklist != null && request.map_checklist.Count > 0)
                 {
-                    foreach (var audit in request.audit_list)
+                    foreach (var audit in request.map_checklist)
                     {
                         // Construct the UPDATE query for each audit record
                         if (audit.weightage > 0)
@@ -291,7 +292,6 @@ namespace CMMSAPIs.Repositories.Masters
             CMDefaultResponse response = new CMDefaultResponse(ID, CMMS.RETRUNSTATUS.SUCCESS, $"Evaluation Plan Deleted");
             return response;
         }
-
 
     }
 }
