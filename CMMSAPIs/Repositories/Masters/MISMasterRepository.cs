@@ -2842,7 +2842,7 @@ namespace CMMSAPIs.Repositories.Masters
                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CLOSED, userId); ;
 
 
-                    
+
                 }
                 else if (check_point_type_id == 2)
                 {
@@ -2859,13 +2859,13 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     throw new ArgumentException("Invalid Observation Type");
                 }
-            
+
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation {request.id} closed");
         }
-        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request,int check_point_type_id, int userId)
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request, int check_point_type_id, int userId)
         {
             string updateQry = "";
-            
+
             if (check_point_type_id == 2)
             {
                 updateQry = "UPDATE pm_execution SET ";
@@ -2970,7 +2970,7 @@ namespace CMMSAPIs.Repositories.Masters
                 string approveQuery = $"Update observations set status_code= {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
                 await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
             }
-            else if(check_point_type_id == 2)
+            else if (check_point_type_id == 2)
             {
                 string approveQuery = $"Update pm_execution set Observation_Status = {(int)status} ,rejectedById={userID}, rejectRemark='{request.comment}', rejectedAt='{UtilsRepository.GetUTCTime()}', PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}' where id = {request.id} ";
                 await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
@@ -2979,8 +2979,8 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid Observation Type");
             }
-                //ADD REMARK TO HISTORY
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Rejected", CMMS.CMMS_Status.OBSERVATION_REJECTED, userID);
+            //ADD REMARK TO HISTORY
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, "Observation Rejected", CMMS.CMMS_Status.OBSERVATION_REJECTED, userID);
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Observation Rejected");
             return response;

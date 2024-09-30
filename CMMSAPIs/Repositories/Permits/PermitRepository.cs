@@ -1290,7 +1290,7 @@ namespace CMMSAPIs.Repositories.Permits
                 string fileIds = "";
                 fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}, extendFile = '{fileIds}', extendRequestById = '{userID}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
+                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}', extendFile = '{fileIds}', extendRequestById = '{userID}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
 
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
@@ -1339,7 +1339,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitExtendApprove(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE}, extendRequestApprovedById = '{userID}', status_updated_at = '{UtilsRepository.GetUTCTime()}, extendApproveTime = '{UtilsRepository.GetUTCTime()}', endDate = ADDDATE(endDate, INTERVAL extendByMinutes MINUTE) where id = {request.id}";
+            string updateQry = $"update permits set extendStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE}, extendRequestApprovedById = {userID}, status_updated_at = '{UtilsRepository.GetUTCTime()}', endDate = ADDDATE(endDate, INTERVAL extendByMinutes MINUTE), extendApproveTime = '{UtilsRepository.GetUTCTime()}' where id = {request.id}";
 
             List<CMDefaultResp> _Employee = await Context.GetData<CMDefaultResp>(updateQry).ConfigureAwait(false);
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -1362,7 +1362,7 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitExtendReject(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED}, extendRequestRejectedById = '{userID}', status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{request.comment}' where id = {request.id}";
+            string updateQry = $"update permits set extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED}, extendRequestRejectedById = {userID}, status_updated_at = '{UtilsRepository.GetUTCTime()}', extendRejectReason = '{request.comment}' where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

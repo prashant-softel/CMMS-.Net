@@ -1,16 +1,14 @@
 ﻿using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Jobs;
-using CMMSAPIs.Repositories.Jobs;
+using CMMSAPIs.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
-using CMMSAPIs.Models.Utils;
 
 namespace CMMSAPIs.Controllers.Jobs
 {
@@ -43,7 +41,7 @@ namespace CMMSAPIs.Controllers.Jobs
                     .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
 
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobBS.GetJobList(facility_id,startDate, endDate, jobType, selfView, userID, status, facilitytimeZone);
+                var data = await _JobBS.GetJobList(facility_id, startDate, endDate, jobType, selfView, userID, status, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -55,7 +53,7 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobListByPermitId")]
         [HttpGet]
-        public async Task<IActionResult> GetJobListByPermitId(int permitId,int facility_id)
+        public async Task<IActionResult> GetJobListByPermitId(int permitId, int facility_id)
         {
             try
             {
@@ -77,14 +75,14 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobDetails")]
         [HttpGet]
-        public async Task<IActionResult> GetJobDetails(int job_id,int facility_id)
+        public async Task<IActionResult> GetJobDetails(int job_id, int facility_id)
         {
 
             try
             {
-                
+
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-                var data = await _JobBS.GetJobDetails(job_id,facilitytimeZone);
+                var data = await _JobBS.GetJobDetails(job_id, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -109,7 +107,7 @@ namespace CMMSAPIs.Controllers.Jobs
                 throw;
             }
         }
-        
+
         //[Authorize]
         [Route("UpdateJob")]
         [HttpPatch]
@@ -134,7 +132,7 @@ namespace CMMSAPIs.Controllers.Jobs
         [HttpPut]
         public async Task<IActionResult> ReAssignJob(int job_id, int assignedTo)
         {
-        
+
             try
             {
                 int updatedBy = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
@@ -205,148 +203,148 @@ namespace CMMSAPIs.Controllers.Jobs
         /*
          * WorkType Crud Operation
         */
-       /* [Route("GetJobWorkTypeList")]
-        [HttpGet]
-        public async Task<IActionResult> GetJobWorkTypeList()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.GetJobWorkTypeList();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+        /* [Route("GetJobWorkTypeList")]
+         [HttpGet]
+         public async Task<IActionResult> GetJobWorkTypeList()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.GetJobWorkTypeList();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("CreateJobWorkType")]
-        [HttpPost]
-        public async Task<IActionResult> CreateJobWorkType(CMJobWorkType request)
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.CreateJobWorkType(request);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("CreateJobWorkType")]
+         [HttpPost]
+         public async Task<IActionResult> CreateJobWorkType(CMJobWorkType request)
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.CreateJobWorkType(request);
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("UpdateWorkType")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateWorkType(CMJobWorkType request)
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.UpdateJobWorkType(request);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("UpdateWorkType")]
+         [HttpPut]
+         public async Task<IActionResult> UpdateWorkType(CMJobWorkType request)
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.UpdateJobWorkType(request);
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("DeleteWorkType")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteWorkType(int id)
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.DeleteJobWorkType(id);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("DeleteWorkType")]
+         [HttpDelete]
+         public async Task<IActionResult> DeleteWorkType(int id)
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.DeleteJobWorkType(id);
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        *//*
-         * Associated Tool to Work Type Crud Operation
-        *//*
+         *//*
+          * Associated Tool to Work Type Crud Operation
+         *//*
 
-        [Route("GetJobWorkTypeToolList")]
-        [HttpGet]
-        public async Task<IActionResult> GetJobWorkTypeToolList()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.GetJobWorkTypeToolList();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("GetJobWorkTypeToolList")]
+         [HttpGet]
+         public async Task<IActionResult> GetJobWorkTypeToolList()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.GetJobWorkTypeToolList();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        *//*
-         * Master Tool List of Required by Work Type
-        *//*
+         *//*
+          * Master Tool List of Required by Work Type
+         *//*
 
-        [Route("GetMasterToolList")]
-        [HttpDelete]
-        public async Task<IActionResult> GetMasterToolList()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.GetMasterToolList();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("GetMasterToolList")]
+         [HttpDelete]
+         public async Task<IActionResult> GetMasterToolList()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.GetMasterToolList();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("CreateJobWorkTypeTool")]
-        [HttpPost]
-        public async Task<IActionResult> CreateJobWorkTypeTool()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.CreateJobWorkTypeTool();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("CreateJobWorkTypeTool")]
+         [HttpPost]
+         public async Task<IActionResult> CreateJobWorkTypeTool()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.CreateJobWorkTypeTool();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("UpdateJobWorkTypeTool")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateJobWorkTypeTool()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.UpdateJobWorkTypeTool();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+         [Route("UpdateJobWorkTypeTool")]
+         [HttpPut]
+         public async Task<IActionResult> UpdateJobWorkTypeTool()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.UpdateJobWorkTypeTool();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
 
-        [Route("DeleteJobWorkTypeTool")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteJobWorkTypeTool()
-        {
-            try
-            {
-                var data = await _JobWorkTypeBS.DeleteJobWorkTypeTool();
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-*/
+         [Route("DeleteJobWorkTypeTool")]
+         [HttpDelete]
+         public async Task<IActionResult> DeleteJobWorkTypeTool()
+         {
+             try
+             {
+                 var data = await _JobWorkTypeBS.DeleteJobWorkTypeTool();
+                 return Ok(data);
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }
+ */
     }
 }

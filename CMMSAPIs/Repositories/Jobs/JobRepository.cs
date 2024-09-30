@@ -121,9 +121,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
                                         "users as user ON user.id = job.assignedId ";
-            if (!string.IsNullOrEmpty(facility_id))
+            if (facility_id != null)
             {
-                myQuery += $" and job.facilityId IN ({facility_id})";
+                myQuery += $" Where job.facilityId IN ({facility_id})";
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;

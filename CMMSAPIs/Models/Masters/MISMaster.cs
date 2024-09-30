@@ -933,7 +933,7 @@ namespace CMMSAPIs.Models.Masters
         public string remarks { get; set; }
         //List of Auditids
         public List<CMEvaluationAudit> map_checklist { get; set; }
-  
+
     }
 
     public class CMEvaluationAudit
@@ -1040,7 +1040,7 @@ namespace CMMSAPIs.Models.Masters
             public DateTime updated_at { get; set; }
         }
     */
-public class ManPowerData
+    public class ManPowerData
     {
         public dynamic AvgHFEEmployee { get; set; }
         public dynamic ManDaysHFEEmployee { get; set; }
