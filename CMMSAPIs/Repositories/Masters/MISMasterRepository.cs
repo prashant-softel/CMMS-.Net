@@ -1922,7 +1922,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
-                                     $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_UPDATED}," +
+                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
@@ -1941,7 +1941,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     sb.Append(": " + request.comment);
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
             }
             catch (Exception ex)
@@ -2004,27 +2004,9 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
 
 
-            /*string pmexecutionquery = "select pm_execution.id,pm_task.facility_id,facilities.name facility_name, " +
-            " Observation_Status as status_code,business.name as contractor_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type, " +
-            " preventive_action,business.contactPerson as responsible_person, business.contactNumber as contact_number,ckp.cost_type, " +
-            " Observation_target_date as date_of_observation,ckp.type_of_observation,business.location as location_of_observation,business.id as source_of_observation, " +
-            " monthname(pm_execution.Observation_target_date) as month_of_observation,pm_execution.PM_Schedule_Observation_add_date as closer_date,pm_execution.PM_Schedule_Observation_update_date as closed_date, " +
-            " concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken,pm_execution.preventive_action as corrective_action,DATEDIFF(pm_execution.Observation_target_date,pm_execution.PM_Schedule_Observation_add_date) AS remaining_days, " +
-            " pm_execution.Observation_target_date as target_date,pm_execution.Check_Point_Requirement as observation_description,PM_Schedule_Observation_add_date as created_at,concat(createdBy.firstName, ' ', createdBy.lastName) created_by, " +
-            " pm_task.updated_at, concat(updatedBy.firstName, ' ', updatedBy.lastName) updated_by,mis_m_typeofobservation.name as type_of_observation_name,ckp.check_point as source_of_observation_name, " +
-            " CASE WHEN pm_execution.PM_Schedule_Observation_add_date IS NOT NULL AND pm_execution.PM_Schedule_Observation_add_date <= pm_execution.PM_Schedule_Observation_add_date THEN 'In Time' " +
-            " WHEN pm_execution.PM_Schedule_Observation_add_date IS NOT NULL AND pm_execution.PM_Schedule_Observation_add_date > pm_execution.Observation_target_date THEN 'Out of Target Date' " +
-            " ELSE 'Open' END AS observation_status from pm_execution left join pm_task  ON pm_task.id = pm_execution.task_id " +
-            " left join facilities ON pm_task.facility_id = facilities.id left join checkpoint as ckp ON ckp.id = pm_execution.Check_Point_id " +
-            " left join ir_risktype ON ckp.risk_type = ir_risktype.id left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
-            " left join users createdBy on createdBy.id = pm_task.createdById left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
-            " left join business on business.id = createdBy.companyId and business.type = 2 " +
-            $" where  pm_task.facility_id = {facility_Id} and  pm_execution.Check_Point_Type_id=4   or date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ";
-            List<CMObservation> Result1 = await Context.GetData<CMObservation>(pmexecutionquery).ConfigureAwait(false);*/
-
             string pmexecutionquery = "select pm_execution.id,pm_task.facility_id,facilities.name facility_name,  Observation_Status as status_code,    " +
                       "business.name as contractor_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type,  preventive_action, " +
-                      "business.contactPerson as responsible_person, business.contactNumber as contact_number,   " +
+                      "concat(responsible.firstName, ' ', responsible.lastName) as  assigned_to_name,Observation_assign_to as assigned_to_id, business.contactNumber as contact_number,   " +
                       "ckp.cost_type,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
                       "Observation_target_date as date_of_observation,ckp.type_of_observation,business.location as location_of_observation, " +
                       "ckp.check_list_id as source_of_observation,  monthname(pm_execution.Observation_target_date) as month_of_observation, " +
@@ -2041,6 +2023,7 @@ namespace CMMSAPIs.Repositories.Masters
                       " left join checklist_number as cls ON ckp.check_list_id = cls.id " +
                       "left join ir_risktype ON ckp.risk_type = ir_risktype.id " +
                       "left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
+                      " left join users responsible  on responsible.id = pm_execution.Observation_assign_to" +
                       " left join users createdBy on createdBy.id = ckp.created_by left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
                       " left join business on business.id = createdBy.companyId and business.type = 2  " +
                       $" where  pm_task.facility_id ={facility_Id} and  ckp.type_id=4  and date_format(PM_Schedule_Observation_add_date, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
@@ -2055,7 +2038,7 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (var task in Result1)
             {
                 string _shortStatus = Statusof(task.status_code);
-                task.status_pm = _shortStatus;
+                task.short_status = _shortStatus;
                 task.check_point_type_id = 2;
             }
             foreach (var task1 in Result1)
