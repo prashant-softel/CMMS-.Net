@@ -1428,6 +1428,11 @@ namespace CMMSAPIs.Repositories.PM
                         responseList.Add(response);
                         changeFlag++;
                     }
+                    if(schedule_detail.job_create == 0)
+                    {
+                        string updateQry = $"UPDATE pm_execution SET job_created = 0, linked_job_id = 0 WHERE id = {schedule_detail.execution_id};";
+                        await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+                    }
                     if (schedule_detail.is_job_deleted > 0)
                     {
                         int delete_id = schedule_detail.is_job_deleted;
