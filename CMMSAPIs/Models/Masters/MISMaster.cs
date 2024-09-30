@@ -656,6 +656,7 @@ namespace CMMSAPIs.Models.Masters
         public string action_taken { get; set; }
         public dynamic month_of_observation { get; set; }
         public int status_code { get; set; }
+        public string status_pm { get; set; }
         public int createdid { get; set; }
         public int updateid { get; set; }
         public string short_status { get; set; }

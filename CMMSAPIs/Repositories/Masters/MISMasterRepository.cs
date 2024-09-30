@@ -2052,6 +2052,12 @@ namespace CMMSAPIs.Repositories.Masters
                 task.short_status = _shortStatus;
                 task.check_point_type_id = 1;
             }
+            foreach (var task in Result1)
+            {
+                string _shortStatus = Statusof(task.status_code);
+                task.status_pm = _shortStatus;
+                task.check_point_type_id = 2;
+            }
             foreach (var task1 in Result1)
             {
                 task1.check_point_type_id = 2;
