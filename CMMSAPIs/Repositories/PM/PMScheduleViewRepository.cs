@@ -1428,8 +1428,15 @@ namespace CMMSAPIs.Repositories.PM
                         responseList.Add(response);
                         changeFlag++;
                     }
+                    if (schedule_detail.is_job_deleted > 0)
+                    {
+                        int delete_id = schedule_detail.is_job_deleted;
+                        string deletejob = $"DELETE FROM jobs WHERE id = {delete_id};";
+                        await Context.ExecuteNonQry<int>(deletejob).ConfigureAwait(false);
+                    }
                     if (schedule_detail.job_create == 1 && execution_details[0].job_create == 0)
                     {
+
 
                         string facilityQry = $"SELECT pm_task.facility_id as block, CASE WHEN facilities.parentId=0 THEN facilities.id ELSE facilities.parentId END AS parent " +
                                             $"FROM pm_schedule Left join pm_task on pm_task.id = pm_schedule.task_id LEFT JOIN facilities ON pm_task.facility_id=facilities.id " +

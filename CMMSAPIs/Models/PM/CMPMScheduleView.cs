@@ -272,6 +272,7 @@ namespace CMMSAPIs.Models.PM
         public int is_ok { get; set; }
         public int boolean { get; set; }
         public string text { get; set; }
+        public int is_job_deleted { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
     public class PMFileUpload
