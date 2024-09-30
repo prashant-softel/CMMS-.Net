@@ -616,7 +616,7 @@ namespace CMMSAPIs.Helper
             OBSERVATION_DELETED,
             OBSERVATION_REJECTED,
             OBSERVATION_APPROVED,
-            //OBSERVATION_UPDATED,        //only for notification purpose
+            OBSERVATION_UPDATED,        //only for notification purpose
 
 
             VEG_PLAN_DRAFT = 701,

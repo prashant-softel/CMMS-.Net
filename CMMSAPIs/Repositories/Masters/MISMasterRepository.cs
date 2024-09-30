@@ -1887,7 +1887,8 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID, int check_point_type_id)
+
+        internal async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
         {
             CMDefaultResponse response = null;
             List<string> errors = new List<string>();
@@ -1906,36 +1907,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             try
             {
-
-                if (check_point_type_id == 2)
-                {
-
-
-                    return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "cant update for check_point_type_id 2.");
-                    /*string updateQuery = $"UPDATE pm_execution SET " +
-                                     //$"contractor_name = '{request.contractor_name}', " +
-                                     //$"risk_type_id = {request.risk_type_id}, " +
-                                     $"preventive_action = '{request.preventive_action}', " +
-                                     //$"responsible_person = {request.assigned_to_id}, " +
-                                     //$"contact_number = '{request.contact_number}', " +
-                                     //$"cost_type = {request.cost_type}, " +
-                                     $"PM_Schedule_Observation_add_date = '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', " +
-                                     $"Check_Point_Type_id = '{request.check_point_type_id}', " +
-                                     $"location_of_observation = '{request.location_of_observation}', " +
-                                     $"action_taken = '{request.action_taken}', " +
-                                     $"source_of_observation = '{request.source_of_observation}', " +
-                                     $"comment = '{request.comment}', " +
-                                     $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
-                                     $"observation_description = '{request.observation_description}', " +
-                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
-                                     $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
-                                     $"updated_by = {UserID} " +
-                                     $"WHERE id = {request.id};";
-                    await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);*/
-                }
-                else if (check_point_type_id == 1)
-                {
-                    string updateQuery = $"UPDATE observations SET " +
+                string updateQuery = $"UPDATE observations SET " +
                                      $"contractor_name = '{request.contractor_name}', " +
                                      $"risk_type_id = {request.risk_type_id}, " +
                                      $"preventive_action = '{request.preventive_action}', " +
@@ -1950,16 +1922,12 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
-                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
+                                     $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_UPDATED}," +
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
-                    await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid Observation Type");
-                }
+                await Context.ExecuteNonQry<int>(updateQuery).ConfigureAwait(false);
+
                 if (request.uploadfileIds.Count > 0)
                 {
                     foreach (int data in request.uploadfileIds)
@@ -1973,7 +1941,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     sb.Append(": " + request.comment);
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.UPDATED, UserID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
             }
             catch (Exception ex)
@@ -2099,7 +2067,7 @@ namespace CMMSAPIs.Repositories.Masters
             if (check_point_type_id == 1)
             {
                 string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                    " contractor_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
+                    " business.name as operator_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, business.contactNumber as contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
                     " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
                     " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, updated_by as updateid, created_by as createdid ," +
                     " observations.preventive_action as corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
@@ -2119,6 +2087,7 @@ namespace CMMSAPIs.Repositories.Masters
                     " left join users responsible on responsible.id = observations.responsible_person" +
                     " left join users updatedBy on updatedBy.id = observations.updated_by" +
                     " left join users responsible1 on responsible1.id = observations.assign_to" +
+                    " left join business on business.id = facilities.operatorId " +
                     " where is_active = 1 and observations.id = " + observation_id + ";";
 
                 Result = await Context.GetData<CMObservationDetails>(myQuery).ConfigureAwait(false);
@@ -2872,6 +2841,8 @@ namespace CMMSAPIs.Repositories.Masters
                 updateQry += $"Observation_assign_to = {request.assigned_to_id}, ";
                 updateQry += $"Observation_Status = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
                 updateQry += $"PM_Schedule_Observation_update_date = '{UtilsRepository.GetUTCTime()}', ";
+                updateQry += $"Observation_target_date = {(request.target_date.HasValue ? $"'{request.target_date.Value.ToString("yyyy-MM-dd")}'" : "NULL")}, ";
+                updateQry += $"preventive_action = '{request.preventive_action}', ";
                 updateQry += $"PM_Schedule_Observation_update_by = '{userId}' ";
                 updateQry += $"WHERE id = {request.id};";
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -2881,7 +2852,20 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 updateQry = "UPDATE observations SET ";
                 updateQry += $"assign_to = {request.assigned_to_id}, ";
+                updateQry += $"target_date = {(request.target_date.HasValue ? $"'{request.target_date.Value.ToString("yyyy-MM-dd")}'" : "NULL")}, ";
                 updateQry += $"status_code = {(int)CMMS.CMMS_Status.OBSERVATION_ASSIGNED}, ";
+                updateQry += $"contractor_name = '{request.contractor_name}', ";
+                updateQry += $"risk_type_id = {request.risk_type_id}, ";
+                updateQry += $"preventive_action = '{request.preventive_action}', ";
+                updateQry += $"responsible_person = {request.assigned_to_id}, ";
+                updateQry += $"contact_number = '{request.contact_number}', ";
+                updateQry += $"cost_type = {request.cost_type}, ";
+                updateQry += $"date_of_observation = {(request.date_of_observation.HasValue ? $"'{request.date_of_observation.Value.ToString("yyyy-MM-dd")}'" : "NULL")}, ";
+                updateQry += $"type_of_observation = {request.type_of_observation}, ";  // Removed extra quotes for int value
+                updateQry += $"location_of_observation = '{request.location_of_observation}', ";
+                updateQry += $"action_taken = '{request.action_taken}', ";
+                updateQry += $"source_of_observation = {request.source_of_observation}, ";
+                updateQry += $"observation_description = '{request.observation_description}', ";
                 updateQry += $"updated_at = '{UtilsRepository.GetUTCTime()}', ";
                 updateQry += $"updated_by = '{userId}' ";
                 updateQry += $"WHERE id = {request.id};";
@@ -2894,7 +2878,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
 
-            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assing Observation ");
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assigned Observation ");
         }
         //EvaluateException
         internal async Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int user_id)

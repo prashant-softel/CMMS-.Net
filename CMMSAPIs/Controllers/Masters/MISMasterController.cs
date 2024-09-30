@@ -1646,12 +1646,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("UpdateObservation")]
         [HttpPost]
-        public async Task<IActionResult> UpdateObservation(CMObservation request, int check_point_type_id)
+        public async Task<IActionResult> UpdateObservation(CMObservation request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.UpdateObservation(request, userID, check_point_type_id);
+                var data = await _IMISMasterBS.UpdateObservation(request, userID);
                 return Ok(data);
             }
             catch (Exception ex)
