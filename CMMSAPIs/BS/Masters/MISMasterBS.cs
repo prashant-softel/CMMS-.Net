@@ -116,7 +116,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id);
         Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment);
-        Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID,int check_point_type_id);
+        Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
 
         Task<GetChecklistInspection> GetChecklistInspection();
@@ -1678,13 +1678,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID, int check_point_type_id)
+        public async Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.UpdateObservation(request, UserID, check_point_type_id);
+                    return await repos.UpdateObservation(request, UserID);
 
                 }
             }

@@ -656,6 +656,7 @@ namespace CMMSAPIs.Models.Masters
         public string action_taken { get; set; }
         public dynamic month_of_observation { get; set; }
         public int status_code { get; set; }
+        public string status_pm { get; set; }
         public int createdid { get; set; }
         public int updateid { get; set; }
         public string short_status { get; set; }
@@ -897,7 +898,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int user_id { get; set; }
         public int check_point_type_id { get; set; }
-        public DateTime target_date { get; set; }
+        public DateTime? target_date { get; set; }
         public string comment { get; set; }
         public int assigned_to_id { get; set; }
         public int cost_type { get; set; }
@@ -907,12 +908,12 @@ namespace CMMSAPIs.Models.Masters
         public int risk_type_id { get; set; }  // risk_type_id
         public int responsible_person { get; set; }  // responsible_person
         public string contact_number { get; set; }  // contact_number   
-        public DateTime date_of_observation { get; set; }  // date_of_observation    
+        public DateTime? date_of_observation { get; set; }  // date_of_observation    
         public string location_of_observation { get; set; }  // location_of_observation
         public string action_taken { get; set; }  // action_taken
         public int source_of_observation { get; set; }  // source_of_observation
         public int status_code { get; set; }  // status_code
-        public DateTime updated_at { get; set; }  // updated_at
+        public DateTime? updated_at { get; set; }  // updated_at
         public int updated_by { get; set; }  // updated_by
         public int type_of_observation { get; set; }
     }
