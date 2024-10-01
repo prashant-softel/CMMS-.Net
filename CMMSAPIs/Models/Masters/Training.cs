@@ -43,7 +43,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic employeeNumber { get; set; }
         public string designation { get; set; }
         public DateTime Rsvp { get; set; }
-        public int Attendend { get; set; }
+        public int attended { get; set; }
         public string notes { get; set; }
         public string companyName { get; set; }
     }
@@ -106,7 +106,7 @@ namespace CMMSAPIs.Models.Masters
         public DateTime Rsvp { get; set; }
         public string notes { get; set; }
         public string designation { get; set; }
-        public dynamic Attendend { get; set; }
+        public dynamic attended { get; set; }
     }
 
     public class CMTrainingSummary

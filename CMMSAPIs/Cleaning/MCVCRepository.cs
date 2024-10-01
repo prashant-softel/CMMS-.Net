@@ -13,6 +13,7 @@ using static CMMSAPIs.Helper.CMMS;
 namespace CMMSAPIs.Repositories.MCVCRepository
 {
 
+
     public class MCVCRepository : GenericRepository
     {
         private UtilsRepository _utilsRepo;
@@ -22,25 +23,22 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
 
-            // Set moduleType based on the passed cleaningType
+
             moduleType = type;
 
-            // Adjust the measure based on cleaningType
+
             if (type == cleaningType.ModuleCleaning)
             {
-                //moduleType = (int)cleaningType.ModuleCleaning;
+
                 measure = "moduleQuantity";
             }
             else if (type == cleaningType.Vegetation)
             {
-                //moduleType = (int)cleaningType.Vegetation;
+
                 measure = "area";
             }
 
         }
-
-
-
 
         private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
         {
@@ -216,9 +214,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             return retValue;
 
         }
-
-
-
         internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMMCExecutionSchedule scheduleObj)
         {
             string retValue = "";
@@ -243,8 +238,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                 case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
                     retValue = String.Format("SCH{0} Close Rejected by {1}", scheduleObj.scheduleId, scheduleObj.rejectedBy);
                     break;
-
-
                 case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
                     retValue = String.Format("PTW{0} Linked with SCH{1} of MCT{2}", scheduleObj.permit_id, scheduleObj.scheduleId, scheduleObj.executionId);
                     break;
@@ -733,90 +726,94 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
              List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);*/
             string scheduleQuery = $"SELECT schedule.scheduleId AS scheduleId, " +
-               $"schedule.status, " +
-               $"schedule.executionId, " +
-               $"schedule.actualDay AS cleaningDay, " +
-               $"schedule.startedAt AS start_date, " +
-               $"schedule.endedAt AS end_date, " +
-               $"permit.startDate AS startDate, " +
-               $"CASE WHEN permit.startDate < NOW() THEN 1 ELSE 0 END AS tbt_start, " +
-               $"cp.cleaningType, " +
-               $"CASE WHEN cp.cleaningType = 1 THEN 'Wet' " +
-               $"WHEN cp.cleaningType = 2 THEN 'Dry' " +
-               $"WHEN cp.cleaningType = 3 THEN 'Robotic' " +
-               $"ELSE 'Wet' END AS cleaningTypeName, " +
-               $"SUM(moduleQuantity) AS scheduled, " +
-               $" CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired, " +
-               $"permit.id AS permit_id, " +
-               $"permit.code AS permit_code, " +
-               $"schedule.rejectedById, " +
-               $"CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) AS rejectedBy, " +
-               $"schedule.rejectedAt, " +
-               $"schedule.approvedById, " +
-               $"CONCAT(approvedByUser.firstName, approvedByUser.lastName) AS approvedBy, " +
-               $"schedule.approvedAt, " +
-               $"CASE WHEN permit.TBT_Done_By IS NULL OR permit.TBT_Done_By = 0 THEN 0 ELSE 1 END AS ptw_tbt_done, " +
-               $"permit.status AS ptw_status, " +
-               $"(SELECT COALESCE(SUM(item2.moduleQuantity), 0) " +
-               $"FROM cleaning_execution_items item2 " +
-               $"WHERE item2.executionDay = schedule.actualDay " +
-               $"AND item2.status = 408 " +
-               $"AND item2.executionId = {excutionId}) AS cleaned, " +
-               $"SUM(CASE WHEN item.status = 409 THEN moduleQuantity ELSE 0 END) AS abandoned, " +
-               $"SUM(CASE WHEN item.status = 407 THEN moduleQuantity ELSE 0 END) AS pending, " +
-               $"schedule.remark_of_schedule AS remark_of_schedule, " +
-               $"schedule.waterUsed, " +
-               $"schedule.remark, " +
-               $"CASE " +
-               $"WHEN schedule.status = 350 THEN 'Draft' " +
-               $"WHEN schedule.status = 351 THEN 'Waiting for Approval' " +
-               $"WHEN schedule.status = 353 THEN 'Approved' " +
-               $"WHEN schedule.status = 352 THEN 'Rejected' " +
-               $"WHEN schedule.status = 354 THEN 'Deleted' " +
-               $"WHEN schedule.status = 360 THEN 'Scheduled' " +
-               $"WHEN schedule.status = 361 THEN 'In Progress' " +
-               $"WHEN schedule.status = 363 THEN 'Completed' " +
-               $"WHEN schedule.status = 364 THEN 'Abandoned' " +
-               $"WHEN schedule.status = 365 THEN 'Approved' " +
-               $"WHEN schedule.status = 366 THEN 'Rejected' " +
-               $"WHEN schedule.status = 370 THEN 'PTW_Linked' " +
-               $"WHEN schedule.status = 381 THEN 'Approved' " +
-               $"WHEN schedule.status = 382 THEN 'Reject' " +
-               $"WHEN schedule.status = 383 THEN 'Approved' " +
-               $"WHEN schedule.status = 384 THEN 'Reject' " +
-               $"WHEN schedule.status = 385 THEN 'Reschedule' " +
-               $"WHEN schedule.status = 369 THEN 'Abandoned Approved' " +
-               $"WHEN schedule.status = 368 THEN 'Abandoned Rejected' " +
-               $"WHEN schedule.status = 701 THEN 'Draft' " +
-               $"WHEN schedule.status = 702 THEN 'Waiting for Approval' " +
-               $"WHEN schedule.status = 704 THEN 'Approved' " +
-               $"WHEN schedule.status = 703 THEN 'Rejected' " +
-               $"WHEN schedule.status = 705 THEN 'Deleted' " +
-               $"WHEN schedule.status = 721 THEN 'Scheduled' " +
-               $"WHEN schedule.status = 722 THEN 'Started' " +
-               $"WHEN schedule.status = 724 THEN 'Close - Waiting for Approval' " +
-               $"WHEN schedule.status = 725 THEN 'Abandon - Waiting for Approval' " +
-               $"WHEN schedule.status = 728 THEN 'Approved' " +
-               $"WHEN schedule.status = 729 THEN 'Rejected' " +
-               $"WHEN schedule.status = 730 THEN 'PTW Linked' " +
-               $"WHEN schedule.status = 731 THEN 'Schedule - Approved' " +
-               $"WHEN schedule.status = 732 THEN 'Schedule - Reject' " +
-               $"WHEN schedule.status = 733 THEN 'Updated' " +
-               $"WHEN schedule.status = 734 THEN 'Reassigned' " +
-               $"WHEN schedule.status = 408 THEN 'Cleaned' " +
-               $"WHEN schedule.status = 409 THEN 'Abandoned' " +
-               $"WHEN schedule.status = 407 THEN 'Scheduled' " +
-               $"WHEN schedule.status = 726 THEN 'Abandoned Rejected' " +
-               $"WHEN schedule.status = 727 THEN 'Abandoned Approved' " +
-               $"ELSE 'Invalid Status' END AS status_short " +
-               $"FROM cleaning_execution_schedules AS schedule " +
-               $"LEFT JOIN cleaning_execution_items AS item ON schedule.scheduleId = item.scheduleId " +
-               $"LEFT JOIN permits AS permit ON permit.id = schedule.ptw_id " +
-               $"LEFT JOIN users AS rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
-               $"LEFT JOIN users AS approvedByUser ON approvedByUser.id = schedule.approvedById " +
-               $"LEFT JOIN cleaning_plan AS cp ON schedule.planId = cp.planId " +
-               $"WHERE schedule.executionId = {excutionId} " +
-               $"GROUP BY schedule.scheduleId;";
+                      $"schedule.status, " +
+                      $"schedule.executionId, " +
+                      $"schedule.actualDay AS cleaningDay, " +
+                      $"schedule.startedAt AS start_date, " +
+                      $"schedule.endedAt AS end_date, " +
+                      $"permit.startDate AS startDate, timediff(permit.endDate,permit.startDate) as extendByMinutes , " +
+                      $"CASE WHEN permit.startDate < NOW() THEN 1 ELSE 0 END AS tbt_start, " +
+                      $"cp.cleaningType, " +
+                      $"CASE WHEN cp.cleaningType = 1 THEN 'Wet' " +
+                      $"WHEN cp.cleaningType = 2 THEN 'Dry' " +
+                      $"WHEN cp.cleaningType = 3 THEN 'Robotic' " +
+                      $"ELSE 'Wet' END AS cleaningTypeName, " +
+                      $"SUM(moduleQuantity) AS scheduled, " +
+                      $" CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired, " +
+                      $"permit.id AS permit_id, " +
+                      $"permit.code AS permit_code, " +
+                      $"schedule.rejectedById, " +
+                      $"CONCAT(rejectedByUser.firstName, rejectedByUser.lastName) AS rejectedBy, " +
+                      $"schedule.rejectedAt, " +
+                      $"schedule.approvedById, " +
+                      $"CONCAT(approvedByUser.firstName, approvedByUser.lastName) AS approvedBy, " +
+                      $"schedule.approvedAt, " +
+                      $"CASE WHEN permit.TBT_Done_By IS NULL OR permit.TBT_Done_By = 0 THEN 0 ELSE 1 END AS ptw_tbt_done, " +
+                      $"permit.status AS ptw_status, " +
+                      $"(SELECT COALESCE(SUM(item2.moduleQuantity), 0) " +
+                      $"FROM cleaning_execution_items item2 " +
+                      $"WHERE item2.executionDay = schedule.actualDay " +
+                      $"AND item2.status = 408 " +
+                      $"AND item2.executionId = {excutionId}) AS cleaned, " +
+                      $"(SELECT COALESCE(SUM(item2.moduleQuantity), 0) " +
+                      $"FROM cleaning_execution_items item2 " +
+                      $"WHERE item2.executionDay = schedule.actualDay " +
+                      $"AND item2.status = 409 " +
+                      $"AND item2.executionId = {excutionId}) AS abandoned , " +
+                      $"SUM(CASE WHEN item.status = 407 THEN moduleQuantity ELSE 0 END) AS pending, " +
+                      $"schedule.remark_of_schedule AS remark_of_schedule, " +
+                      $"schedule.waterUsed, " +
+                      $"schedule.remark, " +
+                      $"CASE " +
+                      $"WHEN schedule.status = 350 THEN 'Draft' " +
+                      $"WHEN schedule.status = 351 THEN 'Waiting for Approval' " +
+                      $"WHEN schedule.status = 353 THEN 'Approved' " +
+                      $"WHEN schedule.status = 352 THEN 'Rejected' " +
+                      $"WHEN schedule.status = 354 THEN 'Deleted' " +
+                      $"WHEN schedule.status = 360 THEN 'Scheduled' " +
+                      $"WHEN schedule.status = 361 THEN 'In Progress' " +
+                      $"WHEN schedule.status = 363 THEN 'Completed' " +
+                      $"WHEN schedule.status = 364 THEN 'Abandoned' " +
+                      $"WHEN schedule.status = 365 THEN 'Approved' " +
+                      $"WHEN schedule.status = 366 THEN 'Rejected' " +
+                      $"WHEN schedule.status = 370 THEN 'PTW_Linked' " +
+                      $"WHEN schedule.status = 381 THEN 'Approved' " +
+                      $"WHEN schedule.status = 382 THEN 'Reject' " +
+                      $"WHEN schedule.status = 383 THEN 'Approved' " +
+                      $"WHEN schedule.status = 384 THEN 'Reject' " +
+                      $"WHEN schedule.status = 385 THEN 'Reschedule' " +
+                      $"WHEN schedule.status = 369 THEN 'Abandoned Approved' " +
+                      $"WHEN schedule.status = 368 THEN 'Abandoned Rejected' " +
+                      $"WHEN schedule.status = 701 THEN 'Draft' " +
+                      $"WHEN schedule.status = 702 THEN 'Waiting for Approval' " +
+                      $"WHEN schedule.status = 704 THEN 'Approved' " +
+                      $"WHEN schedule.status = 703 THEN 'Rejected' " +
+                      $"WHEN schedule.status = 705 THEN 'Deleted' " +
+                      $"WHEN schedule.status = 721 THEN 'Scheduled' " +
+                      $"WHEN schedule.status = 722 THEN 'Started' " +
+                      $"WHEN schedule.status = 724 THEN 'Close - Waiting for Approval' " +
+                      $"WHEN schedule.status = 725 THEN 'Abandon - Waiting for Approval' " +
+                      $"WHEN schedule.status = 728 THEN 'Approved' " +
+                      $"WHEN schedule.status = 729 THEN 'Rejected' " +
+                      $"WHEN schedule.status = 730 THEN 'PTW Linked' " +
+                      $"WHEN schedule.status = 731 THEN 'Schedule - Approved' " +
+                      $"WHEN schedule.status = 732 THEN 'Schedule - Reject' " +
+                      $"WHEN schedule.status = 733 THEN 'Updated' " +
+                      $"WHEN schedule.status = 734 THEN 'Reassigned' " +
+                      $"WHEN schedule.status = 408 THEN 'Cleaned' " +
+                      $"WHEN schedule.status = 409 THEN 'Abandoned' " +
+                      $"WHEN schedule.status = 407 THEN 'Scheduled' " +
+                      $"WHEN schedule.status = 726 THEN 'Abandoned Rejected' " +
+                      $"WHEN schedule.status = 727 THEN 'Abandoned Approved' " +
+                      $"ELSE 'Invalid Status' END AS status_short " +
+                      $"FROM cleaning_execution_schedules AS schedule " +
+                      $"LEFT JOIN cleaning_execution_items AS item ON schedule.scheduleId = item.scheduleId " +
+                      $"LEFT JOIN permits AS permit ON permit.id = schedule.ptw_id " +
+                      $"LEFT JOIN users AS rejectedByUser ON rejectedByUser.id = schedule.rejectedById " +
+                      $"LEFT JOIN users AS approvedByUser ON approvedByUser.id = schedule.approvedById " +
+                      $"LEFT JOIN cleaning_plan AS cp ON schedule.planId = cp.planId " +
+                      $"WHERE schedule.executionId = {excutionId} " +
+                      $"GROUP BY schedule.scheduleId;";
 
             List<CMMCExecutionSchedule> _ViewSchedule = await Context.GetData<CMMCExecutionSchedule>(scheduleQuery).ConfigureAwait(false);
 
@@ -828,10 +825,19 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             _ViewExecution[0].status_long = _longStatus;
             foreach (var item in _ViewSchedule)
             {
-                CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
-                item.status_short_ptw = Status_PTW((int)ptw_status1);
-            }
+                TimeSpan permitDuration = TimeSpan.Parse("08:00:00");
 
+                if (item.extendByMinutes == permitDuration)
+                {
+                    item.status_short_ptw = "Permit Expire";
+                }
+                else
+                {
+                    CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
+                    item.status_short_ptw = Status_PTW((int)ptw_status1);
+                }
+
+            }
             foreach (var view in _ViewExecution)
             {
                 if (view != null && view.abandonedAt != null)

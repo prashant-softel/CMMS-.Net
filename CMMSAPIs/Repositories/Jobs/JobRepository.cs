@@ -156,7 +156,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (CMJobModel _Job in _JobList)
             {
-                if (_Job.ptw_id == 0)
+                if (_Job.status == 3)
+                {
+                    _Job.latestJCStatusShort = "Job Cancelled ";
+                }
+                else if (_Job.ptw_id == 0)
                 {
                     _Job.latestJCStatusShort = "Permit not linked";
                 }

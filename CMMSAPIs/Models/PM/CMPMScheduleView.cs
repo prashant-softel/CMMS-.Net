@@ -113,6 +113,7 @@ namespace CMMSAPIs.Models.PM
         public string closeRejectedbyName { get; set; }
         public DateTime rejected_at { get; set; }
         public int updated_by_id { get; set; }
+        public TimeSpan extendByMinutes { get; set; }
         public string updated_by_name { get; set; }
         public DateTime updated_at { get; set; }
         public string status_long { get; set; }

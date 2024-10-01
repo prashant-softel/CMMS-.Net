@@ -342,7 +342,7 @@ namespace CMMSAPIs.Repositories.PM
 
             string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name,  pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelledbyName, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short, " +
                                "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done,CASE when permit.startDate <  now() then 1 else 0 END as tbt_start, " +
-                               "  permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
+                               "  permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company ,permit.timediff(ptw.endDate,ptw.startDate) as extendByMinutes ," +
                                " passt.name as Isolated_equipments,CONCAT(tbtDone.firstName,' ',tbtDone.lastName) as TBT_conducted_by_name,permit.TBT_Done_At as TBT_done_time,permit.startDate Start_time,permit.description as workdescription ,pm_task.close_remarks as new_remark   ," +
                                " permit.status as status_PTW, CONCAT(isotak.firstName, ' ',isotak.lastName) as Isolation_taken, " +
                                " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName, " +
@@ -449,6 +449,7 @@ namespace CMMSAPIs.Repositories.PM
                 jobStatusQry += "ELSE 'Invalid Status' END ";
                 if (schedule.schedule_id > 0)
                 {
+
                     string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, " +
                                       $"CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, " +
                                       $"{jobStatusQry}   AS job_status,  a.assetName AS Tool_name,SUM(a.id) AS No_of_tools  " +
@@ -456,7 +457,7 @@ namespace CMMSAPIs.Repositories.PM
                                         $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
                                         $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
                                         $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
-                                        $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
+                                        $"WHERE   pm_execution.PM_Schedule_Id = {schedule.schedule_id}  AND pm_execution.job_created = 1 GROUP BY     jobs.id, a.assetName;";
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
                     List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
                     if (linked_jobs != null && linked_jobs.Count > 0 && linked_jobs[0].job_id > 0)
@@ -479,8 +480,17 @@ namespace CMMSAPIs.Repositories.PM
                     string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                 }*/
-                taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
+                TimeSpan permitDuration = TimeSpan.Parse("08:00:00");
+                if (taskViewDetail[0].extendByMinutes == permitDuration)
+                {
+                    taskViewDetail[0].status_short = "Permit - Expired";
+                }
+                else
+                {
+                    taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
+                }
                 taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
+
                 string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
             }
@@ -1428,16 +1438,17 @@ namespace CMMSAPIs.Repositories.PM
                         responseList.Add(response);
                         changeFlag++;
                     }
-                    if(schedule_detail.job_create == 0)
+                    if (schedule_detail.job_create == 0)
                     {
                         string updateQry = $"UPDATE pm_execution SET job_created = 0, linked_job_id = 0 WHERE id = {schedule_detail.execution_id};";
+
                         await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
-                    }
-                    if (schedule_detail.is_job_deleted > 0)
-                    {
-                        int delete_id = schedule_detail.is_job_deleted;
-                        string deletejob = $"DELETE FROM jobs WHERE id = {delete_id};";
-                        await Context.ExecuteNonQry<int>(deletejob).ConfigureAwait(false);
+                        /* int deleteid = 0;
+                         deleteid = schedule_detail.is_job_deleted;
+                         string deletejob = $"DELETE FROM jobs WHERE id = {deleteid};";
+                         await Context.ExecuteNonQry<int>(deletejob).ConfigureAwait(false);*/
+                        string updateQryjob = $"UPDATE jobs SET  status= {(int)CMMS.CMMS_Status.DELETED} WHERE id = {schedule_detail.is_job_deleted};";
+                        await Context.ExecuteNonQry<int>(updateQryjob).ConfigureAwait(false);
                     }
                     if (schedule_detail.job_create == 1 && execution_details[0].job_create == 0)
                     {
