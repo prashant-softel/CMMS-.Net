@@ -45,6 +45,7 @@ namespace CMMSAPIs.Models.PM
         public string category_name { get; set; }
         public int assigned_to_id { get; set; }
         public string assigned_to_name { get; set; }
+        public int Isolation { get; set; }
         public int permit_id { get; set; }
         public string permit_code { get; set; }
         public int status_plan { get; set; }
