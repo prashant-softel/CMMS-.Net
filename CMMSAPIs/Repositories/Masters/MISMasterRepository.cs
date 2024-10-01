@@ -1908,7 +1908,7 @@ namespace CMMSAPIs.Repositories.Masters
             try
             {
                 string updateQuery = $"UPDATE observations SET " +
-                                     $"contractor_name = '{request.contractor_name}', " +
+                                     $"contractor_name = '{request.operator_name}', " +
                                      $"risk_type_id = {request.risk_type_id}, " +
                                      $"preventive_action = '{request.preventive_action}', " +
                                      $"responsible_person = {request.assigned_to_id}, " +
@@ -1922,7 +1922,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"comment = '{request.comment}', " +
                                      $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
                                      $"observation_description = '{request.observation_description}', " +
-                                     $"status_code={(int)CMMS.CMMS_Status.UPDATED}," +
+                                     $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_CREATED}," +
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                      $"updated_by = {UserID} " +
                                      $"WHERE id = {request.id};";
@@ -1981,7 +1981,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
-                " contractor_name , risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person,responsible.mobileNumber as contact_number, cost_type, CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name , " +
+                " bs.name as operator_name , risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person,bs.contactNumber as contact_number, cost_type, CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name , " +
                 " date_of_observation, type_of_observation, location_of_observation, source_of_observation, " +
                 " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date,observations.closed_at as closed_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, " +
                 " observations.preventive_action as  corrective_action, DATEDIFF(observations.target_date, observations.date_of_observation) AS remaining_days," +
@@ -1999,18 +1999,19 @@ namespace CMMSAPIs.Repositories.Masters
                 " left join mis_m_observationsheet as mssheet ON observations.source_of_observation  =mssheet.id " +
                 " left join users createdBy on createdBy.id = observations.created_by" +
                 " left join users updatedBy on updatedBy.id = observations.updated_by" +
+                " left join business bs on bs.id = facilities.operatorId " +
                 " left join users responsible  on responsible.id = observations.assign_to" +
                 " where is_active = 1 and observations.facility_id = " + facility_Id + " and date_format(created_at, '%Y-%m-%d') between '" + fromDate.ToString("yyyy-MM-dd") + "' and '" + toDate.ToString("yyyy-MM-dd") + "' ;";
             List<CMObservation> Result = await Context.GetData<CMObservation>(myQuery).ConfigureAwait(false);
 
 
             string pmexecutionquery = "select pm_execution.id,pm_task.facility_id,facilities.name facility_name,  Observation_Status as status_code,    " +
-                      "business.name as contractor_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type,  preventive_action, " +
-                      "concat(responsible.firstName, ' ', responsible.lastName) as  assigned_to_name,Observation_assign_to as assigned_to_id, business.contactNumber as contact_number,   " +
+                      "bs.name as operator_name, ckp.risk_type as risk_type_id,ir_risktype.risktype as risk_type,  preventive_action, " +
+                      "concat(responsible.firstName, ' ', responsible.lastName) as  assigned_to_name,Observation_assign_to as assigned_to_id, bs.contactNumber as contact_number,   " +
                       "ckp.cost_type,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
-                      "Observation_target_date as date_of_observation,ckp.type_of_observation,business.location as location_of_observation, " +
-                      "ckp.check_list_id as source_of_observation,  monthname(pm_execution.Observation_target_date) as month_of_observation, " +
-                      "pm_execution.PM_Schedule_Observation_add_date as closer_date,pm_execution.PM_Schedule_Observation_update_date as closed_date,  " +
+                      "ckp.type_of_observation,bs.location as location_of_observation, " +
+                      "ckp.check_list_id as source_of_observation,  monthname(pm_execution.PM_Schedule_Observation_add_date) as month_of_observation, " +
+                      "pm_execution.PM_Schedule_Observation_add_date as date_of_observation,pm_execution.closed_at as closed_date,  " +
                       "concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken,pm_execution.preventive_action as corrective_action,  " +
                       "DATEDIFF(pm_execution.Observation_target_date,pm_execution.PM_Schedule_Observation_add_date) AS remaining_days,  " +
                       "pm_execution.Observation_target_date as target_date,ckp.requirement as observation_description,ckp.created_at as created_at, " +
@@ -2023,6 +2024,7 @@ namespace CMMSAPIs.Repositories.Masters
                       " left join checklist_number as cls ON ckp.check_list_id = cls.id " +
                       "left join ir_risktype ON ckp.risk_type = ir_risktype.id " +
                       "left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
+                      " left join business bs on bs.id = facilities.operatorId " +
                       " left join users responsible  on responsible.id = pm_execution.Observation_assign_to" +
                       " left join users createdBy on createdBy.id = ckp.created_by left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
                       " left join business on business.id = createdBy.companyId and business.type = 2  " +
@@ -2788,7 +2790,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
 
                     sb.Append(": " + request.comment);
-                    deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' , updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {request.id};";
+                    deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' ,preventive_action = '{request.comment}'  WHERE id = {request.id};";
 
                     await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
 
@@ -2804,7 +2806,7 @@ namespace CMMSAPIs.Repositories.Masters
                 }
                 else if (check_point_type_id == 2)
                 {
-                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, preventive_action = '{request.comment}'WHERE id = {request.id};";
+                    deleteQry = $"UPDATE pm_execution SET Observation_Status = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}', preventive_action = '{request.comment}'WHERE id = {request.id};";
                     await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
                     sb = new System.Text.StringBuilder("Observation Updated");
                     if (request.comment.Length > 0)

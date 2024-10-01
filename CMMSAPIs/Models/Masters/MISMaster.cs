@@ -627,7 +627,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int check_point_type_id { get; set; }  // added type of enum 
         public int facility_id { get; set; }
-        public string contractor_name { get; set; }
+        public string operator_name { get; set; }
         public int risk_type_id { get; set; }
         public string risk_type { get; set; }
         public string preventive_action { get; set; }
