@@ -10,9 +10,12 @@ namespace CMMSAPIs.BS.EM
 {
     public interface IEMBS
     {
+
+        Task<CMDefaultResponse> SendNotification(CMNotification request, int userID, string facilitytimeZone);
+        
         Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID);
 
-        Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone); // change to run escalation
+        Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone); // change to run escalation
         Task<List<CMEscalationLog>> GetEscalationLog(CMMS.CMMS_Modules module, int module_ref_id, int userID, string facilitytimeZone);
         Task<List<CMSetMasterEM>> GetEscalationMatrixbystatusId(CMMS.CMMS_Modules module, int status_id);
         Task<List<GetEcMatrix>> GetEscalationMatrixList(CMMS.CMMS_Modules module);
@@ -25,6 +28,22 @@ namespace CMMSAPIs.BS.EM
         {
             databaseProvider = dbProvider;
         }
+
+        public async Task<CMDefaultResponse> SendNotification(CMNotification request, int userID, string facilitytimeZone)
+        {
+            try
+            {
+                using (var repos = new EMRepository(getDB))
+                {
+                    return await repos.sendNotification(request, userID, facilitytimeZone);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
         public async Task<CMDefaultResponse> SetEscalationMatrix(List<CMSetMasterEM> request, int userID)
         {
             try
@@ -67,13 +86,13 @@ namespace CMMSAPIs.BS.EM
                 throw;
             }
         }
-        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int userID, string facilitytimeZone)
+        public async Task<CMEscalationResponse> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone)
         {
             try
             {
                 using (var repos = new EMRepository(getDB))
                 {
-                    return await repos.Escalate_2(moduleId, statusId, userID, facilitytimeZone);
+                    return await repos.Escalate_2(moduleId, statusId, additionalUserIds, userID, facilitytimeZone);
                 }
             }
             catch (Exception ex)

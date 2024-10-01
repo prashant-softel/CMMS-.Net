@@ -22,21 +22,23 @@ namespace CMMSAPIs.Repositories.PM
         private PMRepository _pmScheduleRepo;
         private JobRepository _jobRepo;
         public static IWebHostEnvironment _environment;
+        private PermitRepository _permitRepo;
 
         public PMScheduleViewRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
             _pmScheduleRepo = new PMRepository(sqlDBHelper, _environment);
             _jobRepo = new JobRepository(sqlDBHelper);
+            _permitRepo = new PermitRepository(sqlDBHelper);
         }
         Dictionary<CMMS.CMMS_Status, string> statusList = new Dictionary<CMMS.CMMS_Status, string>()
         {
-            { CMMS.CMMS_Status.PM_SUBMIT, "PM Submitted" },
-            { CMMS.CMMS_Status.PM_LINK_PTW, "PM Linked to PTW" },
+            { CMMS.CMMS_Status.PM_SCHEDULED, "PM Scheduled" },
+            { CMMS.CMMS_Status.PM_LINKED_TO_PTW, "PM Linked to PTW" },
             { CMMS.CMMS_Status.PM_START, "PM Started" },
-            { CMMS.CMMS_Status.PM_COMPLETED, "PM Completed" },
-            { CMMS.CMMS_Status.PM_REJECTED, "PM Rejected" },
-            { CMMS.CMMS_Status.PM_APPROVED, "PM Approved" },
+            { CMMS.CMMS_Status.PM_CLOSED, "PM Closed" },
+            { CMMS.CMMS_Status.PM_CLOSE_REJECTED, "PM Rejected" },
+            { CMMS.CMMS_Status.PM_CLOSE_APPROVED, "PM Approved" },
             { CMMS.CMMS_Status.PM_CANCELLED, "PM Cancelled" },
             { CMMS.CMMS_Status.PM_DELETED, "PM Deleted" },
             { CMMS.CMMS_Status.PM_UPDATED, "PM Updated" }
@@ -57,12 +59,8 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = "Linked To PTW"; break;
                 case CMMS.CMMS_Status.PM_START:
                     retValue = "Started"; break;
-                case CMMS.CMMS_Status.PM_COMPLETED:
+                case CMMS.CMMS_Status.PM_CLOSED:
                     retValue = "Close - Waiting for Approval"; break;
-                case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue = "Rejected"; break;
-                case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue = "Approved"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
                     retValue = "Closed - Rejected"; break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
@@ -94,36 +92,15 @@ namespace CMMSAPIs.Repositories.PM
             switch (notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
-                    retValue += String.Format("PMS{0} Schedule </p>", Obj.schedule_id); break;
-                case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue += String.Format("PMS{0} Assigned </p>", Obj.schedule_id);
-                    break;
-                case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue += String.Format("PMS{0} Completed By {1} </p>", Obj.schedule_id, Obj.completedBy_name); ;
-                    break;
-                case CMMS.CMMS_Status.PM_SUBMIT:
-                    retValue += String.Format("PMS{0} Submitted By {1} </p>", Obj.schedule_id, Obj.submittedByName);
-                    break;
+                    retValue += String.Format("PM{0} Schedule </p>", Obj.schedule_id); break;
                 case CMMS.CMMS_Status.PM_START:
-                    retValue += String.Format("PMS{0} Started By {1} </p>", Obj.schedule_id, Obj.PM_Execution_Started_by_name);
-                    break;
-                case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue += String.Format("PMS{0} Rejected By {1} </p>", Obj.schedule_id, Obj.rejectedbyName);
-                    break;
-                case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue += String.Format("PMS{0} Approved By {1} </p>", Obj.schedule_id, Obj.approvedbyName);
-                    break;
-                case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue += String.Format("PMS{0} Cancelled Rejected By {1} </p>", Obj.schedule_id,Obj.cancelledrejectedbyName);
-                    break;
-                case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue += String.Format("PMS{0} Cancelled Approved By {1} </p>", Obj.schedule_id, Obj.cancelledapprovedbyName);
+                    retValue = String.Format("PM{0} Started by {1} at {2} ", Obj.schedule_id, Obj.startedbyName, Obj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_DELETED:
-                    retValue += String.Format("PMS{0} Deleted </p>", Obj.schedule_id);
+                    retValue += String.Format("PM{0} Deleted by {1} at {2} ", Obj.schedule_id, Obj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue += String.Format("PMS{0} Updated By {1} </p>", Obj.schedule_id,Obj.PM_Schedule_updated_by);
+                    retValue = String.Format("PM{0} Updated by {1} at {2} ", Obj.schedule_id, Obj.updatedbyName, Obj.facilityidbyName);
                     break;
                 default:
                     break;
@@ -141,32 +118,42 @@ namespace CMMSAPIs.Repositories.PM
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
                     retValue = $"PM Task Scheduled "; break;
-                case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue = $"PM Task Assigned To {Obj.assigned_to_name} "; break;
                 case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
-                    retValue = $"Permit {Obj.id} Linked To Permit Id {Obj.permit_id} "; break;
+                    retValue = String.Format("PTW{0} Linked to taskId{1} at {2} ", Obj.permit_id, Obj.id, Obj.facilityidbyName); break;
                 case CMMS.CMMS_Status.PM_START:
-                    retValue = $"PM Task Started By {Obj.started_by_name}"; break;
-                case CMMS.CMMS_Status.PM_COMPLETED:
-                    retValue = $"PM Task Closed By {Obj.closed_by_name} "; break;
-                case CMMS.CMMS_Status.PM_REJECTED:
-                    retValue = $"PM Task Rejected By {Obj.rejected_by_name} "; break;
-                case CMMS.CMMS_Status.PM_APPROVED:
-                    retValue = $"PM Task Approved By {Obj.approved_by}"; break;
+                    retValue = $"PM Task Started By {Obj.started_by_name} at {Obj.facilityidbyName}"; break;
+                case CMMS.CMMS_Status.PM_CLOSED:
+                    retValue = String.Format("PM{0} Closed by {1} at {2} ", Obj.id, Obj.closed_by_name, Obj.facilityidbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = $"PM Task Closed Rejected By {Obj.closeRejectedbyName}"; break;
+                    retValue += String.Format("PM{0} Close Rejected by {1} at {2} ", Obj.id, Obj.closeRejectedbyName, Obj.facilityidbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = $"PM Task Closed Approved By {Obj.closedApprovedByName}"; break;
+                    retValue += String.Format("PM{0} Closed Approved by {1} at {2} ", Obj.id, Obj.closedApprovedByName, Obj.facilityidbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
-                    retValue = $"PM Task Cancelled By {Obj.cancelled_by_name} "; break;
+                    retValue = String.Format("PM{0} Cancelled by {1} at {2} ", Obj.id, Obj.cancelledbyName, Obj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.PM_ASSIGNED:
+                    retValue = String.Format("PM{0} Assigned to {1} at {2} ", Obj.id, Obj.assigned_to_name, Obj.facilityidbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue = $"PM Task Cancelled Rejected By {Obj.cancelledrejectedbyName}"; break;
+                    retValue += String.Format("PM{0} Cancelled Rejected by {1} at {2} ", Obj.id, Obj.cancelledrejectedbyName, Obj.facilityidbyName);
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue = $"PM Task cancelled Approved By {Obj.cancelledapprovedbyName}"; break;
+                    retValue += String.Format("PM{0} Cancelled Approved by {1} at {2} ", Obj.id, Obj.cancelledapprovedbyName, Obj.facilityidbyName);
+                    break;
+                case CMMS.CMMS_Status.PM_TASK_UPDATED:
+                    retValue += String.Format("PM{0} Updated  by {1} at {2} ", Obj.id, Obj.updated_by_name, Obj.facilityidbyName);
+                    break;
+
+
+
                 case CMMS.CMMS_Status.PM_UPDATED:
                     retValue = $"PM Task Updated By {Obj.updated_by_name} "; break;
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = $"PM Task Deleted By {Obj.deletedbyName} "; break;
+                    retValue = String.Format("PM{0} Deleted by {1} at {2} ", Obj.id, Obj.deletedbyName, Obj.facilityidbyName);
+                    break;
                 default:
                     break;
             }
@@ -174,7 +161,7 @@ namespace CMMSAPIs.Repositories.PM
 
         }
 
-        internal async Task<List<CMPMTaskList>> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytimeZone)
+        internal async Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -188,7 +175,7 @@ namespace CMMSAPIs.Repositories.PM
             //statusQry += "ELSE 'Unknown Status' END";
             //  
             string myQuery = $"SELECT pm_task.id,pm_plan.id as plan_id, pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
-                               ", f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type FROM pm_task " +
+                               ",f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                                $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
@@ -201,9 +188,9 @@ namespace CMMSAPIs.Repositories.PM
             // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
 
             List<CMPMTaskList> scheduleViewList = new List<CMPMTaskList>();
-            if (facility_id > 0)
+            if (!string.IsNullOrEmpty(facility_id))
             {
-                myQuery += $" and pm_task.Facility_id = {facility_id} and pm_task.category_id!=0 ";
+                myQuery += $" and pm_task.Facility_id IN ({facility_id}) and pm_task.category_id!=0 ";
                 if (start_date != null && end_date != null)
                 {
                     string start = ((DateTime)start_date).ToString("yyyy'-'MM'-'dd");
@@ -239,8 +226,8 @@ namespace CMMSAPIs.Repositories.PM
                     {
                         if (task.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
                         {
-                            string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {task.id};";
-                            await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
+                            string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {task.id};";
+                            //await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                         }
                         task.status_short = "Permit - " + PermitRepository.getShortStatus(task.ptw_status);
                     }
@@ -289,13 +276,15 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int status1 = (int)status;
 
-
-            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            //            if (status != CMMS.CMMS_Status.RESCHEDULED_TASK && status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
+            if (status != CMMS.CMMS_Status.PM_CLOSE_APPROVED)
             {
                 // return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a PM Task that has not been executed can be cancelled.");
                 string myQuery = "UPDATE pm_task SET " +
                                     $"cancelled_by = {userID}, " +
+                                    $"previous_status= {status1}, " +
                                     $"cancelled_at = '{UtilsRepository.GetUTCTime()}', " +
                                     $"cancel_remarks = '{request.comment}', " +
                                     $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED}, " +
@@ -307,23 +296,6 @@ namespace CMMSAPIs.Repositories.PM
                 retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             }
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
-                             $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
-                             $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
-                             $"SELECT LAST_INSERT_ID(); ";
-            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt3.Rows[0][0]);
-
-            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
-            await Context.ExecuteNonQry<int>(scheduleQry);
-
-            string setCodeNameQuery = "UPDATE pm_schedule " +
-                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
-                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
-                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
-                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
-            await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
 
@@ -342,7 +314,6 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task cancelled successfully");
             return response;
         }
-
         internal async Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytimeZone)
         {
             /*
@@ -369,44 +340,54 @@ namespace CMMSAPIs.Repositories.PM
             //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
-            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short, " +
-                               "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done " +
-                               " , permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
+            string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name,  pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelledbyName, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short, " +
+                               "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done,CASE when permit.startDate <  now() then 1 else 0 END as tbt_start, " +
+                               "  permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company, " +
                                " passt.name as Isolated_equipments,CONCAT(tbtDone.firstName,' ',tbtDone.lastName) as TBT_conducted_by_name,permit.TBT_Done_At as TBT_done_time,permit.startDate Start_time,permit.description as workdescription ,pm_task.close_remarks as new_remark   ," +
                                " permit.status as status_PTW, CONCAT(isotak.firstName, ' ',isotak.lastName) as Isolation_taken, " +
                                " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName, " +
-                               " CONCAT(completedBy.firstName,' ',completedBy.lastName)  as completedbyName, " +
                                " CONCAT(cancelledapprovedBy.firstName,' ',cancelledapprovedBy.lastName)  as cancelledapprovedbyName, " +
                                " CONCAT(createdBy.firstName,' ',createdBy.lastName)  as createdbyName, " +
-                               " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, pm_task.status " +
+                               " CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, " +
+                               " CONCAT(statusBy.firstName,' ',statusBy.lastName)  as status_updated_by_name, " +
+                               " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  title.plan_name AS title, category.name AS categoryName, " +
+                               "facility.name AS facilityidbyName, CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, " +
+                               "CONCAT(updatedBy.firstName,' ',updatedBy.lastName)  as updated_by_name, CONCAT(closeapprovedBy.firstName,' ',closeapprovedBy.lastName)  as closedApprovedByName,  CONCAT(statusBy.firstName,' ', statusBy.lastName) AS status_updated_by_name, " +
+                               $"CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
                                " FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
-                               $"left join users as closedBy on pm_task.closed_by = closedBy.id " +
                                $"left join users as approvedBy on pm_task.approved_by = approvedBy.id " +
                                $"left join users as rejectedBy on pm_task.rejected_by = rejectedBy.id " +
                                $"left join users as cancelledBy on pm_task.cancelled_by = cancelledBy.id " +
                                $"left join users as cancelledrejectedBy on pm_task.cancel_rejected_by = cancelledrejectedBy.id " +
-                               $"left join users as completedBy on completedBy.id = pm_task.completedById " +
                                $"left join users as cancelledapprovedBy on cancelledapprovedBy.id = pm_task.cancel_approved_by " +
-                               $"left join users as createdBy on createdBy.id = pm_task.createdById " +
-                               $"left join users as closed on pm_task.closed_by = closed.id " +
+                               $"left join users as closeRejected on closeRejected.id = pm_task.close_rejected_by_id " +
+                               $"left join users as createdBy on createdBy.id = pm_task.started_by " +
                                $"left join users as startedBy on pm_task.started_by = startedBy.id " +
                                $"left join users as deletedBy on pm_task.deletedById = deletedBy.id " +
+                               $"left join users as closeapprovedBy on pm_task.approved_by = closeapprovedBy.id " +
                                $"left join permits as permit on pm_task.PTW_id = permit.id " +
                                $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
                                $"left join facilities  on pm_task.facility_id =facilities.id " +
-                               $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                               $"left join assetcategories as category  on pm_task.category_id = category.id " +
                                $"Left join users as ptwu on permit.issuedById = ptwu.id " +
-                               $"LEFT join  assets as passt on permit.physicalIsoEquips = passt.id  " +
+                               $"Left join  assets as passt on permit.physicalIsoEquips = passt.id  " +
                                $"Left join users as isotak on permit.physicalIsolation = isotak.id  " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id " +
                                $"left join users as tbtDone on permit.TBT_Done_By = tbtDone.id " +
                                $"left join business as bus on bus.id = ptwu.companyId " +
                                $"left join permittypelists on permittypelists.id = permit.typeId  " +
-                               $"LEFT JOIN users AS closeRejected ON pm_task.close_rejected_by_id = closeRejected.id " +
+                               $"LEFT JOIN users AS closedBy ON pm_task.closed_by = closedBy.id " +
+                               $"LEFT JOIN facilities as facility ON facility.id = pm_task.facility_id " +
+                               $"LEFT JOIN users AS updatedBy ON pm_task.updated_by = updatedBy.id " +
+                               $"LEFT JOIN pm_plan AS title ON pm_task.plan_id = title.id " +
+                               $"LEFT JOIN assetcategories AS cat ON pm_task.category_id = cat.id " +
+                               $"LEFT JOIN users AS statusBy ON pm_task.status_updated_by = statusBy.id " +
                                $" where pm_task.id = {task_id} ";
 
+
             List<CMPMTaskView> taskViewDetail = await Context.GetData<CMPMTaskView>(myQuery).ConfigureAwait(false);
+
             string Materialconsumption = "SELECT sam.ID as Material_ID,sam.asset_name as  Material_name,smi.asset_item_ID as Equipment_ID, " +
                     "smtype.asset_type as  Material_type, smi.used_qty,smi.issued_qty" +
                     " FROM smassetmasters sam LEFT JOIN smrsitems smi ON sam.ID = smi.mrs_ID " +
@@ -415,9 +396,16 @@ namespace CMMSAPIs.Repositories.PM
                     "left join smassetitems sai on sai.assetMasterID =  sam.id " +
                     $"WHERE  smm.whereUsedRefID={task_id};";
             List<Materialconsumption> Material = await Context.GetData<Materialconsumption>(Materialconsumption).ConfigureAwait(false);
+            if (Material != null && Material.Count > 0 && Material[0].Material_ID > 0)
+            {
+                taskViewDetail[0].Material_consumption = Material;
+            }
+            else
+            {
+                taskViewDetail[0].Material_consumption = new List<Materialconsumption>();
+            }
             if (taskViewDetail.Count == 0)
                 throw new MissingMemberException("PM Task not found");
-
             string myQuery2 = $"SELECT pm_schedule.id as schedule_id,assets.id as assetsID,assets.name as asset_name, " +
                 $"PM_Schedule_Completed_by_id as completedBy_id,  CONCAT(users.firstName, users.lastName) as   completedBy_name , asst.name as categoryname, " +
                 $" checklist.checklist_number as checklist_name from pm_schedule " +
@@ -455,54 +443,44 @@ namespace CMMSAPIs.Repositories.PM
                         scheduleCheckPoint.files = fileList;
                     }
                 }
-
                 string jobStatusQry = "CASE ";
                 for (CMMS.CMMS_Status jobStatus = CMMS.CMMS_Status.JOB_CREATED; jobStatus <= CMMS.CMMS_Status.JOB_UPDATED; jobStatus++)
                     jobStatusQry += $"WHEN jobs.status={(int)jobStatus} THEN '{JobRepository.getShortStatus(CMMS.CMMS_Modules.JOB, jobStatus)}' ";
                 jobStatusQry += "ELSE 'Invalid Status' END ";
-
-                string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, " +
-                                  $"CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, " +
-                                  $"{jobStatusQry}   AS job_status,  a.assetName AS Tool_name,SUM(a.id) AS No_of_tools  " +
-                                    $"FROM jobs " +
-                                    $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
-                                    $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
-                                    $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
-                                    $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
-                try
+                if (schedule.schedule_id > 0)
                 {
+                    string myQuery4 = $"SELECT jobs.id as job_id, jobs.title as job_title, jobs.description as job_description, " +
+                                      $"CASE WHEN jobs.createdAt = '0000-00-00 00:00:00' THEN NULL ELSE jobs.createdAt END as job_date, " +
+                                      $"{jobStatusQry}   AS job_status,  a.assetName AS Tool_name,SUM(a.id) AS No_of_tools  " +
+                                        $"FROM jobs " +
+                                        $"JOIN pm_execution ON jobs.id = pm_execution.linked_job_id " +
+                                        $"LEFT JOIN jobassociatedworktypes  jas on jas.jobId = jobs.id " +
+                                        $"LEFT JOIN worktypemasterassets as a ON a.workTypeId = jas.workTypeId " +
+                                        $"WHERE pm_execution.PM_Schedule_Id  = {schedule.schedule_id};";
                     List<ScheduleLinkJob> linked_jobs = await Context.GetData<ScheduleLinkJob>(myQuery4).ConfigureAwait(false);
                     List<CMLog> log = await _utilsRepo.GetHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, "");
-                    schedule.schedule_link_job = linked_jobs;
-
+                    if (linked_jobs != null && linked_jobs.Count > 0 && linked_jobs[0].job_id > 0)
+                    {
+                        schedule.schedule_link_job = linked_jobs;
+                    }
+                    else
+                    {
+                        schedule.schedule_link_job = new List<ScheduleLinkJob>();
+                    }
                 }
-                catch (Exception e)
-                {
-
-                }
-
-                //if (checklist_collection.Count > 0)
-                //{
-                //    taskViewDetail[0].checklist_id = checklist_collection[0].id;
-                //    taskViewDetail[0].checklist_name = checklist_collection[0].name;
-                //}
-                //taskViewDetail[0].schedule_check_points = scheduleCheckList;
-                //taskViewDetail[0].history_log = log; 
-
                 schedule.checklist_observation = scheduleCheckList;
             }
             taskViewDetail[0].schedules = checklist_collection;
-            taskViewDetail[0].Material_consumption = Material;
 
             if (taskViewDetail[0].status == (int)CMMS.CMMS_Status.PM_LINKED_TO_PTW)
             {
-                if (taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                /*if (taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
                 {
-                    string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {taskViewDetail[0].id};";
+                    string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
-                }
+                }*/
                 taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
-                //taskViewDetail[0].status_short = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, null);
+                taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
                 string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
             }
@@ -511,6 +489,7 @@ namespace CMMSAPIs.Repositories.PM
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.PM_TASK, _Status);
                 taskViewDetail[0].status_short = _shortStatus;
+
 
                 string _longStatus = getLongStatus(CMMS.CMMS_Modules.PM_TASK, _Status, taskViewDetail[0]);
                 taskViewDetail[0].status_long = _longStatus;
@@ -609,11 +588,11 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINK_PTW, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, task_id, CMMS.CMMS_Modules.PTW, permit_id, "PTW linked to PM", CMMS.CMMS_Status.PM_LINKED_TO_PTW, userID);
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(task_id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_LINK_PTW, new[] { userID }, _PMTaskList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_LINKED_TO_PTW, new[] { userID }, _PMTaskList);
             }
             catch (Exception ex)
             {
@@ -633,7 +612,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT task_id, status FROM pm_schedule WHERE id = {request.schedule_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
+            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_CLOSE_REJECTED)
                 return new CMDefaultResponse(request.schedule_id, CMMS.RETRUNSTATUS.FAILURE, "Execution must be rejected or in progress to add a custom checkpoint");
             string myQuery = "INSERT INTO pm_execution (PM_Schedule_Id, PM_Schedule_Code, Check_Point_Name, custom_checkpoint, file_required, Status, Check_Point_Requirement) " +
                                 $"VALUES ({request.schedule_id}, 'PMSCH{request.schedule_id}', '{request.check_point_name}', 1, {request.is_document_required}, 1, '{request.requirement}'); " +
@@ -677,8 +656,8 @@ namespace CMMSAPIs.Repositories.PM
 
             if (ptw_status == CMMS.CMMS_Status.PTW_APPROVED)
             {
-                string updateQ = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_APPROVED} WHERE id = {task_id};";
-                await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
+                string updateQ = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {task_id};";
+                //await Context.ExecuteNonQry<int>(updateQ).ConfigureAwait(false);
             }
             else
             {
@@ -784,7 +763,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_REJECTED)
+            if (status == CMMS.CMMS_Status.PM_SCHEDULED || status == CMMS.CMMS_Status.PM_CLOSE_REJECTED)
             {
                 responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
                     "Execution must be rejected or in progress to modify execution details"));
@@ -965,7 +944,7 @@ namespace CMMSAPIs.Repositories.PM
                                         await Context.ExecuteNonQry<int>(otherDetailsQry).ConfigureAwait(false);
                                     }
                                     await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, schedule.schedule_id, CMMS.CMMS_Modules.PM_EXECUTION, schedule_detail.execution_id, $"{schedule_detail.pm_files.Count} file(s) attached to PMSCH{schedule.schedule_id}", CMMS.CMMS_Status.PM_UPDATED, userID);
-           
+
                                     response = new CMDefaultResponse(schedule_detail.execution_id, CMMS.RETRUNSTATUS.SUCCESS, $"{schedule_detail.pm_files.Count} file(s) attached to PM Successfully");
                                     responseList.Add(response);
                                     changeFlag++;
@@ -1046,7 +1025,7 @@ namespace CMMSAPIs.Repositories.PM
                                 $"closed_by = {userID}, " +
                                 $"closed_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"close_remarks = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_COMPLETED}, " +
+                                $"status = {(int)CMMS.CMMS_Status.PM_CLOSED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} " +
                                 $"WHERE id = {request.id};";
@@ -1054,11 +1033,11 @@ namespace CMMSAPIs.Repositories.PM
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Requested " : request.comment, CMMS.CMMS_Status.PM_COMPLETED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Requested " : request.comment, CMMS.CMMS_Status.PM_CLOSED, userID);
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_COMPLETED, new[] { userID }, _PMTaskList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CLOSED, new[] { userID }, _PMTaskList);
             }
             catch (Exception ex)
             {
@@ -1069,11 +1048,24 @@ namespace CMMSAPIs.Repositories.PM
         }
         internal async Task<CMDefaultResponse> CancelRejectedPMTaskExecution(CMApproval request, int userID, string facilitytimeZone)
         {
+
+            int status1 = 0;
+            string statusQry = $"SELECT previous_status FROM pm_task WHERE id = {request.id};";
+            DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
+            if (dt1.Rows.Count > 0 && dt1.Rows[0][0] != DBNull.Value)
+            {
+                CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+                status1 = (int)status;
+                if (status1 == 164)
+                {
+                    status1 = 163;
+                }
+            }
             string myQuery = "UPDATE pm_task SET " +
                                 $"cancel_rejected_by = {userID}, " +
                                 $"cancel_rejected_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"cancel_remarks = '{request.comment}', " +
-                                $"status = {(int)CMMS.CMMS_Status.PM_CANCELLED_REJECTED}, " +
+                                $"status = {status1}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID} " +
                                 $"WHERE id = {request.id};";
@@ -1106,6 +1098,23 @@ namespace CMMSAPIs.Repositories.PM
                                 $"WHERE id = {request.id};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
+            string mainQuery = $"INSERT INTO pm_task(plan_id,facility_id,category_id,frequency_id,plan_Date,assigned_to,status,prev_task_id,prev_task_done_date)  " +
+                            $"select plan_id as plan_id,facility_id,category_id,frequency_id,CASE when  pm_task.frequency_id in( 4,5,6)  then\r\nDATE_ADD(plan_date, INTERVAL freq.months MONTH) \r\n  WHEN pm_task.frequency_id = 7 THEN \r\n DATE_ADD(plan_date, INTERVAL 1 YEAR)\r\nelse DATE_ADD(plan_date, INTERVAL freq.days DAY) end as plan_date,assigned_to,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status,{request.id} as prev_task_id, '{UtilsRepository.GetUTCTime()}' as prev_task_done_date from pm_task " +
+                            $"left join frequency as freq on pm_task.frequency_id = freq.id where pm_task.id = {request.id}; " +
+                            $"SELECT LAST_INSERT_ID(); ";
+            DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
+            int id = Convert.ToInt32(dt3.Rows[0][0]);
+
+            string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                $"select {id} as task_id, plan_id, Asset_id, checklist_id, PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pm_schedule where task_id = {request.id}";
+            await Context.ExecuteNonQry<int>(scheduleQry);
+
+            string setCodeNameQuery = "UPDATE pm_schedule " +
+                                        "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                        "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                        "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                        "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+            await Context.ExecuteNonQry<int>(setCodeNameQuery);
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Cancel Rejected " : request.comment, CMMS.CMMS_Status.PM_CANCELLED_APPROVED, userID);
@@ -1118,7 +1127,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send Task Notification: {ex.Message}");
             }
-            CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Cancel Rejected successfully.");
+            CMDefaultResponse response = new CMRescheduleApprovalResponse(id, request.id, retCode, "PM Task Approved  successfully.");
             return response;
         }
 
@@ -1132,7 +1141,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_COMPLETED)
+            if (status != CMMS.CMMS_Status.PM_CLOSED)
                 return new CMRescheduleApprovalResponse(0, request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM Task can be Approved ");
 
             string myQuery = "UPDATE pm_task SET " +
@@ -1176,13 +1185,13 @@ namespace CMMSAPIs.Repositories.PM
 
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? $"PM Task Close Approved" : request.comment, CMMS.CMMS_Status.PM_APPROVED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? $"PM Task Close Approved" : request.comment, CMMS.CMMS_Status.PM_CLOSE_APPROVED, userID);
             //CMPMScheduleViewDetail _PMList = await GetPMTaskDetail(request.id);
             //CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_APPROVED, _PMList);
             try
             {
                 CMPMTaskView _PMTaskList = await GetPMTaskDetail(request.id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_APPROVED, new[] { userID }, _PMTaskList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CLOSE_APPROVED, new[] { userID }, _PMTaskList);
             }
             catch (Exception ex)
             {
@@ -1204,27 +1213,27 @@ namespace CMMSAPIs.Repositories.PM
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
 
-            if (status != CMMS.CMMS_Status.PM_COMPLETED)
+            if (status != CMMS.CMMS_Status.PM_CLOSED)
                 return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.FAILURE, "Only a closed PM Task can be Rejected");
 
             string myQuery = "UPDATE pm_task SET " +
-                                $"rejected_by = {userID}, " +
+                                $"close_rejected_by_id = {userID}, " +
                                 $"rejected_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"reject_remarks = '{request.comment}', " +
                                 $"status = {(int)CMMS.CMMS_Status.PM_CLOSE_REJECTED}, " +
                                 $"status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
                                 $"status_updated_by = {userID}  " +
-                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_COMPLETED};";
+                                $"WHERE id = {request.id} AND status = {(int)CMMS.CMMS_Status.PM_CLOSED};";
             int retVal = await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             if (retVal > 0)
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Rejected" : request.comment, CMMS.CMMS_Status.PM_REJECTED, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_TASK, request.id, 0, 0, string.IsNullOrEmpty(request.comment) ? "PM Task Close Rejected" : request.comment, CMMS.CMMS_Status.PM_CLOSE_REJECTED, userID);
             CMDefaultResponse response = new CMDefaultResponse(request.id, retCode, "PM Task Close Rejected");
             try
             {
                 CMPMTaskView _PMPlanList = await GetPMTaskDetail(request.id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_REJECTED, new[] { userID }, _PMPlanList);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_TASK, CMMS.CMMS_Status.PM_CLOSE_REJECTED, new[] { userID }, _PMPlanList);
             }
             catch (Exception ex)
             {
@@ -1318,7 +1327,7 @@ namespace CMMSAPIs.Repositories.PM
             string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
-            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_REJECTED)
+            if (status != CMMS.CMMS_Status.PM_START && status != CMMS.CMMS_Status.PM_CLOSE_REJECTED)
             {
                 responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
                     "Task Execution must be rejected or in progress to modify execution details"));
@@ -1582,7 +1591,7 @@ namespace CMMSAPIs.Repositories.PM
             string myQuery2 = $"SELECT pm_schedule.id as schedule_id, assets.name as asset_name, checklist.checklist_number as checklist_name, " +
                 $" CONCAT(startedBy.firstName, ' ' ,startedBy.lastName) as PM_Execution_Started_by_name, CONCAT(updatedBy.firstName, ' ' ,updatedBy.lastName) as updatedbyName, " +
                 $" CONCAT(createdBy.firstName, ' ' ,createdBy.lastName) as createdbyName, pm_schedule.Status AS status, PM_Schedule_date, PM_Frequecy_Name, CONCAT(rejectedBy.firstName, ' ' ,rejectedBy.lastName) as rejectedbyName, " +
-                $"CONCAT(approvedBy.firstName, ' ' , approvedBy.lastName) as approvedbyName, CONCAT(cancelledrejected.firstName, ' ' , cancelledrejected.lastName) as cancelledrejectedbyName, " +
+                $"CONCAT(approvedBy.firstName, ' ' , approvedBy.lastName) as approvedbyName, facility.name AS facilityidbyName, CONCAT(cancelledrejected.firstName, ' ' , cancelledrejected.lastName) as cancelledrejectedbyName, " +
                 $"CONCAT(cancelledapproved.firstName, ' ' , cancelledapproved.lastName) as cancelledapprovedbyName, PM_Schedule_updated_by, " +
                 $"CONCAT(submittedBy.firstName, ' ' , submittedBy.lastName) as submittedByName, " +
                 $"CONCAT(completedbyName.firstName, ' ' , completedbyName.lastName) as completedBy_name" +
@@ -1597,6 +1606,7 @@ namespace CMMSAPIs.Repositories.PM
                 $"left join users AS cancelledrejected ON cancelledrejected.id = pm_schedule.PM_Schedule_cancel_by_id " +
                 $"left join users AS cancelledapproved ON cancelledapproved.id = pm_schedule.PM_Schedule_Approved_by_id " +
                 $"left join users AS submittedBy ON submittedBy.id = pm_schedule.submittedById " +
+                $"LEFT JOIN facilities as facility ON facility.id = pm_schedule.Facility_id " +
                 $"left join users AS completedbyName ON completedbyName.id = pm_schedule.PM_Schedule_Completed_by_id " +
                 $"where pm_schedule.id = {schedule_id} and task_id = {task_id};";
 
@@ -1975,7 +1985,7 @@ namespace CMMSAPIs.Repositories.PM
                                     "RIGHT JOIN frequency ON a.PM_Frequecy_id = frequency.id " +
                                     "WHERE a.PM_Schedule_date = (SELECT CASE WHEN MAX(b.PM_Schedule_date) IS NOT NULL THEN MAX(b.PM_Schedule_date) ELSE NULL END AS schdate " +
                                     "FROM pm_schedule as b WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id AND b.status NOT IN " +
-                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_APPROVED}) AND " +
+                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}) AND " +
                                     $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY frequency.id ORDER BY frequency.id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;
@@ -2043,7 +2053,7 @@ namespace CMMSAPIs.Repositories.PM
                     {
                         if (frequency_schedule.schedule_date != null)
                         {
-                            string updateQry = $"UPDATE pm_schedule SET PM_Schedule_date = '{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', " +
+                            string updateQry = $"UPDATE pm_schedule SET Facility_id = {request.facility_id}, PM_Schedule_date = '{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', " +
                                                 $"PM_Schedule_updated_by = {userID}, PM_Schedule_updated_date = '{UtilsRepository.GetUTCTime()}' " +
                                                 $"WHERE id = {scheduleData[0].schedule_id};";
                             await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
@@ -2071,10 +2081,10 @@ namespace CMMSAPIs.Repositories.PM
                                $"('{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', '{frequency[0].name}', {frequency[0].id}, 'FRC{frequency[0].id}', " +
                                $"{facility[0].id}, '{facility[0].name}', 'FAC{facility[0].id + 1000}', {blockId}, 'BLOCK{blockId}', {category[0].id}, 'AC{category[0].id + 1000}', '{category[0].name}', " +
                                $"{asset[0].id}, 'INV{asset[0].id}', '{asset[0].name}', {user[0].id}, '{user[0].full_name}', {user[0].id}, '{user[0].full_name}', {userID}, " +
-                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SUBMIT}, '{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
+                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SCHEDULED}, '{UtilsRepository.GetUTCTime()}', {userID}); SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
                             int id = Convert.ToInt32(dt2.Rows[0][0]);
-                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SUBMIT, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SCHEDULED, userID);
                             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "PM Schedule data inserted successfully");
                             responseList.Add(response);
                         }
@@ -2100,7 +2110,7 @@ namespace CMMSAPIs.Repositories.PM
             try
             {
                 CMPMScheduleExecutionDetail PMTaskSchedule = await GetPMTaskScheduleDetail(task_id, schedule_id, facilitytimeZone);
-                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_SUBMIT, new[] { userID }, PMTaskSchedule);
+                CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_SCHEDULE, CMMS.CMMS_Status.PM_SCHEDULED, new[] { userID }, PMTaskSchedule);
             }
             catch (Exception ex)
             {

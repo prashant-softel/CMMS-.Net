@@ -293,7 +293,10 @@ namespace CMMSAPIs.Models.SM
     {
         public int ID { get; set; }
         public int facilityId { get; set; }
+        public string facilityName { get; set; }
+        public int jobId { get; set; }
         public int requested_by_emp_ID { get; set; }
+        public int approved_by_emp_ID { get; set; }
         public string approver_name { get; set; }
         public string? requestd_date { get; set; }
         public string returnDate { get; set; }
@@ -318,19 +321,25 @@ namespace CMMSAPIs.Models.SM
         public int updated_by_emp_ID { get; set; }
         public string request_rejected_by_name { get; set; }
         public int rejected_by_emp_ID { get; set; }
-        public dynamic request_rejected_at { get; set; }
-        public string issue_appoved_by_name { get; set; }
+        public DateTime? rejected_date { get; set; }
+        public string issue_approved_by_name { get; set; }
         public int issue_approved_by_emp_ID { get; set; }
         public string issue_rejected_by_name { get; set; }
         public int issue_rejected_by_emp_ID { get; set; }
         public string updated_by_emp { get; set; }
         public string rejected_by_emp { get; set; }
+        public int from_actor_type_id { get; set; }
+        public int from_actor_id { get; set; }
+        public int to_actor_type_id { get; set; }
+        public int to_actor_id { get; set; }
         public string issue_approved_by_emp { get; set; }
         public string issue_rejected_by_emp { get; set; }
         public int UpdatedByEmpID { get; set; }
         public int RejectedByEmpID { get; set; }
         public int IssueApprovedByEmpID { get; set; }
         public int IssueRejectedByEmpID { get; set; }
+        public DateTime? issue_approved_date { get; set; }
+        public DateTime? issue_rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
     }
 
@@ -338,13 +347,14 @@ namespace CMMSAPIs.Models.SM
     {
         public int ID { get; set; }
         public int mrs_id { get; set; }
-
+        public int facilityId { get; set; }
+        public string facilityName { get; set; }
         public int requested_by_emp_ID { get; set; }
         public string approver_name { get; set; }
-        public string? requestd_date { get; set; }
+        public DateTime? requested_date { get; set; }
         public string returnDate { get; set; }
         public string? issued_date { get; set; }
-        public string approval_date { get; set; }
+        public DateTime? approved_date { get; set; }
         public int approval_status { get; set; }
         public string approval_comment { get; set; }
         public string requested_by_name { get; set; }
@@ -359,6 +369,13 @@ namespace CMMSAPIs.Models.SM
         public string remarks { get; set; }
         public int is_splited { get; set; }
         public int is_mrs_return { get; set; }
+        public int return_mrs { get; set; }
+        public int from_actor_type_id { get; set; }
+        public int from_actor_id { get; set; }
+        public int to_actor_type_id { get; set; }
+        public int to_actor_id { get; set; }
+        public string request_rejected_by_name { get; set; }
+        public dynamic rejected_date { get; set; }
         public List<CMMRSItems> CMMRSItems { get; set; }
         public List<CMMRSItems> CMMRSFaultyItems { get; set; }
     }

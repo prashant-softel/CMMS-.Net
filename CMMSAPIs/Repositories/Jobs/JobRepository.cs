@@ -83,7 +83,7 @@ namespace CMMSAPIs.Repositories.Jobs
         }
 
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
-        internal async Task<List<CMJobModel>> GetJobList(int facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytimeZone)
+        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytimeZone)
 
         {
             /*
@@ -121,9 +121,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
                                         "users as user ON user.id = job.assignedId ";
-            if (facility_id > 0)
+            if (!string.IsNullOrEmpty(facility_id))
             {
-                myQuery += " WHERE job.facilityId = " + facility_id;
+                myQuery += $" and job.facilityId IN ({facility_id})";
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;
@@ -137,8 +137,11 @@ namespace CMMSAPIs.Repositories.Jobs
                         myQuery += " AND DATE_FORMAT(job.createdAt,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
                 }
 
-                if (selfView > 0)
-                    myQuery += " AND (user.id = " + userId + " OR created_user.id = " + userId + ")";
+                if (selfView)
+                {
+                    myQuery += " AND (user.id = " + userId + " OR job.createdBy = " + userId + " OR job.assignedId = " + userId + ")";
+                }
+
 
                 if (status?.Length > 0)
                     myQuery += " AND job.status IN (" + status + ")";
@@ -247,20 +250,20 @@ namespace CMMSAPIs.Repositories.Jobs
                     }
                     else
                     {
-                        retValue = String.Format("Job{0} Created by {1} and Assigned to {2}", jobId, jobObj.created_by_name, jobObj.assigned_name);
+                        retValue = String.Format("Job{0} created by {1} and assigned to {2}", jobId, jobObj.created_by_name, jobObj.assigned_name);
                     }
                     break;
                 case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
-                    retValue = String.Format("Job{0} assigned to <{1}>", jobId, jobObj.assigned_name);
+                    retValue = String.Format("Job{0} assigned to {1}", jobId, jobObj.assigned_name);
                     break;
                 case CMMS.CMMS_Status.JOB_LINKED:     //Linked
-                    retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.job_title, jobObj.current_ptw_id);
+                    retValue = String.Format("Job{0} linked to PTW{1}", jobId, jobObj.current_ptw_id);
                     break;
                 case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
                     retValue = String.Format("Job{0} closed", jobId);
                     break;
                 case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
-                    retValue = String.Format("Job{0} <{1}> cancelled", jobId);
+                    retValue = String.Format("Job{0} cancelled by <{1}>", jobId, jobObj.cancelled_by_name);
                     break;
                 default:
                     break;
@@ -282,8 +285,8 @@ namespace CMMSAPIs.Repositories.Jobs
                                     "job.id as id, facilities.id as facility_id, facilities.name as facility_name, blocks.id as block_id, blocks.name as block_name, job.status as status, job.createdAt as created_at,created_user.id as created_by_id," +
                                     " CONCAT(created_user.firstName, ' ', created_user.lastName) as created_by_name,bus_user.name as Company, user.id as assigned_id, CONCAT(user.firstName, ' ', user.lastName) as assigned_name, job.title as job_title, " +
                                     "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
-                                    " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name,ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, " +
-                                    "jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on ," +
+                                    " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name, ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, job.cancelledAt as cancelled_at, job.cancelledBy as cancelled_by_id, " +
+                                    " jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on, CONCAT(cancelledByUser.firstName, ' ', cancelledByUser.lastName) as cancelled_by_name, " +
                                     " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName, ' ', isotak.lastName) as Isolation_taken  " +
                                       "FROM " +
                                             "jobs as job " +
@@ -302,6 +305,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "LEFT join  assets as passt on ptw.physicalIsoEquips = passt.id " +
                                             "Left join users as isotak on ptw.physicalIsolation = isotak.id  " +
                                             "left join users as tbtDone on ptw.TBT_Done_By = tbtDone.id " +
+                                            "LEFT join users as cancelledByUser ON cancelledByUser.id = job.cancelledBy " +
                                       "LEFT JOIN " +
                                             "users as user ON user.id = job.assignedId " +
                                       "WHERE job.id = " + job_id;
@@ -466,7 +470,7 @@ namespace CMMSAPIs.Repositories.Jobs
             CMJobView _ViewJobList = await GetJobDetails(newJobID, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);
-            //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_CREATED, new[] { userId }, _ViewJobList);
 
             string strJobStatusMsg = $"Job{newJobID} Created";
             int assigned_id = 1;
@@ -475,7 +479,7 @@ namespace CMMSAPIs.Repositories.Jobs
                 strJobStatusMsg = $"Job {newJobID} Created and Assigned to " + _ViewJobList.assigned_name;
 
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Assigned", CMMS.CMMS_Status.JOB_ASSIGNED, userId);
-                // await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { userId }, _ViewJobList);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.JOB, CMMS.CMMS_Status.JOB_ASSIGNED, new[] { userId }, _ViewJobList);
             }
 
             // File Upload code for JOB
@@ -565,7 +569,19 @@ namespace CMMSAPIs.Repositories.Jobs
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}, updatedBy = {updatedBy} where id = {job_id} ";
+
+            string getstatusqry = $"select status from jobs where id = {job_id} ";
+            List<CMJobView> status = await Context.GetData<CMJobView>(getstatusqry).ConfigureAwait(false);
+
+            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {updatedBy}";
+
+            if (status[0].status == (int)CMMS.CMMS_Status.JOB_CREATED)
+            {
+                updateQry += $", status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}";
+            }
+
+            updateQry += $" where id = {job_id}";
+
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -573,8 +589,6 @@ namespace CMMSAPIs.Repositories.Jobs
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-
-
 
             CMJobView _ViewJobList = await GetJobDetails(job_id, "");
 

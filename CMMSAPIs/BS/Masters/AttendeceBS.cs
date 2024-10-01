@@ -16,6 +16,7 @@ namespace CMMSAPIs.BS.Masters
 
         Task<List<CMGetAttendenceList>> GetAttendanceList(int facility_id, int year);
         Task<object> GetAttendanceByDetailsByMonth(int facility_id, DateTime from_date, DateTime to_date);
+        Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requset, int userID);
     }
     public class _AttendeceBS : AttendeceBS
     {
@@ -86,6 +87,22 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new AttendenceRepository(getDB))
                 {
                     return await repos.GetAttendanceByDetailsByMonth(facility_id, from_date, to_date);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requset, int userID)
+        {
+            try
+            {
+                using (var repos = new AttendenceRepository(getDB))
+                {
+                    return await repos.UpdateAttendance(requset, userID);
 
                 }
             }

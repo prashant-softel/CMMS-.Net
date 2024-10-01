@@ -16,6 +16,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> AddSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> UpdateSourceOfObservation(MISSourceOfObservation request, int userId);
         Task<CMDefaultResponse> DeleteSourceOfObservation(int id, int userId);
+        Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id);
+        Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id);
         Task<MISTypeObservation> GetTypeOfObservation(int id);
         Task<List<MISTypeObservation>> GetTypeOfObservationList();
         Task<CMDefaultResponse> AddTypeOfObservation(MISTypeObservation request, int userId);
@@ -90,7 +92,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate);
-        Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId);
+        Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId, int check_point_type_id);
         Task<CMStatutoryCompliance> GetStatutoryComplianceMasterById(int id);
         Task<List<CMStatutoryCompliance>> GetStatutoryComplianceMasterList();
         Task<CMDefaultResponse> CreateStatutoryComplianceMaster(CMStatutoryCompliance request, int UserId);
@@ -111,7 +113,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<MISTypeObservation>> GetDocument();
         Task<CMDefaultResponse> UpdateDocument(MISTypeObservation request, int userID);
         Task<CMDefaultResponse> DeleteDocument(int id, int userID);
-        Task<CMObservationByIdList> GetObservationById(int observation_id);
+        Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id);
         Task<List<CMObservation>> GetObservationList(int facility_Id, DateTime fromDate, DateTime toDate);
         Task<CMDefaultResponse> DeleteObservation(int id, int UserID, string comment);
         Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
@@ -142,6 +144,27 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> DeleteKaizensData(int id);
         Task<List<KaizensData>> GetKaizensData();
         Task<List<CumalativeReport>> Cumulativereport(string facility_id, int module_id, string start_date, string end_date);
+        Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request, int check_point_type_id, int userId);
+        //Evaution
+        Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int userID);
+        Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanRejected(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosedApproved(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelledReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosedReject(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskClosed(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelled(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskCancelledApproved(CMApproval request, int userID);
+        Task<CMDefaultResponse> DeleteEvaluationPlan(int id, int userID);
+        Task<CMDefaultResponse> EvaluationTaskStart(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanUpdated(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskSchedule(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskAssign(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
+        Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
+        Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
+        Task<List<ProjectDetails>> GetMisSummary(string year, int userID);
+        Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -227,6 +250,36 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.DeleteSourceOfObservation(id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.ApproveObservation(request, userId, facilitytimeZone, check_point_type_id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<CMDefaultResponse> RejectObservation(CMApproval request, int userId, string facilitytimeZone, int check_point_type_id)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.RejectObservation(request, userId, facilitytimeZone,check_point_type_id);
                 }
             }
             catch (Exception ex)
@@ -1284,13 +1337,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId)
+        public async Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.CloseObservation(requset, userId);
+                    return await repos.CloseObservation(requset, userId, check_point_type_id);
 
                 }
             }
@@ -1670,13 +1723,13 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<CMObservationByIdList> GetObservationById(int observation_id)
+        public async Task<CMObservationDetails> GetObservationDetails(int observation_id, int check_point_type_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetObservationById(observation_id);
+                    return await repos.GetObservationDetails(observation_id, check_point_type_id);
 
                 }
             }
@@ -2059,6 +2112,154 @@ namespace CMMSAPIs.BS.MISMasters
                 using (var repos = new MISMasterRepository(getDB))
                 {
                     return await repos.Cumulativereport(facility_id, module_id, start_date, end_date);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> AssingtoObservation(AssignToObservation request, int check_point_type_id, int userId)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.AssingtoObservation(request, check_point_type_id, userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public async Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.CreateEvaluation(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.ApproveEvaluation(request, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public Task<CMDefaultResponse> EvaluationPlanRejected(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosedApproved(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelledReject(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosedReject(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskClosed(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelled(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskCancelledApproved(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> DeleteEvaluationPlan(int id, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskStart(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationPlanUpdated(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskSchedule(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskAssign(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<ProjectDetails>> GetMisSummary(string year, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GetMisSummary(year, userID);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID)
+        {
+            try
+            {
+                using (var repos = new MISMasterRepository(getDB))
+                {
+                    return await repos.GeEnvironmentalSummary(year, userID);
                 }
             }
             catch (Exception ex)

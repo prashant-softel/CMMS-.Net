@@ -113,11 +113,19 @@ namespace CMMSAPIs.Repositories.Utils
                 $"WHERE moduleType = {(int)module_type} AND moduleRefId = {id} AND secondaryModuleRefType = {(int)module_type} ORDER BY history.createdAt DESC";
                 _Log = await Context.GetData<CMLog>(myQuery1).ConfigureAwait(false);
             }
+            else if (module_type == CMMS.CMMS_Modules.PM_TASK)
+            {
+                statusCase += "ELSE 'Invalid' END ";
+                string myQuery = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT (UPPER(status_cmms))) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
+                    $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id})  ORDER BY history.id DESC";
+                _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
+
+            }
             else
             {
                 statusCase += "ELSE 'Invalid' END ";
                 string myQuery = $"select history.Id as id, moduleType as module_type, moduleRefId as module_ref_id, secondaryModuleRefType as secondary_module, secondaryModuleRefId as secondary_module_ref_id, comment as comment, history.status as status, {statusCase} as status_cmms,(SELECT (UPPER(status_cmms))) as status_name, history.createdBy as created_by_id, CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, history.createdAt as created_at, history.currentLatitude as current_latitude, history.currentLongitude as current_longitude from history left join users as created_user on history.createdBy=created_user.id " +
-                    $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id}) ORDER BY history.createdAt DESC";
+                    $"WHERE (moduleType = {(int)module_type} AND moduleRefId = {id}) OR (secondaryModuleRefType = {(int)module_type} AND secondaryModuleRefId = {id}) ORDER BY  history.id DESC";
                 _Log = await Context.GetData<CMLog>(myQuery).ConfigureAwait(false);
             }
             foreach (var list in _Log)

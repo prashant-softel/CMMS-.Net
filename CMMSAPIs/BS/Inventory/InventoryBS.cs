@@ -1,11 +1,9 @@
-﻿using CMMSAPIs.Helper;
-using CMMSAPIs.Repositories.Inventory;
+using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Inventory;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Inventory;
 using Microsoft.AspNetCore.Hosting;
 using System;
-using System.Data;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,8 +32,8 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> DeleteInventoryCategory(int id);
         Task<List<CMDefaultList>> GetWarrantyTypeList();
         Task<List<CMDefaultList>> GetWarrantyUsageTermList();
-        Task<List<CMWarrantyCertificate>> GetWarrantyCertificate();
-        Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytime);
+        Task<List<CMWarrantyCertificate>> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date);
+        Task<List<CMCalibrationAssets>> GetCalibrationList(string facilityId, string facilitytime);
 
         Task<CMDefaultResponse> SetParentAsset(int parentID, int childID, int userID);
     }
@@ -391,13 +389,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate()
+        public async Task<List<CMWarrantyCertificate>> GetWarrantyCertificate(string facility_id, DateTime from_date, DateTime to_date)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetWarrantyCertificate();
+                    return await repos.GetWarrantyCertificate(facility_id, from_date, to_date);
 
                 }
             }
@@ -407,7 +405,7 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMCalibrationAssets>> GetCalibrationList(int facilityId, string facilitytime)
+        public async Task<List<CMCalibrationAssets>> GetCalibrationList(string facilityId, string facilitytime)
         {
             try
             {

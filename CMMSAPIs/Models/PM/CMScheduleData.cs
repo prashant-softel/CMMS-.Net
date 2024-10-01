@@ -16,6 +16,7 @@ namespace CMMSAPIs.Models.PM
         public int category_id { get; set; }
         public string category_name { get; set; }
         public int assigned_to_id { get; set; }
+        public string assignedTo { get; set; }
         public string assigned_to_name { get; set; }
         public int plan_freq_id { get; set; }
         public string plan_freq_name { get; set; }
@@ -42,8 +43,18 @@ namespace CMMSAPIs.Models.PM
         public string comment { get; set; }
         public string started_by_name { get; set; }
         public int task_id { get; set; }
-
+        public string facilityidbyName { get; set; }
         public string status_name { get; set; }
+        public string deleted_by_name { get; set; }
+        public string checklist_name { get; set; }
+        public string description { get; set; }
+        public string plan_number { get; set; }
+        public DateTime? schedule_Date { get; set; }
+        public string Employees { get; set; }
+        public int deleted_by { get; set; }
+        public DateTime? deleted_Date { get; set; }
+
+
     }
     public class CMPMPlanDetail : CMPMPlanList
     {

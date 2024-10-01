@@ -300,7 +300,7 @@ namespace CMMSAPIs.Repositories.DSM
             }
             return new CMDefaultResponse(idList, retCode, strRetMessage);
         }
-        public async Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId)
+        public async Task<List<CMDSMData>> getDSMData(string fy, string month, string stateId, string spvId, string siteId, string dsmtype)
         {
             string[] fyArray = null;
             string[] monthArray = null;
@@ -332,7 +332,7 @@ namespace CMMSAPIs.Repositories.DSM
             filter += (!string.IsNullOrEmpty(stateId) ? " AND sm.stateId IN (" + string.Join(",", stateId) + ")" : string.Empty);
             filter += (!string.IsNullOrEmpty(spvId) ? " AND sm.spvId IN (" + string.Join(",", spvId) + ")" : string.Empty);
             filter += (!string.IsNullOrEmpty(siteId) ? " AND sm.id IN (" + string.Join(",", siteId) + ")" : string.Empty);
-
+            filter += (!string.IsNullOrEmpty(dsmtype) ? " AND dsm.dsm_type IN (" + string.Join(",", dsmtype) + ")" : string.Empty);
             string qry = "SELECT dsm.id as id , fy, month,sm.site as site,dsm.site_id ,spv.id as spv_id, sm.stateId, spv.name AS spv, states.name AS state,dct.name as  category, " +
                          "dst.name as dsmtype ,dst.id as dsm_type_id , " +
                          "bus.name  AS forcasterName, dsmPenalty, actualKwh, scheduleKwh, " +
@@ -345,10 +345,8 @@ namespace CMMSAPIs.Repositories.DSM
                          "LEFT JOIN dsm_type as dst on dsm.dsm_type = dst.id  " +
                          "LEFT JOIN states ON states.id = sm.stateId " +
                          "WHERE 1 = 1 " + filter + " " +
-                         "GROUP BY dsm.id, fy, month, site";
-
+                         "GROUP BY fy, month, site";
             List<CMDSMData> data = await Context.GetData<CMDSMData>(qry).ConfigureAwait(false);
-
             return data;
         }
         public async Task<List<DSMTYPE>> getDSMType()

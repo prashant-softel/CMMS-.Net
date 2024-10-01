@@ -68,41 +68,41 @@ namespace CMMSAPIs.Repositories
 
         }
 
-        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id)
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id, CMGOMaster m_GOObj)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
             string retValue = "";
             switch (status)
             {
                 case CMMS.CMMS_Status.GO_DRAFT:
-                    retValue = $" Goods order{Id} Drafted";
+                    retValue = String.Format("GO{0} Updated By {1}", m_GOObj.Id, m_GOObj.go_updated_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_SUBMITTED:
-                    retValue = $"Goods order{Id} Submitted and Waiting for Appoval";
+                    retValue = String.Format("GO{0} Submitted and Waiting for Appoval By {1}", m_GOObj.Id, m_GOObj.submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_CLOSED:
-                    retValue = $"Goods order{Id} Closed";
+                    retValue = String.Format("GO{0} Closed By {1}", m_GOObj.Id, m_GOObj.closed_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_DELETED:
-                    retValue = $"Goods order{Id} deleted";
+                    retValue = String.Format("GO{0} deleted By {1}", m_GOObj.Id, m_GOObj.deleted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_REJECTED:
-                    retValue = $"Goods order{Id} rejected";
+                    retValue = String.Format("GO{0} rejected By {1}", m_GOObj.Id, m_GOObj.rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_APPROVED:
-                    retValue = $"Goods order{Id} approved";
+                    retValue = String.Format("GO{0} approved By {1}", m_GOObj.Id, m_GOObj.approved_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVE_DRAFT:
-                    retValue = $"Goods order{Id} receive draft";
+                    retValue = String.Format("GO{0} receive draft By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_SUBMITTED:
-                    retValue = $"Goods order{Id} receive submitted";
+                    retValue = String.Format("GO{0} receive submitted By {1}", m_GOObj.Id, m_GOObj.receive_submitted_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_REJECTED:
-                    retValue = $"Goods order{Id} receive rejected";
+                    retValue = String.Format("GO{0} receive rejected By {1}", m_GOObj.Id, m_GOObj.receive_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.GO_RECEIVED_APPROVED:
-                    retValue = $"Goods order{Id} receive approved";
+                    retValue = String.Format("GO{0} receive approved By {1}", m_GOObj.Id, m_GOObj.receive_approved_by_name);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -265,7 +265,7 @@ namespace CMMSAPIs.Repositories
             CMDefaultResponse response = new CMDefaultResponse(goid, CMMS.RETRUNSTATUS.SUCCESS, "Goods order created successfully.");
             return response;
         }
-        internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID)
+        internal async Task<CMDefaultResponse> UpdateGO(CMGoodsOrderList request, int userID, string facilitytimeZone)
         {
             string OrderQuery = "";
             string received_date = (request.receivedAt == null) ? "0001-01-01 00:00:00" : ((DateTime)request.receivedAt).ToString("yyyy-MM-dd HH:mm:ss");
@@ -277,7 +277,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}," +
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},go_updated_by = {userID},go_updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_DRAFT}," +
                         $" received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}'" +
                         $"  where ID={request.id}";
             }
@@ -287,7 +287,7 @@ namespace CMMSAPIs.Repositories
                         $"challan_no = '{request.challan_no}',po_no='{request.po_no}', freight='{request.freight}',no_pkg_received='{request.no_pkg_received}'," +
                         $"lr_no='{request.lr_no}',condition_pkg_received='{request.condition_pkg_received}',vehicle_no='{request.vehicle_no}', gir_no='{request.gir_no}', " +
                         $"challan_date = '{request.challan_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', " +
-                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},updated_by = {userID},updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
+                        $"job_ref='{request.job_ref}',amount='{request.amount}', currency={request.currencyID},go_updated_by = {userID},go_updatedOn = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.GO_SUBMITTED}, received_on = '{received_date}', po_date = '{request.po_date.Value.ToString("yyyy-MM-dd HH:mm:ss")}', purchaseDate= '{request.purchaseDate.Value.ToString("yyyy-MM-dd HH:mm:ss")}' where ID={request.id}";
             }
             await Context.ExecuteNonQry<int>(OrderQuery);
 
@@ -338,6 +338,8 @@ namespace CMMSAPIs.Repositories
             }
             else
             {
+                CMGOMaster _GOList = await GetGODetailsByID(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_GO, CMMS.CMMS_Status.GO_SUBMITTED, new[] { userID }, _GOList);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_GO, request.id, 0, 0, request.remarks, CMMS.CMMS_Status.GO_SUBMITTED);
             }
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Goods order updated successfully.");
@@ -1082,7 +1084,8 @@ namespace CMMSAPIs.Repositories
                 "CONCAT(approveUser.firstName, ' ', approveUser.lastName) as approved_by_name, po.approvedOn, " +
                 "CONCAT(receiveSubmitUser.firstName, ' ', receiveSubmitUser.lastName) as receive_submit_by_name, po.updatedOn, " +
                 "CONCAT(receiveRejectUser.firstName, ' ', receiveRejectUser.lastName) as receive_rejected_by_name , po.receive_rejected_at, " +
-                "CONCAT(receiveApproveUser.firstName, ' ', receiveApproveUser.lastName) as receive_approved_by_name, po.receive_approved_at " +
+                "CONCAT(receiveApproveUser.firstName, ' ', receiveApproveUser.lastName) as receive_approved_by_name, po.receive_approved_at, " +
+                "CONCAT(goupdate.firstName, ' ', goupdate.lastName) as go_updated_by_name, po.go_updatedOn " +
                 "FROM smgoodsorderdetails pod " +
                 "LEFT JOIN smgoodsorder po ON po.ID = pod.purchaseID " +
                 "LEFT JOIN smassetitems sai ON sai.ID = pod.assetItemID " +
@@ -1106,6 +1109,7 @@ namespace CMMSAPIs.Repositories
                 "LEFT JOIN users receiveSubmitUser ON receiveSubmitUser.id = po.updated_by " +
                 "LEFT JOIN users receiveRejectUser ON receiveRejectUser.id = po.receive_rejected_by_id " +
                 "LEFT JOIN users receiveApproveUser ON receiveApproveUser.id = po.receive_approved_by_id " +
+                "LEFT JOIN users goupdate ON goupdate.id = po.go_updated_by " +
                 "WHERE po.ID =" + id + " and pod.is_splited = 1 /*GROUP BY pod.ID*/";
 
             List<CMGoodsOrderList> _List = await Context.GetData<CMGoodsOrderList>(query).ConfigureAwait(false);
@@ -1139,7 +1143,7 @@ namespace CMMSAPIs.Repositories
                 location_ID = p.location_ID,
                 freight_value = p.freight_value,
                 inspection_report = p.inspection_report,
-                approved_by_name = p.approvedBy,
+                approved_by_name = p.approved_by_name,
                 receive_rejected_by_name = p.receive_rejected_by_name,
                 drafted_by_name = p.drafted_by_name,
                 closed_by_name = p.closed_by_name,
@@ -1153,7 +1157,10 @@ namespace CMMSAPIs.Repositories
                 approved_at = p.approvedOn,
                 receive_submitted_at = p.updatedOn,
                 receive_rejected_at = p.receive_rejected_at,
-                receive_approved_at = p.receive_approved_at
+                receive_approved_at = p.receive_approved_at,
+                go_updated_by_name = p.go_updated_by_name,
+                go_updatedOn = p.go_updatedOn
+
 
 
             }).FirstOrDefault();
@@ -1191,9 +1198,10 @@ namespace CMMSAPIs.Repositories
                 }).ToList();
                 _MasterList.GODetails = _itemList;
 
+                //CMGOMaster m_GOObj = new CMGOMaster();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList.status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_GO, _Status);
-                string _longStatus = getLongStatus(_Status, _MasterList.Id);
+                string _longStatus = getLongStatus(_Status, _MasterList.Id, _MasterList);
 
                 _MasterList.status_short = _shortStatus;
                 _MasterList.status_long = _longStatus;
@@ -1279,9 +1287,10 @@ namespace CMMSAPIs.Repositories
 
             for (var i = 0; i < _MasterList.Count; i++)
             {
+                CMGOMaster m_GOObj = new CMGOMaster();
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_MasterList[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_GO, _Status);
-                string _longStatus = getLongStatus(_Status, _MasterList[i].Id);
+                string _longStatus = getLongStatus(_Status, _MasterList[i].Id, m_GOObj);
 
                 _MasterList[i].status_short = _shortStatus;
                 _MasterList[i].status_long = _longStatus;

@@ -396,15 +396,28 @@ namespace CMMSAPIs.Models.Masters
 
     public class CMChecklistInspectionReport
     {
-        public int id { get; set; }
+        public int facility_id { get; set; }
+        public string facility_name { get; set; }
+        public List<Checklist1> checklist { get; set; }
+    }
+    public class ChecklistDetails
+    {
         public string checklist_name { get; set; }
         public string SOP_number { get; set; }
         public string frequency { get; set; }
-        public string month { get; set; }
         public string inspection_status { get; set; }
         public DateTime? date_of_inspection { get; set; }
         public string checklist_attachment { get; set; }
         public int no_of_unsafe_observation { get; set; }
+    }
+
+    public class Checklist1 : ChecklistDetails
+    {
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+        public dynamic year_id { get; set; }
+        public List<ChecklistDetails> Details { get; set; }
+
     }
     public class CMObservationReport
     {
@@ -419,11 +432,15 @@ namespace CMMSAPIs.Models.Masters
         public string risk_type { get; set; }
         public string observation_description { get; set; }
         public string corrective_action { get; set; }
-        public string responsible_person { get; set; }
+        public int responsible_person { get; set; }
+
+
+        public int assign_to { get; set; }
+        public string assigned_to_name { get; set; }
         public DateTime? target_date { get; set; }
         public string action_taken { get; set; }
         public DateTime? closer_date { get; set; }
-        public string cost_type { get; set; }
+        public int cost_type { get; set; }
         public string status { get; set; }
         public int days_remaining { get; set; }
         public string timeline { get; set; }
@@ -608,17 +625,17 @@ namespace CMMSAPIs.Models.Masters
     public class CMObservation
     {
         public int id { get; set; }
+        public int check_point_type_id { get; set; }  // added type of enum 
         public int facility_id { get; set; }
-        public string contractor_name { get; set; }
+        public string operator_name { get; set; }
         public int risk_type_id { get; set; }
         public string risk_type { get; set; }
         public string preventive_action { get; set; }
-        public string responsible_person { get; set; }
+        public int assigned_to_id { get; set; }
+        public string assigned_to_name { get; set; }
         public string contact_number { get; set; }
-
-
-
         public int cost_type { get; set; }
+        public string Cost_name { get; set; }
         public DateTime closed_date { get; set; }
         public string observation_status { get; set; }
         public DateTime? date_of_observation { get; set; }
@@ -639,24 +656,29 @@ namespace CMMSAPIs.Models.Masters
         public string action_taken { get; set; }
         public dynamic month_of_observation { get; set; }
         public int status_code { get; set; }
+        public int createdid { get; set; }
+        public int updateid { get; set; }
         public string short_status { get; set; }
         // public List<int> file_ids { get; set; }
         public List<int> uploadfileIds { get; set; }
         public string comment { get; set; }
+
     }
-    public class CMObservationByIdList
+    public class CMObservationDetails
     {
         public int id { get; set; }
         public int facility_id { get; set; }
-        public string contractor_name { get; set; }
+        public string operator_name { get; set; }
         public int risk_type_id { get; set; }
-        public string risk_type_name { get; set; }
+        public string risk_type { get; set; }
         public string preventive_action { get; set; }
-        public string responsible_person { get; set; }
+        public int assigned_to_id { get; set; }
+        public string assigned_to_name { get; set; }
         public int status_code { get; set; }
         public string short_status { get; set; }
         public string contact_number { get; set; }
-        public string cost_type { get; set; }
+        public int cost_type { get; set; }
+        public string Cost_name { get; set; }
         public DateTime? date_of_observation { get; set; }
         public int type_of_observation { get; set; }
         public string type_of_observation_name { get; set; }
@@ -668,10 +690,13 @@ namespace CMMSAPIs.Models.Masters
         public string observation_description { get; set; }
         public DateTime? created_at { get; set; }
         public string created_by { get; set; }
+        public int createdid { get; set; }
         public DateTime? updated_at { get; set; }
         public string updated_by { get; set; }
+        public int updateid { get; set; }
         public dynamic month_of_observation { get; set; }
         public string action_taken { get; set; }
+        public dynamic observation_status { get; set; }
         public List<CMFileDetailObservation> FileDetails { get; set; }
     }
     public class CMFileDetailObservation
@@ -758,8 +783,10 @@ namespace CMMSAPIs.Models.Masters
         public int PetrolConsumedAtSite { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -770,6 +797,7 @@ namespace CMMSAPIs.Models.Masters
         public int month_id { get; set; }
         public int facility_id { get; set; }
         public string facility_name { get; set; }
+        public string Submited_by { get; set; }
         public int year { get; set; }
         public int KaizensImplemented { get; set; }
         public int CostForImplementation { get; set; }
@@ -778,6 +806,7 @@ namespace CMMSAPIs.Models.Masters
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class PlantationData
@@ -794,7 +823,9 @@ namespace CMMSAPIs.Models.Masters
         public int Status { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string Submited_by { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class VisitsAndNotices
@@ -813,8 +844,10 @@ namespace CMMSAPIs.Models.Masters
         public int AnyOther { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 
@@ -832,8 +865,10 @@ namespace CMMSAPIs.Models.Masters
         public int OccupationalIllnesses { get; set; }
         public int Status { get; set; }
         public int CreatedBy { get; set; }
+        public string Submited_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public int UpdatedBy { get; set; }
+        public string Updated_by_name { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
     public class CumalativeReport
@@ -847,7 +882,168 @@ namespace CMMSAPIs.Models.Masters
         public dynamic ClosedOnTime { get; set; }
         public dynamic ClosedWithExtension { get; set; }
         public dynamic ClosedOnTimeCreate { get; set; }
+        public dynamic CleaningType { get; set; }
+        public dynamic WaterUsed { get; set; }
+        public dynamic ScheduledQuantity { get; set; }
+        public dynamic ActualQuantity { get; set; }
+        public dynamic Abandoned { get; set; }
+        public dynamic Remark { get; set; }
+        public dynamic Deviation { get; set; }
+        public dynamic TimeTaken { get; set; }
+    }
 
+    public class AssignToObservation
+    {
+        public int id { get; set; }
+        public int user_id { get; set; }
+        public int check_point_type_id { get; set; }
+        public DateTime? target_date { get; set; }
+        public string comment { get; set; }
+        public int assigned_to_id { get; set; }
+        public int cost_type { get; set; }
+        public string preventive_action { get; set; }
+        public string observation_description { get; set; }
+        public string contractor_name { get; set; }  // contractor_name
+        public int risk_type_id { get; set; }  // risk_type_id
+        public int responsible_person { get; set; }  // responsible_person
+        public string contact_number { get; set; }  // contact_number   
+        public DateTime? date_of_observation { get; set; }  // date_of_observation    
+        public string location_of_observation { get; set; }  // location_of_observation
+        public string action_taken { get; set; }  // action_taken
+        public int source_of_observation { get; set; }  // source_of_observation
+        public int status_code { get; set; }  // status_code
+        public DateTime? updated_at { get; set; }  // updated_at
+        public int updated_by { get; set; }  // updated_by
+        public int type_of_observation { get; set; }
+    }
+    public class CMEvaluationCreate
+    {
+        public int id { get; set; }
+        public string plan_name { get; set; }
+        public int facility_id { get; set; }
+        public int frequency_id { get; set; }
+        public DateTime plan_date { get; set; }
+        public string assigned_to { get; set; }
+        public string status { get; set; }
+        public int created_by { get; set; }
+        public int updated_by { get; set; }
+        public int approved_by { get; set; }
+        public int rejected_by { get; set; }
+        public string remarks { get; set; }
+    }
+    public class MapAuditlist
+    {
+        public int id { get; set; }
+        public int evalution_id { get; set; }
+        public int audit_id { get; set; }
+        public decimal weightage { get; set; }
+        public string comments { get; set; }
+        public int created_by { get; set; }
+        public DateTime created_at { get; set; }
+        public int updated_by { get; set; }
+        public DateTime updated_at { get; set; }
+    }
+
+    public class ProjectDetails
+    {
+        public string SpvName { get; set; }
+        public string sitename { get; set; }
+        public string State { get; set; }
+        public string District { get; set; }
+        public string TalukMandal { get; set; }
+        public string ContractorName { get; set; }
+        public string ContractorSiteInChargeName { get; set; }
+        public string HfeSiteInChargeName { get; set; }
+        public string CapacityAC { get; set; }
+        public string TotalLandArea { get; set; }
+        public string LengthOfInternalTransmissionLineKm { get; set; }
+        public string NoOfWTGs { get; set; }
+        public string NoOfInternalPoles { get; set; }
+        public string LengthOfExternalTransmissionLineKm { get; set; }
+        public string RatingOfPSS { get; set; }
+        public string NoOfPowerTransformerInPSS { get; set; }
+        public string TransformerCapacity { get; set; }
+        public List<ManPowerData> MonthlyData { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
+
+
+    }
+
+    /*public class MonthlyData
+    {
+        public string Month { get; set; }
+
+        public ManPowerData ManPowerData { get; set; }
+        public IncidentAccidentData IncidentAccidentData { get; set; }
+        public HseTrainingData HseTrainingData { get; set; }
+        public HseInspectionAuditData HseInspectionAuditData { get; set; }
+        public ReportChecklistData ReportChecklistData { get; set; }
+        public GrievanceData GrievanceData { get; set; }
+        public OccupationalHealthData healthData { get; set; }
+    }*/
+
+    public class ManPowerData
+    {
+        public dynamic AvgHFEEmployee { get; set; }
+        public dynamic ManDaysHFEEmployee { get; set; }
+        public dynamic ManHoursWorkedHFEEmployee { get; set; }
+        public dynamic AvgContractorWorkers { get; set; }
+        public dynamic ManHoursWorked { get; set; }
+        public dynamic TotalManHours { get; set; }
+    }
+
+    public class IncidentAccidentData
+    {
+        public int FatalIncidents { get; set; }
+        public int LostTimeInjuries { get; set; }
+        public int MedicalTreatmentInjuries { get; set; }
+        public int FirstAidIncidents { get; set; }
+        public int FireIncidents { get; set; }
+        public int NearMisses { get; set; }
+        public int ManDaysLost { get; set; }
+        public decimal CostOfAccidents { get; set; }
+    }
+
+    public class HseTrainingData
+    {
+        public int TotalTrainings { get; set; }
+        public int TrainingManHours { get; set; }
+        public int MockDrillsConducted { get; set; }
+        public int SpecialTrainingsConducted { get; set; }
+    }
+
+    public class HseInspectionAuditData
+    {
+        public int ObservationsRaised { get; set; }
+        public int ObservationsClosed { get; set; }
+        public int MajorObservationsRaised { get; set; }
+        public int MajorObservationsClosed { get; set; }
+        public int UnsafeActsRecorded { get; set; }
+        public int UnsafeConditionsRecorded { get; set; }
+    }
+
+    public class ReportChecklistData
+    {
+        public int ReportsToBeInspected { get; set; }
+        public int ReportsInspectedInMonth { get; set; }
+        public int ReportsNotInspected { get; set; }
+    }
+
+    public class GrievanceData
+    {
+        public int TotalGrievancesRaised { get; set; }
+        public int GrievancesResolved { get; set; }
+        public int WorkforceGrievancesPending { get; set; }
+        public int LocalCommunityGrievancesResolved { get; set; }
+    }
+
+    public class EnviromentalSummary
+    {
+        public int facility_id { get; set; }
+        public string facilty_name { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
     }
 }
 

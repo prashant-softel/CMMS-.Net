@@ -44,7 +44,7 @@ namespace CMMSAPIs.Models.Facility
         public string state { get; set; }
         public string country { get; set; }
         public int pin { get; set; }
-
+        public dynamic experince { get; set; }
         public string designation { get; set; }
 
         public int[] responsibilityIds { get; set; }

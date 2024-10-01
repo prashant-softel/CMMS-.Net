@@ -5,6 +5,7 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,20 +27,21 @@ namespace CMMSAPIs.Repositories.SM
 
             string filter = " WHERE is_mrs_return = 0 and sm.facility_ID = " + facility_ID + "  AND  (DATE_FORMAT(sm.lastmodifieddate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' OR DATE_FORMAT(sm.returnDate,'%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "')";
 
-            string stmt = "SELECT is_mrs_return, sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
+            string stmt = "SELECT is_mrs_return, sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date,jc.jobId, " +
                 "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status,sm.issuedAt, CONCAT(ed2.firstName,' ',ed2.lastName) as issued_name , " +
                 "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
                  " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, sm.remarks " +
-                "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID  LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID LEFT JOIN users ed2 ON ed2.id = sm.issued_by_emp_ID   " +
+                "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID  LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID LEFT JOIN users ed2 ON ed2.id = sm.issued_by_emp_ID LEFT JOIN jobcards jc ON jc.id = sm.id   " +
                 "" + filter + "";
             List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
-
 
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 if (_List[i].is_mrs_return == 0)
@@ -267,7 +269,7 @@ namespace CMMSAPIs.Repositories.SM
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = "Submitted";
+                    retValue = "Requested";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
                     retValue = "Request Rejected";
@@ -279,10 +281,10 @@ namespace CMMSAPIs.Repositories.SM
                     retValue = "Request Issued";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = "Request Issued Rejected";
+                    retValue = "Issue Rejected";
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = "Request Issued Approved";
+                    retValue = "Issue Approved";
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -362,7 +364,7 @@ namespace CMMSAPIs.Repositories.SM
                     var IsSpareSelectionEnable = await getMultiSpareSelectionStatus(asset_code, asset_type_ID);
                     if (approval_required == 1)
                     {
-                        isApproval_required = false;
+                        isApproval_required = true;
                     }
 
                     if (asset_type_ID == (int)CMMS.SM_AssetTypes.Spare && request.cmmrsItems[i].requested_qty > 0)
@@ -426,8 +428,8 @@ namespace CMMSAPIs.Repositories.SM
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.ID, 0, 0, approve_request.comment, CMMS.CMMS_Status.MRS_SUBMITTED);
                 //CMMRSList _MRSList = await getMRSDetails(UserID, facilitytimeZone);
             }
-                CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
+            CMMRSList _MRSList = await getMRSDetails(request.ID, facilitytimeZone);
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _MRSList);
 
             return response;
         }
@@ -702,16 +704,6 @@ namespace CMMSAPIs.Repositories.SM
         }
         internal async Task<List<CMMRSItems>> getMRSItems(int ID, string facilitytimeZone)
         {
-            //string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID,smi.asset_MDM_code," +
-            //    "t1.serial_number,smi.returned_qty,smi.available_qty,smi.used_qty,smi.ID,smi.issued_qty,sm.flag as status,DATE_FORMAT(sm.returnDate,'%Y-%m-%d') as returnDate," +
-            //    "sm.approval_status,DATE_FORMAT(sm.approved_date,'%Y-%m-%d') as approved_date,DATE_FORMAT(sm.requested_date,'%Y-%m-%d') as issued_date," +
-            //    "DATE_FORMAT(sm.returnDate, '%Y-%m-%d') as returnDate, smi.requested_qty,if(smi.approval_required = 1,'Yes','No') as approval_required,\r\n " +
-            //    "t1.asset_name,t1.asset_type_ID,t1.asset_type,COALESCE(t1.file_path,'') as file_path,t1.Asset_master_id , smi.is_splited\r\n        FROM smrsitems smi\r\n " +
-            //    " LEFT JOIN smmrs sm ON sm.ID = smi.mrs_ID         \r\n        LEFT JOIN (SELECT sai.ID as asset_item_ID, sai.serial_number, sam.asset_name, " +
-            //    "sam.asset_type_ID,sat.asset_type,COALESCE(file.file_path,'') as file_path,file.Asset_master_id\r\n        FROM smassetitems sai  " +
-            //    "LEFT JOIN smassetmasters sam ON sam.asset_code = sai.asset_code LEFT JOIN smassetmasterfiles  file ON file.Asset_master_id =  sam.ID " +
-            //    "LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID) as t1 ON t1.asset_item_ID = smi.asset_item_ID" +
-            //    "  WHERE smi.mrs_ID = " + ID + " /*GROUP BY smi.ID*/";
 
             string stmt = "SELECT smi.ID,smi.return_remarks,smi.mrs_return_ID,smi.finalRemark,smi.asset_item_ID, smtd.fromActorID,smtd.fromActorType," +
                 "smi.asset_MDM_code as asset_code,smi.returned_qty," +
@@ -734,7 +726,10 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                //var data=m_MRSObj.CMMRSItems;
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
@@ -776,7 +771,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
             }
@@ -837,29 +834,79 @@ namespace CMMSAPIs.Repositories.SM
             //    _List[i].status_short = _shortStatus;
             //}
             //return _List;
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,DATE_FORMAT(sm.requested_date,'%Y-%m-%d %H:%i') as requestd_date," +
-    "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
-    "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType," +
-    " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName,  sm.whereUsedRefID, sm.remarks " +
-    ", DATE_FORMAT(sm.issuedAt,'%Y-%m-%d %H:%i') as issued_date, CONCAT(issuedUser.firstName,' ',issuedUser.lastName) as issued_name " +
-    ", sm.updated_by_emp_ID, CONCAT(updateUser.firstName, ' ', updateUser.lastName) as request_updated_by_name, sm.rejected_by_emp_ID , CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as request_rejected_by_name, sm.issue_approved_by_emp_ID, CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) as issue_appoved_by_name , sm.issue_rejected_by_emp_ID, CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) as issue_rejected_by_name " +
-    " FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
-    " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
-    " LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
-    " LEFT JOIN users updateUser ON updateUser.id = sm.updated_by_emp_ID " +
-    " LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
-    " LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
-    " LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
-    "WHERE sm.id = " + ID + ";";
-            List<CMMRSList> _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
+            List<CMMRSList> _List = new List<CMMRSList>();
+            string stmt = "SELECT fc.name AS facilityName, " +
+                          "fc.id AS facilityid, " +
+                          "sm.ID, " +
+                          "sm.requested_by_emp_ID, " +
+                          "sm.approved_by_emp_ID, " +
+                          "CONCAT(ed1.firstName, ' ', ed1.lastName) AS approver_name, " +
+                          "DATE_FORMAT(sm.requested_date, '%Y-%m-%d %H:%i') AS requestd_date, " +
+                          "DATE_FORMAT(sm.returnDate, '%Y-%m-%d %H:%i') AS returnDate, " +
+                          "IF(sm.approval_status != '', " +
+                          "DATE_FORMAT(sm.approved_date, '%Y-%m-%d %H:%i'), '') AS approval_date,jc.jobId, " +
+                          "sm.approval_status, " +
+                          "sm.from_actor_id, " +
+                          "sm.from_actor_type_id, " +
+                          "sm.to_actor_id, " +
+                          "sm.to_actor_type_id, " +
+                          "sm.approval_comment, " +
+                          "sm.status, " +
+                          "sm.activity, " +
+                          "sm.is_mrs_return, " +
+                          "sm.whereUsedType, " +
+                          "CASE " +
+                              "WHEN sm.whereUsedType = 1 THEN 'Job' " +
+                              "WHEN sm.whereUsedType = 2 THEN 'PM' " +
+                              "WHEN sm.whereUsedType = 4 THEN 'JOBCARD' " +
+                              "WHEN sm.whereUsedType = 27 THEN 'PMTASK' " +
+                              "ELSE 'Invalid' " +
+                          "END AS whereUsedTypeName, " +
+                          "sm.whereUsedRefID, " +
+                          "sm.remarks, " +
+                          "DATE_FORMAT(sm.issuedAt, '%Y-%m-%d %H:%i') AS issued_date, " +
+                          "CONCAT(ed.firstName, ' ', ed.lastName) AS requested_by_name, " +
+                          "CONCAT(issuedUser.firstName, ' ', issuedUser.lastName) AS issued_name, " +
+                          "sm.issuedAt, " +
+                          "sm.updated_by_emp_ID, " +
+                          "CONCAT(updateUser.firstName, ' ', updateUser.lastName) AS request_updated_by_name, " +
+                          "sm.rejected_by_emp_ID, " +
+                          "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name,sm.rejected_date, " +
+                          "sm.issue_approved_by_emp_ID, " +
+                          "CONCAT(issuedApproveUser.firstName, ' ', issuedApproveUser.lastName) AS issue_approved_by_name, " +
+                          "sm.issue_approved_date, " +
+                          "sm.issue_rejected_by_emp_ID, " +
+                          "CONCAT(issuedRejectUser.firstName, ' ', issuedRejectUser.lastName) AS issue_rejected_by_name, " +
+                          "sm.issue_rejected_date " +
+                          "FROM smmrs sm " +
+                          "LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
+                          "LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+                          "LEFT JOIN facilities fc ON fc.id = sm.facility_ID " +
+                          "LEFT JOIN jobcards jc ON jc.id = sm.id " +
+                          "LEFT JOIN users issuedUser ON issuedUser.id = sm.issued_by_emp_ID " +
+                          "LEFT JOIN users updateUser ON updateUser.id = sm.updated_by_emp_ID " +
+                          "LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
+                          "LEFT JOIN users issuedApproveUser ON issuedApproveUser.id = sm.issue_approved_by_emp_ID " +
+                          "LEFT JOIN users issuedRejectUser ON issuedRejectUser.id = sm.issue_rejected_by_emp_ID " +
+                          "WHERE sm.id = " + ID + ";";
+
+            _List = await Context.GetData<CMMRSList>(stmt).ConfigureAwait(false);
             for (var i = 0; i < _List.Count; i++)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                //CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, _List[0], m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
+                /* if (_List[i].is_mrs_return == 1)
+                 {
+                     _List[i].CMMRSItems = await getMRSItemsReturn(_List[i].CMMRSItems[i].mrs_return_ID, facilitytimeZone);
+                 }*/
                 _List[i].CMMRSItems = await getMRSItems(_List[i].ID, facilitytimeZone);
+
+
             }
 
             return _List[0];
@@ -867,13 +914,38 @@ namespace CMMSAPIs.Repositories.SM
 
         internal async Task<CMMRSReturnList> getReturnDataByID(int ID, string facilitytimeZone)
         {
-            string stmt = "SELECT sm.ID,sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,sm.remarks as remarks ," +
-                          "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate,if(sm.approval_status != '',DATE_FORMAT(sm.approved_date,'%Y-%m-%d %H:%i'),'') as approval_date,sm.approval_status," +
-                          "sm.approval_comment,CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, sm.status, sm.activity, sm.whereUsedType, " +
-                          " case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
+            string stmt = "SELECT  sm.ID," +
+                          "fc.name AS facilityName, " +
+                          "facility_id AS facilityId, " +
+                          "sm.requested_by_emp_ID as requested_by_emp_ID,CONCAT(ed1.firstName,' ',ed1.lastName) as approver_name,sm.remarks as remarks ," +
+                          "DATE_FORMAT(sm.returnDate,'%Y-%m-%d %H:%i') as returnDate," +
+                          "sm.approved_date, " +
+                          "sm.requested_date, " +
+                          "sm.approval_status," +
+                          "sm.from_actor_id, " +
+                          "sm.from_actor_type_id, " +
+                          "sm.to_actor_id, " +
+                          "sm.to_actor_type_id, " +
+                          "smi.asset_item_ID, " +
+                          "smi.issued_qty, " +
+                          "smi.requested_qty, " +
+                          "smi.is_faulty, " +
+                          "smi.faulty_item_asset_id, " +
+                          "smi.ID, " +
+                          "smi.serial_number, " +
+                          "smi.approval_required, " +
+                          "sm.whereUsedType, " +
+                          "sm.approval_comment,sm.is_mrs_return as return_mrs, " +
+                          "CONCAT(ed.firstName,' ',ed.lastName) as requested_by_name, " +
+                           "CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) AS request_rejected_by_name, sm.rejected_date, " +
+                          "sm.status, sm.activity, sm.whereUsedType, " +
+                          "case when sm.whereUsedType = 1 then 'Job' when sm.whereUsedType = 2 then 'PM' when sm.whereUsedType = 4 then 'JOBCARD' when sm.whereUsedType = 27 then 'PMTASK' else 'Invalid' end as whereUsedTypeName, sm.whereUsedRefID, COALESCE(sm.remarks,'') as  remarks " +
                           "FROM smmrs sm LEFT JOIN users ed ON ed.id = sm.requested_by_emp_ID " +
-                          " LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
-                          " WHERE sm.ID = " + ID + "  and sm.flag = 2";
+                          "LEFT JOIN facilities fc ON fc.id = sm.facility_ID " +
+                          "LEFT JOIN smrsitems smi ON smi.id = sm.ID " +
+                          "LEFT JOIN users rejectedByUser ON rejectedByUser.id = sm.rejected_by_emp_ID " +
+                          "LEFT JOIN users ed1 ON ed1.id = sm.approved_by_emp_ID " +
+                          "WHERE sm.ID = " + ID + "  and sm.flag = 2";
             List<CMMRSReturnList> _List = await Context.GetData<CMMRSReturnList>(stmt).ConfigureAwait(false);
             foreach (var _Item in _List)
             {
@@ -896,7 +968,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, _List[0]);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
@@ -1198,7 +1272,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 string stmt1 = $"UPDATE smmrs SET rejected_by_emp_ID = {userId}, rejected_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED} , rejected_comment = '{request.comment}' WHERE ID = {request.id}";
-                 int id=await Context.ExecuteNonQry<int>(stmt1);
+                int id = await Context.ExecuteNonQry<int>(stmt1);
 
 
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
@@ -1212,6 +1286,267 @@ namespace CMMSAPIs.Repositories.SM
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS, CMMS.CMMS_Status.MRS_REQUEST_REJECTED, new[] { userId }, _MRSList);
 
             return response;
+        }
+
+
+        // Transfer material code with database transaction and rollback
+        public async Task<int> TransferMaterialInTransaction_dbTransaction(CMTransferItems request, int userID)
+        {
+
+            int facilityID = request.facilityID;
+            int fromActorID = request.fromActorID;
+            int fromActorType = request.fromActorType;
+            int toActorID = request.toActorID;
+            int toActorType = request.toActorType;
+            int assetItemID = request.assetItemID;
+            int qty = request.qty;
+            int refType = request.refType;
+            int refID = request.refID;
+            string remarks = request.remarks;
+            int mrsID = request.mrsID;
+            int mrsitemID = request.mrsItemID;
+            double longitude = request.longitude;
+            double latitude = request.latitude;
+            string address = request.address;
+
+            int assetItemStatus = 0;
+            int transaction_id = 0;
+            int natureOfTransaction = 0;
+
+            // Create a transaction
+            var MyConfig = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+            string ConnectionString = MyConfig.GetValue<string>("ConnectionStrings:Con");
+
+            using (MySqlConnection conn = new MySqlConnection(ConnectionString))
+            {
+                await conn.OpenAsync();
+                using (var transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        // Validate MRS ID
+                        if (mrsID == 0)
+                        {
+                            return 4;
+                        }
+
+                        int existingQty = 0;
+                        decimal mrsitem_issued_qty = 0;
+                        decimal mrsitem_used_qty = 0;
+                        decimal mrsitem_returned_qty = 0;
+                        decimal stored_used_qty = 0;
+
+                        // Get quantities issued for this material
+                        string stmtMRSItem = "SELECT i.issued_qty, i.used_qty, i.returned_qty FROM smrsitems i INNER JOIN smmrs m ON m.ID = i.mrs_ID WHERE i.mrs_ID = @mrsID AND i.ID = @mrsitemID AND is_splited = 1;";
+                        using (var cmd = new MySqlCommand(stmtMRSItem, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (await reader.ReadAsync())
+                                    {
+                                        mrsitem_issued_qty = reader.GetDecimal(0);
+                                        mrsitem_used_qty = reader.GetDecimal(1);
+                                        mrsitem_returned_qty = reader.GetDecimal(2);
+                                    }
+                                }
+                                else
+                                {
+                                    return 2; // No data found
+                                }
+                            }
+                        }
+
+                        // Get all the quantities used for this material in various assets
+                        string stmt1 = "SELECT SUM(qty) AS used_qty FROM smtransactiondetails WHERE toActorType = @toActorType AND mrsID = @mrsID AND assetItemID = @assetItemID AND mrsItemID = @mrsitemID;";
+                        using (var cmd = new MySqlCommand(stmt1, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            //stored_used_qty = Convert.ToDouble(await cmd.ExecuteScalarAsync());
+                            object result = await cmd.ExecuteScalarAsync();
+                            stored_used_qty = result != DBNull.Value ? Convert.ToDecimal(result) : 0;
+
+                        }
+
+                        // Check if the quantity is already used by this asset
+                        string chkAssetPresnt = "SELECT ID, qty AS existingqty FROM smtransactiondetails WHERE toActorID = @toActorID AND toActorType = @toActorType AND assetItemID = @assetItemID AND mrsID = @mrsID AND mrsItemID = @mrsitemID;";
+                        using (var cmd = new MySqlCommand(chkAssetPresnt, conn, transaction))
+                        {
+                            cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                            cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                            cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                            cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                            cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+
+                            using (var reader = await cmd.ExecuteReaderAsync())
+                            {
+                                if (reader.HasRows)
+                                {
+                                    while (await reader.ReadAsync())
+                                    {
+                                        transaction_id = reader.GetInt32(0);
+                                        existingQty = reader.GetInt32(1);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (existingQty == qty)
+                        {
+                            return 6;
+                        }
+
+                        if (mrsitem_issued_qty > 0)
+                        {
+                            int updatingMRSqty = (int)(qty + stored_used_qty - existingQty);
+                            if (mrsitem_issued_qty >= updatingMRSqty)
+                            {
+                                if (transaction_id == 0)
+                                {
+                                    if (qty == 0)
+                                    {
+                                        return 7; // Quantity is zero, no need to proceed
+                                    }
+
+                                    // Insert the new transaction
+                                    string insertStmt = "INSERT INTO smtransactiondetails (plantID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, referedby, reference_ID, remarks, Asset_Item_Status, mrsID, mrsItemID, latitude, longitude) " +
+                                                        "VALUES (@facilityID, @fromActorID, @fromActorType, @toActorID, @toActorType, @assetItemID, @qty, @refType, @refID, @remarks, @assetItemStatus, @mrsID, @mrsitemID, @latitude, @longitude); SELECT LAST_INSERT_ID();";
+
+                                    using (var cmd = new MySqlCommand(insertStmt, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@fromActorID", MySqlDbType.Int32).Value = fromActorID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@qty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@refType", MySqlDbType.Int32).Value = refType;
+                                        cmd.Parameters.Add("@refID", MySqlDbType.Int32).Value = refID;
+                                        cmd.Parameters.Add("@remarks", MySqlDbType.VarChar).Value = remarks;
+                                        cmd.Parameters.Add("@assetItemStatus", MySqlDbType.Int32).Value = assetItemStatus;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+                                        cmd.Parameters.Add("@latitude", MySqlDbType.Double).Value = latitude;
+                                        cmd.Parameters.Add("@longitude", MySqlDbType.Double).Value = longitude;
+
+                                        transaction_id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                    }
+
+                                    //int debitTransactionID = await DebitTransation(facilityID, transaction_id, fromActorType, fromActorID, qty, assetItemID, mrsID);
+                                    //int creditTransactionID = await CreditTransation(facilityID, transaction_id, toActorType, toActorID, qty, assetItemID, mrsID);
+                                    /*
+                                    bool isValid = await VerifyTransactionDetails(transaction_id, debitTransactionID, creditTransactionID, facilityID, fromActorID, fromActorType, toActorID, toActorType, assetItemID, qty, refType, refID, remarks, mrsID);
+                                    if (!isValid)
+                                    {
+                                        throw new Exception("Transaction details verification failed.");
+                                    }*/
+
+                                    int debitTransactionID = 0;
+                                    string stmtCredit = $"INSERT INTO smtransition (transactionID, facilityID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID, createdBy)  " +
+                                        "VALUES (@transactionID, @facilityID, @fromActorID, @fromActorType, @creditQty, @debitQty, @assetItemID, @mrsID, @userID); SELECT LAST_INSERT_ID();";
+                                    using (var cmd = new MySqlCommand(stmtCredit, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@transactionID", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@fromActorID", MySqlDbType.Int32).Value = fromActorID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@creditQty", MySqlDbType.Int32).Value = 0;
+                                        cmd.Parameters.Add("@debitQty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@userID", MySqlDbType.Int32).Value = userID;
+
+                                        debitTransactionID = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                    }
+
+                                    int creditTransactionID = 0;
+                                    string stmtDebit = $"INSERT INTO smtransition (transactionID, facilityID, actorType, actorID,creditQty, debitQty, assetItemID, mrsID, createdBy)  " +
+                                        "VALUES (@transactionID, @facilityID, @toActorID, @toActorType, @creditQty, @debitQty, @assetItemID, @mrsID, @userID); SELECT LAST_INSERT_ID();";
+                                    using (var cmd = new MySqlCommand(stmtDebit, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@transactionID", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@facilityID", MySqlDbType.Int32).Value = facilityID;
+                                        cmd.Parameters.Add("@toActorID", MySqlDbType.Int32).Value = toActorID;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+                                        cmd.Parameters.Add("@creditQty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@debitQty", MySqlDbType.Int32).Value = 0;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@userID", MySqlDbType.Int32).Value = userID;
+
+                                        creditTransactionID = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                                    }
+                                }
+                                else
+                                {
+                                    // Update the existing transaction
+                                    string updateQ = "UPDATE smtransactiondetails SET qty = @qty, lastInsetedDateTime = @lastInsetedDateTime WHERE ID = @transaction_id;" +
+                                                     "UPDATE smtransition SET debitQty = @qty WHERE transactionID = @transaction_id AND mrsID = @mrsID AND assetItemID = @assetItemID AND actorType = @fromActorType;" +
+                                                     "UPDATE smtransition SET creditQty = @qty WHERE transactionID = @transaction_id AND mrsID = @mrsID AND assetItemID = @assetItemID AND actorType = @toActorType;";
+
+                                    using (var cmd = new MySqlCommand(updateQ, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@qty", MySqlDbType.Int32).Value = qty;
+                                        cmd.Parameters.Add("@lastInsetedDateTime", MySqlDbType.VarChar).Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                                        cmd.Parameters.Add("@transaction_id", MySqlDbType.Int32).Value = transaction_id;
+                                        cmd.Parameters.Add("@mrsID", MySqlDbType.Int32).Value = mrsID;
+                                        cmd.Parameters.Add("@assetItemID", MySqlDbType.Int32).Value = assetItemID;
+                                        cmd.Parameters.Add("@fromActorType", MySqlDbType.Int32).Value = fromActorType;
+                                        cmd.Parameters.Add("@toActorType", MySqlDbType.Int32).Value = toActorType;
+
+                                        await cmd.ExecuteNonQueryAsync();
+                                    }
+                                }
+
+                                // Update the MRS item quantities
+                                if (transaction_id > 0)
+                                {
+                                    string stmt_update = "UPDATE smrsitems SET used_qty = @UpdatingMRSqty WHERE ID = @mrsitemID;";
+                                    using (var cmd = new MySqlCommand(stmt_update, conn, transaction))
+                                    {
+                                        cmd.Parameters.Add("@UpdatingMRSqty", MySqlDbType.Decimal).Value = updatingMRSqty;
+                                        cmd.Parameters.Add("@mrsitemID", MySqlDbType.Int32).Value = mrsitemID;
+                                        await cmd.ExecuteNonQueryAsync();
+                                    }
+
+                                    transaction.Commit(); // Commit the transaction if all operations are successful
+                                    return 0;
+                                }
+                                else
+                                {
+                                    transaction.Rollback();
+                                    throw new Exception("Transaction ID not generated.");
+                                }
+                            }
+                            else
+                            {
+                                transaction.Rollback();
+                                return 1; // Issued quantity exceeded
+                            }
+                        }
+                        else
+                        {
+                            transaction.Rollback();
+                            return 5; // Invalid MRS item
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback(); // Rollback the transaction in case of any error
+                        return 3; // Return a generic error code
+                    }
+                }
+            }
         }
 
         // here using int status code for returning
@@ -1559,7 +1894,7 @@ namespace CMMSAPIs.Repositories.SM
             }
         }
 
-        internal async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> CreateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -1757,10 +2092,14 @@ namespace CMMSAPIs.Repositories.SM
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, MRS_ReturnID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
 
+            CMMRSReturnList _RMRSList = await getReturnDataByID(MRS_ReturnID, facilitytimeZone);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS_RETURN, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _RMRSList);
+
             return response;
         }
 
-        internal async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID)
+        internal async Task<CMDefaultResponse> UpdateReturnMRS(CMMRS request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             bool Queryflag = false;
@@ -1891,9 +2230,13 @@ namespace CMMSAPIs.Repositories.SM
             }
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, MRS_ReturnID, 0, 0, "MRS return submitted.", CMMS.CMMS_Status.MRS_SUBMITTED);
 
+            CMMRSReturnList _RMRSList = await getReturnDataByID(MRS_ReturnID, facilitytimeZone);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS_RETURN, CMMS.CMMS_Status.MRS_SUBMITTED, new[] { UserID }, _RMRSList);
+
             return response;
         }
-        internal async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID)
+        internal async Task<CMDefaultResponse> ApproveMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             var executeUpdateStmt = 0;
@@ -1902,39 +2245,6 @@ namespace CMMSAPIs.Repositories.SM
 
             string stmtSelect = "SELECT ID,facility_ID,requested_by_emp_ID, reference,from_actor_id,from_actor_type_id,to_actor_id,to_actor_type_id FROM smmrs WHERE ID = " + request.id + "";
             List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
-            //for (int i = 0; i < request.cmmrsItems.Count; i++)
-            //{
-            //    decimal req_qty = request.cmmrsItems[i].returned_qty;
-            //    //MRS_REQUEST_REJECT contains 2 as enum value
-            //    if (request.approval_status ==   (int)CMMS.CMMS_Status.MRS_REQUEST_REJECTED)
-            //    {
-            //        req_qty = 0;
-            //    }
-            //    string stmt = "UPDATE smrsitems SET returned_qty = " + request.cmmrsItems[i].returned_qty + ", finalRemark = '" + request.cmmrsItems[i].return_remarks + "' WHERE ID = " + request.cmmrsItems[i].id;  
-            //    try
-            //    {
-            //      executeUpdateStmt = await Context.ExecuteNonQry<int>(stmt);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        throw ex;
-            //    }
-            //    if (executeUpdateStmt == null || executeUpdateStmt == 0)
-            //    {
-            //        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update MRS item return.");
-            //    }
-            //    Queryflag = true;
-
-            //    // MRS_REQUEST_APPROVE == 1 in constant.cs file
-            //    if (request.approval_status == (int)CMMS.CMMS_Status.MRS_REQUEST_APPROVED)
-            //    {
-            //        var tResult = await TransactionDetails(mrsList[0].facility_ID, mrsList[0].requested_by_emp_ID, 2, mrsList[0].facility_ID, 2, request.cmmrsItems[0].id, Convert.ToInt32(request.cmmrsItems[0].received_qty), Convert.ToInt32(mrsList[0].reference), request.ID, request.return_remarks, request.mrs_return_ID);
-            //        if (!tResult)
-            //        {
-            //            return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Transaction details failed.");                        
-            //        }
-            //    }
-            //}
 
             comment = "MRS Return Approved";
 
@@ -1987,41 +2297,22 @@ namespace CMMSAPIs.Repositories.SM
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS return Approved.", CMMS.CMMS_Status.MRS_REQUEST_APPROVED);
+
+            CMMRSReturnList _RMRSList = await getReturnDataByID(request.id, facilitytimeZone);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS_RETURN, CMMS.CMMS_Status.MRS_REQUEST_APPROVED, new[] { UserID }, _RMRSList);
+
             return response;
         }
 
-        internal async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID)
+        internal async Task<CMDefaultResponse> RejectMRSReturn(CMApproval request, int UserID, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             var executeUpdateStmt = 0;
             bool Queryflag = false;
             string comment = "";
-
-            //string stmtSelect = "SELECT * FROM smmrs WHERE ID = " + request.id + "";
-            //List<CMMRS> mrsList = await Context.GetData<CMMRS>(stmtSelect).ConfigureAwait(false);
-            //for (int i = 0; i < request.cmmrsItems.Count; i++)
-            //{
-            //    decimal req_qty = request.cmmrsItems[i].returned_qty;                
-            //    req_qty = 0;
-            //    string stmt = "UPDATE smrsitems SET returned_qty = " + request.cmmrsItems[i].returned_qty + ", finalRemark = '" + request.cmmrsItems[i].return_remarks + "' WHERE ID = " + request.cmmrsItems[i].id;
-            //    try
-            //    {
-            //        executeUpdateStmt = await Context.ExecuteNonQry<int>(stmt);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        throw ex;
-            //    }
-            //    if (executeUpdateStmt == null || executeUpdateStmt == 0)
-            //    {
-            //        return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "Failed to update MRS item return.");
-            //    }
-            //    Queryflag = true;
-
-            //    // MRS_REQUEST_APPROVE == 1 in constant.cs file
-
-            //}
-
 
             comment = "MRS Return Rejected. Reason : " + request.comment + "";
 
@@ -2038,12 +2329,19 @@ namespace CMMSAPIs.Repositories.SM
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
-            if (executeUpdateStmt == 0 || executeUpdateStmt == null)
+            if (executeUpdateStmt == 0)
             {
                 return new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "MRS Item update details failed.");
             }
 
             response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, comment);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.SM_MRS, request.id, 0, 0, "MRS return Rejected.", CMMS.CMMS_Status.MRS_REQUEST_REJECTED);
+
+            CMMRSReturnList _RMRSList = await getReturnDataByID(request.id, facilitytimeZone);
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.SM_MRS_RETURN, CMMS.CMMS_Status.MRS_REQUEST_REJECTED, new[] { UserID }, _RMRSList);
+
             return response;
         }
         internal async Task<CMMRSAssetTypeList> getAssetTypeByItemID(int ItemID)
@@ -2204,7 +2502,8 @@ namespace CMMSAPIs.Repositories.SM
             return Listitem;
         }
 
-        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id)
+
+        private static string getLongStatus(CMMS.CMMS_Status m_notificationID, int Id, CMMRSList m_MRSObj, CMMRSReturnList m_RMRSObj)
         {
             CMMS.CMMS_Status status = (CMMS.CMMS_Status)m_notificationID;
             string retValue = "";
@@ -2212,22 +2511,43 @@ namespace CMMSAPIs.Repositories.SM
             {
 
                 case CMMS.CMMS_Status.MRS_SUBMITTED:
-                    retValue = $"MRS{Id} Submitted.";
+                    if (m_RMRSObj.return_mrs == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Requested By {1}", m_RMRSObj.ID, m_RMRSObj.requested_by_name);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Requested By {1}", m_MRSObj.ID, m_MRSObj.requested_by_name);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_REJECTED:
-                    retValue = $"MRS{Id} Request Rejected";
+                    if (m_RMRSObj.return_mrs == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Request Rejected By {1}", m_RMRSObj.ID, m_RMRSObj.request_rejected_by_name);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Request Rejected By {1}", m_MRSObj.ID, m_MRSObj.request_rejected_by_name);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_APPROVED:
-                    retValue = $"MRS{Id} Request Approved";
+                    if (m_RMRSObj.return_mrs == 1)
+                    {
+                        retValue = String.Format("RMRS{0} Request Approved By {1}", m_RMRSObj.ID, m_RMRSObj.approver_name);
+                    }
+                    else
+                    {
+                        retValue = String.Format("MRS{0} Request Approved By {1}", m_MRSObj.ID, m_MRSObj.approver_name);
+                    }
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED:
-                    retValue = $"MRS{Id} Request Issued";
+                    retValue = String.Format("MRS{0} Issued By {1}", m_MRSObj.ID, m_MRSObj.issued_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_REJECTED:
-                    retValue = $"MRS{Id} Request Issued Rejected";
+                    retValue = String.Format("MRS{0} Issue Rejected By {1}", m_MRSObj.ID, m_MRSObj.issue_rejected_by_name);
                     break;
                 case CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED:
-                    retValue = $"MRS{Id} Request Issued Approved";
+                    retValue = String.Format("MRS{0} Issue Approved By {1}", m_MRSObj.ID, m_MRSObj.issue_approved_by_name);
                     break;
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
@@ -2321,7 +2641,7 @@ namespace CMMSAPIs.Repositories.SM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId,string facilitytimeZone)
+        internal async Task<CMDefaultResponse> ApproveMRSIssue(CMApproval request, int userId, string facilitytimeZone)
         {
             CMDefaultResponse response = null;
             string stmtSelect = $"SELECT ID FROM smmrs WHERE ID = {request.id}";
@@ -2331,7 +2651,7 @@ namespace CMMSAPIs.Repositories.SM
             {
                 string stmt = $"UPDATE smmrs SET issue_approved_by_emp_ID = {userId}, issue_approved_date='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', lastmodifieddate='{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}'," +
                                    $" status ={(int)CMMS.CMMS_Status.MRS_REQUEST_ISSUED_APPROVED} , issue_approval_comment = '{request.comment}' WHERE ID = {request.id}";
-                int id= await Context.ExecuteNonQry<int>(stmt);
+                int id = await Context.ExecuteNonQry<int>(stmt);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Status updated.");
             }
             else
@@ -2415,7 +2735,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 _List[i].CMMRSItems = await getMRSReturnItems(_List[i].ID, facilitytimeZone);
@@ -2448,7 +2770,9 @@ namespace CMMSAPIs.Repositories.SM
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_List[i].status);
                 string _shortStatus = getShortStatus(CMMS.CMMS_Modules.SM_MRS, _Status);
-                string _status_long = getLongStatus(_Status, _List[i].ID);
+                CMMRSList m_MRSObj = new CMMRSList();
+                CMMRSReturnList m_RMRSObj = new CMMRSReturnList();
+                string _status_long = getLongStatus(_Status, _List[i].ID, m_MRSObj, m_RMRSObj);
                 _List[i].status_short = _shortStatus;
                 _List[i].status_long = _status_long;
                 if (_List[i].is_faulty == 1)

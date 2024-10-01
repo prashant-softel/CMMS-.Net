@@ -1,7 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using CMMSAPIs.Helper;
+using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.EM
 {
+       
+    public class CMNotification
+    {
+        public int facilityId { get; set; }
+        public CMMS.CMMS_Modules moduleId { get; set; }
+        public CMMS.CMMS_Status statusId { get; set; }
+        public int moduleRefId { get; set; }        
+        public string message { get; set; }                 //Optional
+        public string additionalUserIds { get; set; }    //Optional. comma delimited string
+    }
+
     public class CMSetMasterEM
     {
         public int module_id { get; set; }

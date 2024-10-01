@@ -70,9 +70,8 @@ namespace CMMSAPIs.Models.Incident_Reports
         public int investigation_item_id { get; set; }
         public int incidents_id { get; set; }
         public string person_id { get; set; }
-        public string person_name { get; set; }
+        public string name { get; set; }
         public string designation { get; set; }
-
     }
     public class CMProposed_action_plan
     {

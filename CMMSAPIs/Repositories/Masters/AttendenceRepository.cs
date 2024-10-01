@@ -29,20 +29,17 @@ namespace CMMSAPIs.Repositories.Masters
             int employeeValue = 0;
             int fid = 0;
             string date = requests.date.ToString("yyyy-MM-dd");
-            string delete = $"DELETE FROM employee_attendance WHERE Date='{date}';";
-            await Context.ExecuteNonQry<int>(delete).ConfigureAwait(false);
-            string deletecontractor = $"DELETE FROM contractor_attendnace WHERE Date='{date}';";
-            await Context.ExecuteNonQry<int>(deletecontractor).ConfigureAwait(false);
+            /* string delete = $"DELETE FROM employee_attendance WHERE Date='{date}';";
+             await Context.ExecuteNonQry<int>(delete).ConfigureAwait(false);
+             string deletecontractor = $"DELETE FROM contractor_attendnace WHERE Date='{date}';";
+             await Context.ExecuteNonQry<int>(deletecontractor).ConfigureAwait(false);*/
             CMDefaultResponse response = new CMDefaultResponse();
-            //Employee ATTENDENCE
-
 
             foreach (CMGetAttendence request in requests.hfeAttendance)
             {
 
-
                 string AttenQuery = $"INSERT INTO employee_attendance ( attendance_id, facility_id, employee_id, present, in_time, out_time,Date, CreatedAt, CreatedBy, UpdatedAt, UpdatedBy) VALUES " +
-               $"({request.Attendance_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
+               $"({request.Attendence_Id}, {requests.facility_id}, '{request.employee_id}', {request.present}, '{request.InTime}','{request.OutTime}','{date}','{UtilsRepository.GetUTCTime()}',{userID},'{UtilsRepository.GetUTCTime()}',{userID}); " +
                $"SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(AttenQuery).ConfigureAwait(false);
                 employeeValue = Convert.ToInt32(dt2.Rows[0][0]);
@@ -59,7 +56,48 @@ namespace CMMSAPIs.Repositories.Masters
                $"SELECT LAST_INSERT_ID();";
             DataTable dt3 = await Context.FetchData(contQuery).ConfigureAwait(false);
             int contractValue = Convert.ToInt32(dt3.Rows[0][0]);
+            return response;
+        }
+        internal async Task<CMDefaultResponse> UpdateAttendance(CMCreateAttendence requests, int userID)
+        {
+            int employeeValue = 0;
+            int fid = 0;
+            string date = requests.date.ToString("yyyy-MM-dd");
+            CMDefaultResponse response = new CMDefaultResponse();
 
+            foreach (CMGetAttendence request in requests.hfeAttendance)
+            {
+                if (request.Attendence_Id > 0)
+                {
+                    string AttenUpdateQuery = $"UPDATE employee_attendance SET " +
+                          $"facility_id = {requests.facility_id}, " +
+                          $"employee_id = '{request.employee_id}', " +
+                          $"present = {request.present}, " +
+                          $"in_time = '{request.InTime}', " +
+                          $"out_time = '{request.OutTime}', " +
+                          $"Date = '{date}', " +
+                          $"UpdatedAt = '{UtilsRepository.GetUTCTime()}', " +
+                          $"UpdatedBy = {userID} " +
+                          $"WHERE id = {request.Attendence_Id};";
+                    await Context.ExecuteNonQry<int>(AttenUpdateQuery).ConfigureAwait(false);
+                }
+            }
+            response = new CMDefaultResponse(employeeValue, CMMS.RETRUNSTATUS.SUCCESS, "Attendence Mark successfully.");
+            //Contractor Ateendence
+
+            CMGetCotractor requst = requests.contractAttendance;
+
+            requst.contractor_id = 0;
+            string contUpdateQuery = $"UPDATE contractor_attendnace SET " +
+                          $"facility_id = {requests.facility_id}, " +
+                          $"Date = '{date}', " +
+                          $"contractor_id = {requst.contractor_id}, " +
+                          $"age_lessthan_35 = {requst.lessThan35}, " +
+                          $"age_Between_35_50 = {requst.between35to50}, " +
+                          $"age_Greater_50 = {requst.greaterThan50}, " +
+                          $"purpose = '{requst.purpose}' " +
+                          $"WHERE id = {requst.Id};";
+            await Context.ExecuteNonQry<int>(contUpdateQuery).ConfigureAwait(false);
             return response;
         }
 
@@ -70,7 +108,7 @@ namespace CMMSAPIs.Repositories.Masters
                                            $" FROM employee_attendance where facility_id ={facility_id};";
             List<CMGETAttendenceDETAIL> Detail = await Context.GetData<CMGETAttendenceDETAIL>(detail).ConfigureAwait(false);
 
-            string getEmployeeAttendance = $"SELECT employee_attendance.id AS Id, attendance_id AS Attendance_Id, facility_id AS Facility_Id, employee_id AS Employee_Id,concat(u.firstName,u.lastName) as name, present AS Present, in_time AS In_Time, out_time AS Out_Time,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Dates " +
+            string getEmployeeAttendance = $"SELECT employee_attendance.id AS attendence_Id, facility_id AS Facility_Id, employee_id AS Employee_Id,concat(u.firstName,u.lastName) as name, present AS Present, in_time AS In_Time, out_time AS Out_Time,(DATE_FORMAT(Date ,'%Y-%m-%d')) as Dates " +
                                            $" FROM employee_attendance left join users as u on u.id=employee_attendance.employee_id  WHERE (DATE(Date) = '{dates.ToString("yyyy-MM-dd")} ') AND facility_id ={facility_id};";
             List<CMGetAttendence1> employeeAttendanceList = await Context.GetData<CMGetAttendence1>(getEmployeeAttendance).ConfigureAwait(false);
 
@@ -80,7 +118,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             var hfeAttendance = employeeAttendanceList.Select(a => new CMGetAttendence1
             {
-                // id = a.id,
+                attendence_Id = a.attendence_Id,
                 employee_id = a.employee_id,
                 name = a.name,
                 present = a.present == 1 ? true : false,
@@ -201,15 +239,19 @@ namespace CMMSAPIs.Repositories.Masters
 
             List<DetailsOFMonth> EmpAteendence = await Context.GetData<DetailsOFMonth>(queryByEmp).ConfigureAwait(false);
 
-            var result = empDetails.Select(a => new EmployeeMonth
-            {
-                employeeId = a.employeeId,
-                employeeName = a.employeeName,
-                dateOfJoining = a.dateOfJoining,
-                DateofExit = a.DateofExit,
-                workingStatus = a.workingStatus,
-                details = EmpAteendence.Where(x => x.emp_id == a.employeeId).ToList()
-            }).ToList();
+            var result = empDetails
+    .Where(a => a.employeeId != null && a.employeeName != null && a.dateOfJoining != null && a.DateofExit != null && a.workingStatus != null)
+    .Select(a => new EmployeeMonth
+    {
+        employeeId = a.employeeId,
+        employeeName = a.employeeName,
+        dateOfJoining = a.dateOfJoining,
+        DateofExit = a.DateofExit,
+        workingStatus = a.workingStatus,
+        details = EmpAteendence.Where(x => x.emp_id == a.employeeId).ToList()
+    })
+    .ToList();
+
 
             var response = new
             {

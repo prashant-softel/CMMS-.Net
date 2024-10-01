@@ -10,7 +10,7 @@ namespace CMMSAPIs.BS.JC
 {
     public interface IJCBS
     {
-        Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view, string facilitytime);
+        Task<List<CMJCList>> GetJCList(string facility_id, int userID, bool self_view, string facilitytime);
         Task<List<CMJCListForJob>> GetJCListByJobId(int jobId, string facilitytime);
         Task<List<CMJCDetail>> GetJCDetail(int jc_id, string facilitytime);
         Task<CMDefaultResponse> CreateJC(int job_id, int userID);
@@ -33,7 +33,7 @@ namespace CMMSAPIs.BS.JC
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJCList>> GetJCList(int facility_id, int userID, bool self_view, string facilitytime)
+        public async Task<List<CMJCList>> GetJCList(string facility_id, int userID, bool self_view, string facilitytime)
         {
             try
             {

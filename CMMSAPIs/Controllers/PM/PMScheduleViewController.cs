@@ -1,14 +1,13 @@
 using CMMSAPIs.BS.PM;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System;
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.PM
 {
@@ -47,7 +46,7 @@ namespace CMMSAPIs.Controllers.PM
         [HttpGet]
         public async Task<IActionResult> GetPMTaskDetail(int task_id, int facility_id)
         {
-           
+
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
@@ -71,13 +70,21 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds ,bool self_view)
+        public async Task<IActionResult> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, bool self_view)
         {
             try
             {
+                // Split the comma-delimited string into an array of facility IDs (string array)
+                var facilityIds = facility_id.Split(',');
+
+                // Use the first facility ID from the array and convert it to an integer
+                int firstFacilityId = int.Parse(facilityIds.FirstOrDefault());
+
+                // Get the time zone for the first facility ID
+                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo"))
+                    .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
-                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds,userID,self_view,facilitytimeZone);
+                var data = await _PMScheduleViewBS.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds, userID, self_view, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)
@@ -236,7 +243,8 @@ namespace CMMSAPIs.Controllers.PM
         public async Task<IActionResult> ApprovePMTaskExecution(CMApproval request)
         {
             try
-            {   int facility_id = request.facility_id;
+            {
+                int facility_id = request.facility_id;
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _PMScheduleViewBS.ApprovePMTaskExecution(request, userID, facilitytimeZone);
@@ -303,7 +311,7 @@ namespace CMMSAPIs.Controllers.PM
 
         [Route("GetPMTaskScheduleDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskScheduleDetail(int task_id, int schedule_id,int facility_id)
+        public async Task<IActionResult> GetPMTaskScheduleDetail(int task_id, int schedule_id, int facility_id)
         {
             try
             {
@@ -333,7 +341,7 @@ namespace CMMSAPIs.Controllers.PM
             {
                 return new JsonResult(new { error = ex.Message })
                 {
-                    StatusCode = 200 
+                    StatusCode = 200
                 };
             }
         }
@@ -405,7 +413,8 @@ namespace CMMSAPIs.Controllers.PM
         public async Task<IActionResult> DeletePMTask(CMApproval request)
         {
             try
-            {   int facility_id  = request.facility_id;
+            {
+                int facility_id = request.facility_id;
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _PMScheduleViewBS.DeletePMTask(request, userID, facilitytimeZone);

@@ -7,7 +7,6 @@ using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -67,17 +66,16 @@ namespace CMMSAPIs.Repositories.PM
                     retValue = String.Format("PM Plan in Draft by {0}", PlanObj.created_by_name);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_CREATED:
-                    retValue = String.Format("PM Plan submitted by {0}", PlanObj.created_by_name);
+                    retValue = String.Format("PM{0} Created by {1} at {2} ", PlanObj.plan_id, PlanObj.started_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_REJECTED:
-                    retValue = String.Format("PM Plan Rejected by {0}", PlanObj.rejected_by_name);
+                    retValue = String.Format("PM{0} Rejected by {1} at {2} ", PlanObj.plan_id, PlanObj.rejected_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_APPROVED:
-                    retValue = String.Format("PM Plan Approved by {0}", PlanObj.approved_by_name);
+                    retValue = String.Format("PM{0} Approved by {1} at {2} ", PlanObj.plan_id, PlanObj.approved_by_name, PlanObj.facilityidbyName);
                     break;
                 case CMMS.CMMS_Status.PM_PLAN_DELETED:
-                    //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
-                    retValue = String.Format("PM Plan Deleted by {0} ", PlanObj.created_by_name);
+                    retValue = String.Format("PM{0} Deleted  at {1} ", PlanObj.plan_id, PlanObj.facilityidbyName);
                     break;
 
                 default:
@@ -134,7 +132,7 @@ namespace CMMSAPIs.Repositories.PM
 
             try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(pm_plan.plan_id, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_CREATED, new[] { userID }, _ViewPMPlan);
             }
 
@@ -148,6 +146,7 @@ namespace CMMSAPIs.Repositories.PM
         internal async Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilityTimeZone)
         {
             string date = Convert.ToString(request.plan_date.ToString("yyyy-MM-dd"));
+
             string myQuery = "UPDATE pm_plan SET ";
             if (request.plan_name != null && request.plan_name != "")
                 myQuery += $"plan_name = '{request.plan_name}', ";
@@ -164,7 +163,7 @@ namespace CMMSAPIs.Repositories.PM
             if (request.assigned_to_id > 0)
                 myQuery += $"assigned_to = {request.assigned_to_id}, ";
 
-            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}', updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
+            myQuery += $"updated_at = '{UtilsRepository.GetUTCTime()}',status={(int)CMMS.CMMS_Status.PM_PLAN_CREATED}, updated_by = {userID} WHERE id = {request.plan_id} and facility_id = {request.facility_id};";
 
             string myQuery2 = $"Delete from pmplanassetchecklist where planId = {request.plan_id};";
             await Context.ExecuteNonQry<int>(myQuery2).ConfigureAwait(false);
@@ -178,20 +177,16 @@ namespace CMMSAPIs.Repositories.PM
                 mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             }
-
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
-
             String car = request.comment;
             System.Text.StringBuilder sb = new System.Text.StringBuilder("PM Plan Updated");
             sb.Append(": " + request.comment);
-
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.plan_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PM_PLAN_UPDATED);
             try
             {
                 CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(request.plan_id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_UPDATED, new[] { userID }, _ViewPMPlan);
             }
-
             catch (Exception e)
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
@@ -199,7 +194,6 @@ namespace CMMSAPIs.Repositories.PM
             CMDefaultResponse response = new CMDefaultResponse(request.plan_id, CMMS.RETRUNSTATUS.SUCCESS, $"Plan Updated Successfully ");
             return response;
         }
-
         internal async Task<List<CMPMPlanList>> GetPMPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytimeZone)
         {
             if (facility_id <= 0)
@@ -286,7 +280,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id,  statuses.statusName as status_short, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
                         $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                         $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -295,7 +289,7 @@ namespace CMMSAPIs.Repositories.PM
                         $"CONCAT(assignedTo.firstName, ' ', assignedTo.lastName) as assigned_to_name, updatedBy.id as updated_by_id, " +
                         $"CONCAT(updatedBy.firstName, ' ', updatedBy.lastName) as updated_by_name, plan.updated_at, " +
                         $"CONCAT(startedBy.firstName, ' ', startedBy.lastName) as started_by_name, " +
-                        $"CONCAT(status.firstName, ' ', status.lastName) as status_name " + // Added started_by_name
+                        $"CONCAT(status.firstName, ' ', status.lastName) as status_name,facility.name AS facilityidbyName " + // Added started_by_name
                         $"FROM pm_plan as plan " +
                         $"LEFT JOIN statuses ON plan.status = statuses.softwareId " +
                         $"JOIN facilities ON plan.facility_id = facilities.id " +
@@ -307,8 +301,9 @@ namespace CMMSAPIs.Repositories.PM
                         $"LEFT JOIN users as rejectedBy ON rejectedBy.id = plan.rejected_by " +
                         $"LEFT JOIN users as assignedTo ON assignedTo.id = plan.assigned_to " +
                         $"LEFT JOIN users as status ON status.id = plan.status " +
-                        $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table
-                        $"LEFT JOIN users as startedBy ON startedBy.id = task.started_by " +  // Added join with users for started_by
+                        $"LEFT JOIN pm_task as task ON task.plan_id = plan.id " +  // Added join with pm_task table                   
+                        $"LEFT JOIN users as startedBy ON startedBy.id = plan.created_by " +// Added join with users for started_by
+                        $"LEFT JOIN facilities as facility ON facility.id = plan.facility_id " +
                         $"WHERE plan.id = {id} ";
 
 
@@ -378,7 +373,7 @@ namespace CMMSAPIs.Repositories.PM
                                     "RIGHT JOIN frequency ON a.PM_Frequecy_id = frequency.id " +
                                     "WHERE a.PM_Schedule_date = (SELECT CASE WHEN MAX(b.PM_Schedule_date) IS NOT NULL THEN MAX(b.PM_Schedule_date) ELSE NULL END AS schdate " +
                                     "FROM pm_schedule as b WHERE a.Asset_id = b.Asset_id AND a.PM_Frequecy_id = b.PM_Frequecy_id AND b.status NOT IN " +
-                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_APPROVED}) AND " +
+                                    $"({(int)CMMS.CMMS_Status.PM_CANCELLED}, {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED}) AND " +
                                     $"PM_Rescheduled = 0) AND a.Asset_id = {schedule.asset_id} GROUP BY frequency.id ORDER BY frequency.id;";
                 List<ScheduleFrequencyData> _freqData = await Context.GetData<ScheduleFrequencyData>(query2).ConfigureAwait(false);
                 schedule.frequency_dates = _freqData;
@@ -475,10 +470,10 @@ namespace CMMSAPIs.Repositories.PM
                                $"('{((DateTime)frequency_schedule.schedule_date).ToString("yyyy'-'MM'-'dd")}', '{frequency[0].name}', {frequency[0].id}, 'FRC{frequency[0].id}', " +
                                $"{facility[0].id}, '{facility[0].name}', 'FAC{facility[0].id + 1000}', {blockId}, 'BLOCK{blockId}', {category[0].id}, 'AC{category[0].id + 1000}', '{category[0].name}', " +
                                $"{asset[0].id}, 'INV{asset[0].id}', '{asset[0].name}', {user[0].id}, '{user[0].full_name}', {user[0].id}, '{user[0].full_name}', {userID}, " +
-                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SUBMIT}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
+                               $"'{UtilsRepository.GetUTCTime()}', '{serialNumber}', {(int)CMMS.CMMS_Status.PM_SCHEDULED}, '{UtilsRepository.GetUTCTime()}'); SELECT LAST_INSERT_ID();";
                             DataTable dt2 = await Context.FetchData(mainQuery).ConfigureAwait(false);
                             int id = Convert.ToInt32(dt2.Rows[0][0]);
-                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SUBMIT, userID);
+                            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_SCHEDULE, id, 0, 0, "PM Schedule Created", CMMS.CMMS_Status.PM_SCHEDULED, userID);
                             response = new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "PM Schedule data inserted successfully");
                             responseList.Add(response);
                         }
@@ -605,7 +600,7 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
             }
-            string approveQuery = $"update pm_plan set status_id = 0 where id = {planId}; ";
+            string approveQuery = $"update pm_plan set deleted_by = {userID}, status_id = 0 where id = {planId}; ";
             await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);

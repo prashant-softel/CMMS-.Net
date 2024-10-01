@@ -58,7 +58,7 @@ namespace CMMSAPIs.Repositories.Masters
             { CMMS.CMMS_Modules.WARRANTY_CLAIM, 30 },
             { CMMS.CMMS_Modules.CALIBRATION, 31 },
 
-            { CMMS.CMMS_Modules.VEGETATION, 33 }
+            { CMMS.CMMS_Modules.VEGETATION_PLAN, 33 }
         };
 
 

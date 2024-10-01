@@ -449,7 +449,7 @@ namespace CMMSAPIs.Repositories.WC
             if (request.facilityId > 0)
                 updateQry += $"facilityId = {request.facilityId}, wc_fac_code = 'FAC{1000 + request.facilityId}', updatedbyId = {userID}, status = {(int)CMMS.CMMS_Status.WC_UPDATED}";
             if (request.equipmentId > 0)
-                updateQry += $"equipment_id = {request.equipmentId}, " +
+                updateQry += $" , equipment_id = {request.equipmentId}, " +
                                 $"equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"equipment_sr_no = (SELECT serialNumber FROM assets WHERE assets.id = {request.equipmentId}), " +
                                 $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {request.equipmentId}), ";
@@ -728,6 +728,22 @@ namespace CMMSAPIs.Repositories.WC
                 $" where id = {request.id} ;";
             int cloesd = await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
+            if (request.supplierActions != null)
+            {
+                if (request.supplierActions.Count > 0)
+                {
+                    string deleteActions = $"DELETE FROM wcschedules WHERE warranty_id = {request.id}";
+                    await Context.ExecuteNonQry<int>(deleteActions).ConfigureAwait(false);
+                    string addSupplierActions = "INSERT INTO wcschedules (warranty_id, supplier_action, input_value, input_date,srNumber,is_required, created_at) VALUES ";
+                    foreach (var action in request.supplierActions)
+                    {
+                        addSupplierActions += $"({request.id}, '{action.name}', 0, '{((DateTime)action.required_by_date).ToString("yyyy-MM-dd")}', " +
+                                                $"'{action.srNumber}',{action.is_required},'{UtilsRepository.GetUTCTime()}'), ";
+                    }
+                    addSupplierActions = addSupplierActions.Substring(0, addSupplierActions.Length - 2) + ";";
+                    await Context.ExecuteNonQry<int>(addSupplierActions).ConfigureAwait(false);
+                }
+            }
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
 
             if (cloesd > 0)

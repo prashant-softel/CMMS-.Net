@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -156,23 +157,39 @@ namespace CMMSAPIs.Repositories.Users
 
 
 
-        internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
+
+        internal async Task<List<CMUserID>> getUsersByRoleId(int role_id)
         {
             try
             {
-                // Get previous settings
+                string query = $"SELECT id FROM Users WHERE roleId = {role_id}";
+                List<CMUserID> user_list = await Context.GetData<CMUserID>(query).ConfigureAwait(false);
+                return user_list;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Unable to get Users List");
+            }
+        }
+        internal async Task<CMDefaultResponse> SetRoleAccess(CMSetRoleAccess request, int userID)
+        {
+
+            try
+            {
                 CMRoleAccess old_access = await GetRoleAccess(request.role_id);
                 string featureAccessQry = "SELECT id as feature_id, concat(moduleName,': ',featureName) as feature_name, menuImage as menu_image, features.* FROM features;";
                 List<CMAccessList> featureAccessList = await Context.GetData<CMAccessList>(featureAccessQry).ConfigureAwait(false);
+
                 string featureIDquery = "SELECT id FROM features;";
                 DataTable dt = await Context.FetchData(featureIDquery).ConfigureAwait(false);
                 List<int> featureIDs = dt.GetColumn<int>("id");
+
                 Dictionary<int, CMAccessList> features = new Dictionary<int, CMAccessList>();
                 features.Merge(featureIDs, featureAccessList);
-                // Check the whether to change existing settings or not
+
+                // Check whether to change existing settings or not
                 if (request.set_role)
                 {
-
                     if (old_access.access_list.Count != request.access_list.Count)
                     {
                         // Delete the previous setting
@@ -193,123 +210,110 @@ namespace CMMSAPIs.Repositories.Users
                         }
                         string role_access_insert_str = string.Join(',', role_access);
 
-                        string insert_query = $"INSERT INTO RoleAccess" +
-                                                    $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
-                                              $" VALUES {role_access_insert_str}";
+                        string insert_query = $"INSERT INTO RoleAccess " +
+                                              $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
+                                              $"VALUES {role_access_insert_str}";
                         await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
                         await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE, request.role_id, 0, 0, JsonSerializer.Serialize(old_access.access_list), CMMS.CMMS_Status.UPDATED, userID);
-                        // Add previous setting to log table                       
+                    }
+                    else
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        foreach (var access in request.access_list)
+                        {
+                            sb.AppendLine($"UPDATE RoleAccess SET `edit` = {access.edit}, `view` = {access.view}, `delete` = {access.delete}, " +
+                                          $"`issue` = {access.issue}, `approve` = {access.approve}, `add` = {access.add}, `selfView` = {access.selfView}, " +
+                                          $"lastModifiedAt = '{UtilsRepository.GetUTCTime()}', lastModifiedBy = {UtilsRepository.GetUserID()} " +
+                                          $"WHERE roleId = {request.role_id} AND featureId = {access.feature_id};");
+                        }
+
+                        await Context.GetData<List<int>>(sb.ToString()).ConfigureAwait(false);
+                        await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.ROLE_DEFAULT_ACCESS_MODULE, request.role_id, 0, 0, JsonSerializer.Serialize(old_access.access_list), CMMS.CMMS_Status.UPDATED, userID);
                     }
                 }
 
                 if (request.set_existing_users)
                 {
-                    List<CMUserID> user_list = await getUsersByRoleId(request.role_id);
-                    CMUserAccess user_access = new CMUserAccess();
-                    user_access.access_list = request.access_list;
-
-                    using (var repos = new UserAccessRepository(_conn))
+                    CMRoleAccess old_access1 = await GetRoleAccess(request.role_id);
+                    if (old_access1.access_list.Count != request.access_list.Count)
                     {
+                        List<CMUserID> user_list = await getUsersByRoleId(request.role_id);
+                        CMUserAccess user_access = new CMUserAccess();
+                        user_access.access_list = request.access_list;
+
+                        using (var repos = new UserAccessRepository(_conn))
+                        {
+                            foreach (var user in user_list)
+                            {
+                                user_access.user_id = user.id;
+                                await repos.SetUserAccess(user_access, userID);
+                            }
+                        }
+
+                        // Added for old users
                         foreach (var user in user_list)
                         {
                             user_access.user_id = user.id;
-                            await repos.SetUserAccess(user_access, userID);
+                            string roleQry = $"SELECT roleId FROM users WHERE id = {user.id};";
+                            DataTable dt_role = await Context.FetchData(roleQry).ConfigureAwait(false);
+                            int role = Convert.ToInt32(dt_role.Rows[0][0]);
 
+                            // Adding code for missed feature list
+                            var default_user_access = (await GetRoleAccess(role)).access_list;
+                            string missed_featureQ = $"select id as feature_id,featureName as feature_name, menuimage as menu_image " +
+                                                     $"from Features where id not in ({string.Join(",", default_user_access.Select(item => item.feature_id))}) ;";
+
+                            List<CMAccessList> missed_feature_list = await Context.GetData<CMAccessList>(missed_featureQ).ConfigureAwait(false);
+                            default_user_access.AddRange(missed_feature_list);
+                            default_user_access = default_user_access.ToLookup(item => item.feature_id)
+                                                                     .Select(group => group.First())
+                                                                     .ToList();
+
+                            string delete_qry = $"DELETE FROM usersaccess WHERE userId = {user.id}";
+                            await Context.GetData<List<int>>(delete_qry).ConfigureAwait(false);
+
+                            // Insert the new setting
+                            List<string> role_access = new List<string>();
+                            foreach (var access in default_user_access)
+                            {
+                                Dictionary<dynamic, CMAccessList> feature_role_access = default_user_access.SetPrimaryKey("feature_id");
+                                CMAccessList feature = features[access.feature_id];
+                                role_access.Add($"({user.id}, {access.feature_id}, {(feature.add == 0 ? 0 : access.add)}, " +
+                                                $"{(access.edit == 0 ? 0 : access.edit)}, {(access.view == 0 ? 0 : access.view)}, " +
+                                                $"{(access.delete == 0 ? 0 : access.delete)}, {(access.issue == 0 ? 0 : access.issue)}, " +
+                                                $"{(access.approve == 0 ? 0 : access.approve)}, {(access.selfView == 0 ? 0 : access.selfView)}, " +
+                                                $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                            }
+                            string role_access_insert_str = string.Join(',', role_access);
+
+                            string insert_query = $"INSERT INTO usersaccess " +
+                                                  $"(userId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
+                                                  $"VALUES {role_access_insert_str}";
+                            await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
                         }
                     }
-
-                    // added for old users
-
-                    foreach (var user in user_list)
+                    else
                     {
-                        user_access.user_id = user.id;
-                        string roleQry = $"SELECT roleId FROM users WHERE id = {user.id};";
-                        DataTable dt_role = await Context.FetchData(roleQry).ConfigureAwait(false);
-                        int role = Convert.ToInt32(dt_role.Rows[0][0]);
+                        List<CMUserID> user_list = await getUsersByRoleId(request.role_id);
+                        CMUserAccess user_access = new CMUserAccess();
+                        user_access.access_list = request.access_list;
 
-                        //Adding code for missed feature list
-                        var default_user_access = (await GetRoleAccess(role)).access_list;
-                        string missed_featureQ = $"select id as feature_id,featureName as feature_name, menuimage as menu_image from Features where id not in ({string.Join(",", default_user_access.Select(item => item.feature_id))}) and isActive=1 ; ";
-
-                        List<CMAccessList> missed_feature_list = await Context.GetData<CMAccessList>(missed_featureQ).ConfigureAwait(false);
-
-                        default_user_access.AddRange(missed_feature_list);
-                        default_user_access = default_user_access.ToLookup(item => item.feature_id)
-                                      .Select(group => group.First())
-                                      .ToList();
-                        string delete_qry = $" DELETE FROM RoleAccess WHERE RoleId = {user.id}";
-                        await Context.GetData<List<int>>(delete_qry).ConfigureAwait(false);
-
-                        // Insert the new setting
-                        List<string> role_access = new List<string>();
-
-                        foreach (var access in default_user_access)
+                        using (var repos = new UserAccessRepository(_conn))
                         {
-                            Dictionary<dynamic, CMAccessList> feature_role_access = default_user_access.SetPrimaryKey("feature_id");
-                            CMAccessList feature = features[access.feature_id];
-                            role_access.Add($"({user.id}, {access.feature_id}, {(feature.add == 0 ? 0 : access.add)}, " +
-                                            $"{(access.edit == 0 ? 0 : access.edit)}, {(access.view == 0 ? 0 : access.view)}, " +
-                                            $"{(access.delete == 0 ? 0 : access.delete)}, {(access.issue == 0 ? 0 : access.issue)}, " +
-                                            $"{(access.approve == 0 ? 0 : access.approve)}, {(access.selfView == 0 ? 0 : access.selfView)}, " +
-                                            $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
+                            foreach (var user in user_list)
+                            {
+                                user_access.user_id = user.id;
+                                await repos.SetUserAccess(user_access, userID);
+                            }
                         }
-                        string role_access_insert_str = string.Join(',', role_access);
-
-                        string insert_query = $"INSERT INTO RoleAccess" +
-                                                    $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
-                                              $" VALUES {role_access_insert_str}";
-                        await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
-
                     }
-
-
                 }
-                else
-                {
-                    string delete_qry = $" DELETE FROM RoleAccess WHERE RoleId = {request.role_id}";
-                    await Context.GetData<List<int>>(delete_qry).ConfigureAwait(false);
-
-                    // Insert the new setting
-                    List<string> role_access = new List<string>();
-
-                    foreach (var access in request.access_list)
-                    {
-                        Dictionary<dynamic, CMAccessList> feature_role_access = request.access_list.SetPrimaryKey("feature_id");
-                        CMAccessList feature = features[access.feature_id];
-                        role_access.Add($"({request.role_id}, {access.feature_id}, {(feature.add == 0 ? 0 : access.add)}, " +
-                                        $"{(access.edit == 0 ? 0 : access.edit)}, {(access.view == 0 ? 0 : access.view)}, " +
-                                        $"{(access.delete == 0 ? 0 : access.delete)}, {(access.issue == 0 ? 0 : access.issue)}, " +
-                                        $"{(access.approve == 0 ? 0 : access.approve)}, {(access.selfView == 0 ? 0 : access.selfView)}, " +
-                                        $"'{UtilsRepository.GetUTCTime()}', {UtilsRepository.GetUserID()})");
-                    }
-                    string role_access_insert_str = string.Join(',', role_access);
-
-                    string insert_query = $"INSERT INTO RoleAccess" +
-                                                $"(roleId, featureId, `add`, `edit`, `view`, `delete`, `issue`, `approve`, `selfView`, `lastModifiedAt`, `lastModifiedBy`) " +
-                                          $" VALUES {role_access_insert_str}";
-                    await Context.GetData<List<int>>(insert_query).ConfigureAwait(false);
-                }
-
                 CMDefaultResponse response = new CMDefaultResponse(request.role_id, CMMS.RETRUNSTATUS.SUCCESS, "Updated Role Access Successfully");
                 return response;
             }
             catch (Exception)
             {
                 throw;
-            }
-        }
-
-        internal async Task<List<CMUserID>> getUsersByRoleId(int role_id)
-        {
-            try
-            {
-                string query = $"SELECT id FROM Users WHERE roleId = {role_id}";
-                List<CMUserID> user_list = await Context.GetData<CMUserID>(query).ConfigureAwait(false);
-                return user_list;
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Unable to get Users List");
             }
         }
 

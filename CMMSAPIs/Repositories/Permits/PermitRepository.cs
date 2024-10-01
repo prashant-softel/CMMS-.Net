@@ -85,8 +85,7 @@ namespace CMMSAPIs.Repositories.Permits
             { (int)CMMS.CMMS_Status.EQUIP_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED, "TASK ABANDONED REJECTED" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED, "TASK ABANDONED APPROVED" },
-            { (int)CMMS.CMMS_Status.RESCHEDULED_TASK, "TASK RESCHEDULE" },
-            { (int)CMMS.CMMS_Status.MC_ASSIGNED, "TASK REASSING" },
+            { (int)CMMS.CMMS_Status.MC_TASK_ASSIGNED, "TASK REASSING" },
         };
         public static string getShortStatus(int statusID)
         {
@@ -177,73 +176,73 @@ namespace CMMSAPIs.Repositories.Permits
             switch (status)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
-                    retValue += String.Format("PTW{0} <{1}> requested by  <{2}>", permitId, title, permitObj.issuedByName);
+                    retValue = String.Format("PTW{0} requested by {1}", permitId, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_ISSUED:
-                    retValue = String.Format("PTW{0} <{1}> issued by <{2}>", permitId, title, permitObj.issuedByName);
+                    retValue = String.Format("PTW{0} issued by {1}", permitId, permitObj.issuedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
-                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
+                    retValue = String.Format("PTW{0} Rejected By {1}", permitId, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_APPROVED:
-                    retValue = String.Format("PTW{0} <{1}> Approved By <{2}>", permitId, title, permitObj.approvedByName);
+                    retValue = String.Format("PTW{0} Approved By {1}", permitId, permitObj.approvedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER:
-                    retValue = String.Format("PTW{0} <{1}> Rejected By <{2}>", permitId, title, permitObj.rejectedByName);
+                    retValue = String.Format("PTW{0} Rejected By {1}", permitId, permitObj.rejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CLOSED:
-                    retValue = String.Format("PTW{0} <{1}> Closed By <{2}>", permitId, title, permitObj.closedByName);
+                    retValue = String.Format("PTW{0} Closed By {1}", permitId, permitObj.closedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by Issuer <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by Issuer {1} ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by HSE <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by HSE {1} ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
-                    retValue = String.Format("PTW{0} <{1}> cancelled by approver <{2}> ", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} cancelled by approver {1} ", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested by <{2}>", permitId, title, permitObj.cancelRequestByName);
+                    retValue = String.Format("PTW{0} Cancel Requested by {1}", permitId, permitObj.cancelRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.cancelRequestApprovedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Approve by {1}", permitId, permitObj.cancelRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.cancelRequestRejectedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Rejected by {1}", permitId, permitObj.cancelRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
-                    retValue = String.Format("PTW{0} <{1}> Extend Requested By <{2}>", permitId, title, permitObj.extendRequestByName);
+                    retValue = String.Format("PTW{0} Extend Requested By {1}", permitId, permitObj.extendRequestByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Approve by <{2}>", permitId, title, permitObj.extendRequestApprovedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Approve by {1}", permitId, permitObj.extendRequestApprovedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
-                    retValue = String.Format("PTW{0} <{1}> Cancel Requested Rejected by <{2}>", permitId, title, permitObj.extendRequestRejectedByName);
+                    retValue = String.Format("PTW{0} Cancel Requested Rejected by {1}", permitId, permitObj.extendRequestRejectedByName);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Job", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Job", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
-                    retValue = String.Format("PTW{0} <{1}> Linked to PM Permit", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to PM Permit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Audit", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Audit", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
-                    retValue = String.Format("PTW{0} <{1}> Linked to Hoto", permitId, title);
+                    retValue = String.Format("PTW{0} Linked to Hoto", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_EXPIRED:
-                    retValue = String.Format("PTW{0} <{1}> Expired", permitId, title);
+                    retValue = String.Format("PTW{0} Expired", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_UPDATED:
-                    retValue = String.Format("PTW{0} <{1}> Updated", permitId, title);
+                    retValue = String.Format("PTW{0} Updated", permitId, title);
                     break;
                 case CMMS.CMMS_Status.PTW_RESUBMIT:
-                    retValue = String.Format("PTW{0} <{1}> Resubmited", permitId, title);
+                    retValue = String.Format("PTW{0} {1} Resubmited", permitId, title);
                     break;
                 default:
-                    retValue = String.Format("PTW{0} <{1}> Unknow status <{3}>", permitId, title, status);
+                    retValue = String.Format("PTW{0} Unknow status <{2}>", permitId, status);
                     break;
             }
             return retValue;
@@ -788,21 +787,21 @@ namespace CMMSAPIs.Repositories.Permits
             DataTable dt = await Context.FetchData(qryPermitBasic).ConfigureAwait(false);
             int insertedId = Convert.ToInt32(dt.Rows[0][0]);
 
-            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, CAST(ptw.permitNumber as char(100))  as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
-              "FROM permits as ptw " +
-              "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-              "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
-              "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
-              "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
-              "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
-              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
-              "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
-              "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
-              "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
+            /*            string myQuery = "SELECT ptw.id as insertedId, ptw.status as ptwStatus, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, CAST(ptw.permitNumber as char(100))  as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName, ptw.issuedDate as issue_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName, ptw.approvedDate as approve_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName, ptw.completedDate as close_at, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ptw.cancelRequestDate as cancel_at " +
+                          "FROM permits as ptw " +
+                          "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
+                          "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
+                          "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
+                          "JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
+                          "JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
+                          "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+                          "LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
+                          "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById " +
+                          "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById " +
+                          "LEFT JOIN users as user5 ON user5.id = ptw.completedById order by ptw.id desc limit 1";
 
-            List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
-
+                        List<CMPermitDetail> permitDetails = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
+            */
             string ptwCodeQry = $"UPDATE permits SET code = CONCAT('PTW', id);";
             await Context.ExecuteNonQry<int>(ptwCodeQry).ConfigureAwait(false);
 
@@ -886,7 +885,9 @@ namespace CMMSAPIs.Repositories.Permits
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, insertedId, 0, 0, request.physical_iso_remark, CMMS.CMMS_Status.PTW_CREATED, userID);
 
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails[0]);
+            CMPermitDetail permitDetails = await GetPermitDetails(insertedId, "");
+
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
 
             CMDefaultResponse response = new CMDefaultResponse(insertedId, CMMS.RETRUNSTATUS.SUCCESS, "Permit Created Successfully");
 
@@ -910,26 +911,27 @@ namespace CMMSAPIs.Repositories.Permits
                 throw new ArgumentException("Invalid Permit ID");
 
             string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,TBT_Done_By as TBT_Done_By_id ,CONCAT('PTW ',ptw.id) as sitePermitNo,case when TBT_Done_At = '0000-00-00 00:00:00' then null else TBT_Done_At end as TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany,ptw.acceptedDate as request_datetime, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at,ptw.gridIsolation as is_grid_isolation_required,gridStartDate as grid_start_datetime,gridStopDate  as grid_stop_datetime, gridRemark as grid_remark,physicalIsolation as is_physical_iso_required , physicalIsoRemark as physical_iso_remark,lotoRequired as is_loto_required,ptw.TBT_Done_Check as TBT_Done_Check, lotoRemark as loto_remark,ptw.extendRequestby_id ,ptw.extendRequestApprovedby_id ," +
-              "CONCAT(userT1.firstName,' ',userT1.lastName) as extendRequestByName,CONCAT(user2.firstName,' ',user2.lastName) as extendRequestApprovedByName " +
+              "CONCAT(userT1.firstName,' ',userT1.lastName) as extendRequestByName,ptw.startDate as startDate, CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start, CONCAT(user2.firstName,' ',user2.lastName) as extendRequestApprovedByName " +
               " FROM permits as ptw " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
               "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
               "LEFT JOIN facilities as facilities  ON ptw.facilityId = facilities.id " +
               "LEFT JOIN facilities as blocks  ON ptw.blockId = blocks.id " +
-              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById  LEFT JOIN users as userT1 ON user1.id = ptw.extendRequestby_id  left join userroles as ud1 on  user1.roleId = ud1.id left join business as co1 on  user1.companyId = co1.id  " +
-              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on  user2.companyId = co2.id  " +
+              "LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
+              "LEFT JOIN users as userT1 ON user1.id = ptw.extendRequestby_id " +
+              "left join userroles as ud1 on  user1.roleId = ud1.id " +
+              "left join business as co1 on user1.companyId = co1.id  " +
+              "LEFT JOIN users as user2 ON user2.id = ptw.approvedById LEFT JOIN users as userT2 ON user1.id = ptw.extendRequestApprovedby_id  left join userroles as ud2 on  user2.roleId = ud2.id left join business as co2 on user2.companyId = co2.id  " +
               "LEFT JOIN users as user3 ON user3.id = ptw.acceptedById left join userroles as ud3 on  user3.roleId = ud3.id left join business as co3 on  user3.companyId = co3.id  " +
               "LEFT JOIN users as user4 ON user4.id = ptw.cancelRequestById left join userroles as ud4 on  user4.roleId = ud4.id left join business as co4 on  user4.companyId = co4.id  " +
               "LEFT JOIN users as user5 ON user5.id = ptw.completedById left join userroles as ud5 on  user5.roleId = ud5.id left join business as co5 on  user5.companyId = co5.id  " +
               $"LEFT JOIN users as user6 ON user6.id = ptw.rejectedById and ptw.status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud6 on  user6.roleId = ud6.id left join business as co6 on  user6.companyId = co6.id  " +
-              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on  user7.companyId = co7.id  " +
+              $"LEFT JOIN users as user7 ON user7.id = ptw.rejectedById and ptw.status > {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER} left join userroles as ud7 on  user7.roleId = ud7.id left join business as co7 on user7.companyId = co7.id  " +
               "LEFT JOIN users as user8 ON user8.id = ptw.cancelRequestApproveById left join userroles as ud8 on  user8.roleId = ud8.id left join business as co8 on  user8.companyId = co8.id " +
-              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on  user9.companyId = co9.id " +
+              "LEFT JOIN users as user9 ON user9.id = ptw.cancelRequestRejectById left join userroles as ud9 on  user9.roleId = ud9.id left join business as co9 on user9.companyId = co9.id " +
               " LEFT JOIN users as userTBT ON userTBT.id = ptw.TBT_Done_By " +
-
                 $"where ptw.id = {permit_id}";
-
             List<CMPermitDetail> _PermitDetailsList = await Context.GetData<CMPermitDetail>(myQuery).ConfigureAwait(false);
 
             if (_PermitDetailsList.Count == 0)
@@ -987,7 +989,13 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
 
             //get Associated Job
-            string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment from jobs as job left join jobmappingassets as jobassets on job.id = jobassets.jobid left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid left join users as user on user.id = job.assignedid where job.linkedpermit = {permit_id} group by job.id; ";
+            string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto,jcd.id as jc_id , " +
+                             $"job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name " +
+                             $" order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment  " +
+                             $"from jobs as job   left join jobcards as jcd on job.id=jcd.jobId " +
+                             $" left join jobmappingassets as jobassets on job.id = jobassets.jobid " +
+                             $"left join assetcategories as asset_cat on asset_cat.id = jobassets.categoryid left join assets on assets.id = jobassets.assetid " +
+                             $"left join users as user on user.id = job.assignedid where job.linkedpermit = {permit_id} group by job.id; ";
 
             List<CMAssociatedList> _AssociatedJobList = await Context.GetData<CMAssociatedList>(joblist).ConfigureAwait(false);
             //get mc
@@ -999,13 +1007,13 @@ namespace CMMSAPIs.Repositories.Permits
             }
             statusOut += $"ELSE 'Invalid Status' END";
             //getMC
-            string MClist = $"Select  ces.planId as plan_id,ces.scheduleId as schedule_id,ces.executionId, ces.status as status, {statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  cx.startDate   as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid left join cleaning_execution as cx on ces.executionId=cx.id   left join users as user on user.id = cx.assignedTo where ces.ptw_id ={permit_id} and  ces.moduleType=1; ; ";
+            string MClist = $"Select  ces.planId as plan_id,ces.scheduleId as schedule_id,ces.executionId, ces.status as status, {statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  cx.startDate   as start_date, ces.ptw_id as  permitid,asset_cat.name  as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id =8 left join cleaning_execution as cx on ces.executionId=cx.id   left join users as user on user.id = cx.assignedTo where ces.ptw_id ={permit_id} and  ces.moduleType=1; ; ";
             List<CMAssociatedListMC> _AssociatedMCList = await Context.GetData<CMAssociatedListMC>(MClist).ConfigureAwait(false);
             List<CMAssociatedListMC> filteredMCList = _AssociatedMCList
              .Where(mc => mc.permitId != 0 && mc.plan_id != 0)
              .ToList();
             //get vc
-            string Vclist = $"Select ces.planId as plan_id, ces.scheduleId as schedule_id,ces.executionId, ces.status as status,{statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  cx.startDate  as start_date, ces.ptw_id as  permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id = assets.categoryid left join cleaning_execution as cx on ces.executionId=cx.id   left join users as user on user.id = cx.assignedTo where ces.ptw_id ={permit_id} and ces.moduleType=2 ; ";
+            string Vclist = $"Select ces.planId as plan_id, ces.scheduleId as schedule_id,ces.executionId, ces.status as status,{statusOut} as status_short, concat(user.firstname, ' ', user.lastname)  as assignedto, cp.title as title,  cx.startDate  as start_date, ces.ptw_id as  permitid, asset_cat.name   as equipmentcat,\r\n group_concat(distinct assets.name order by assets.id separator ', ') as equipment from cleaning_execution_schedules as ces  left join cleaning_plan as cp on ces.planId = cp.planId  left join cleaning_execution_items as cei on cei.scheduleId = ces.scheduleId  left join assets on assets.id = cei.assetid  left join assetcategories as asset_cat on asset_cat.id =8 left join cleaning_execution as cx on ces.executionId=cx.id   left join users as user on user.id = cx.assignedTo where ces.ptw_id ={permit_id} and ces.moduleType=2 ; ";
             List<CMAssociatedPMListVC> _AssociatedVcList = await Context.GetData<CMAssociatedPMListVC>(Vclist).ConfigureAwait(false);
             List<CMAssociatedPMListVC> filteredMCList1 = _AssociatedVcList
             .Where(mc => mc.permitId != 0 && mc.plan_id != 0)
@@ -1015,14 +1023,14 @@ namespace CMMSAPIs.Repositories.Permits
                 list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
 
             }
-
             string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.plan_name as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
                 $"from pm_task as pm " +
                 $"left join pm_plan as plan on pm.plan_id = plan.id " +
                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
                 $"left join assets on assets.id = pmassets.Asset_id " +
                 $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
-                $"left join users as user on user.id = pm.assigned_to where pm.ptw_id = {permit_id} group by pm.id; ";
+                $"left join users as user on user.id = pm.assigned_to " +
+                $"where pm.ptw_id = {permit_id} group by pm.id; ";
 
             List<CMAssociatedPMList> _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
 
@@ -1490,7 +1498,9 @@ namespace CMMSAPIs.Repositories.Permits
 
         internal async Task<CMDefaultResponse> PermitReject(CMApproval request, int userID)
         {
-            string updateQry = $"update permits set rejectReason = '{request.comment}', rejectStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER}, status_updated_at = '{UtilsRepository.GetUTCTime()}', rejectedDate ='{UtilsRepository.GetUTCTime()}', rejectedById = {userID}  where id = {request.id}";
+            string updateQry = $"update permits set rejectReason = '{request.comment}', " +
+                               $"rejectStatus = 1, status = {(int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER}, status_updated_at = '{UtilsRepository.GetUTCTime()}', " +
+                               $"rejectedDate ='{UtilsRepository.GetUTCTime()}', rejectedById = {userID}  where id = {request.id}";
             int retValue = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1502,7 +1512,7 @@ namespace CMMSAPIs.Repositories.Permits
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.id, "");
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, "Permit rejected by Approver. Reason :  " + request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, userID);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, userID);
 
             await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER, new[] { userID }, permitDetails);
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" Permit  {request.id} Rejected");
@@ -1704,10 +1714,6 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"facilityId = {request.facility_id}, ";
             if (request.blockId > 0)
                 updatePermitQry += $"blockId = {request.blockId}, ";
-            if (request.start_datetime != null)
-                updatePermitQry += $"startDate = '{((DateTime)request.start_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
-            if (request.end_datetime != null)
-                updatePermitQry += $"endDate = '{((DateTime)request.end_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
             if (request.description != null && request.description != "")
                 updatePermitQry += $"description = '{request.description}', ";
             if (request.job_type_id > 0)
@@ -1716,26 +1722,37 @@ namespace CMMSAPIs.Repositories.Permits
                 updatePermitQry += $"typeId = {request.typeId}, ";
             if (request.sop_type_id > 0)
                 updatePermitQry += $"TBTId = {request.sop_type_id}, ";
-            if (request.issuer_id > 0)
-                updatePermitQry += $"issuedById = {request.issuer_id}, ";
-            if (request.approver_id > 0)
-                updatePermitQry += $"approvedById = {request.approver_id}, ";
-            if (request.resubmit == true)
-                updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
             if (request.physical_iso_remark != null)
                 updatePermitQry += $"physicalIsoRemark = '{request.physical_iso_remark}', ";
-
-
-            updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
-            int id = request.TBT_Done_By;
-            if (id != null && id != 0)
+            if (request.start_datetime != null)
+                updatePermitQry += $"startDate = '{((DateTime)request.start_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.end_datetime != null)
+                updatePermitQry += $"endDate = '{((DateTime)request.end_datetime).ToString("yyyy-MM-dd HH:mm:ss")}', ";
+            if (request.resubmit == true)
             {
-
-                updatePermitQry += $"TBT_Done_Check=1,";
+                updatePermitQry += $"status = {(int)CMMS.CMMS_Status.PTW_CREATED}, ";
+                updatePermitQry += $"approvedById = 0, ";
+                string resetTime = "'0001-01-01 00:00:00'";
+                //reset tbt
+                updatePermitQry += $" TBT_Done_By = 0,";
+                updatePermitQry += $"TBT_Done_Check = 0,";
+                updatePermitQry += $"TBT_Done_At = {resetTime} ";
             }
-
-            string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
-            updatePermitQry += $"TBT_Done_At = {TBT_Done_At} ";
+            else
+            {
+                /*if (request.issuer_id > 0)
+                    updatePermitQry += $"issuedById = {request.issuer_id}, ";
+                if (request.approver_id > 0)
+                    updatePermitQry += $"approvedById = {request.approver_id}, ";*/
+                int id = request.TBT_Done_By;
+                if (id != null && id != 0)
+                {
+                    updatePermitQry += $" TBT_Done_By = {request.TBT_Done_By},";
+                    updatePermitQry += $"TBT_Done_Check=1,";
+                }
+                string TBT_Done_At = (request.TBT_Done_At == null) ? "'0001-01-01 00:00:00'" : "'" + ((DateTime)request.TBT_Done_At).ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                updatePermitQry += $"TBT_Done_At = {TBT_Done_At} ";
+            }
 
             updatePermitQry = updatePermitQry.Substring(0, updatePermitQry.Length - 1);
             updatePermitQry += $" where id = {request.permit_id}; ";
@@ -1854,7 +1871,7 @@ namespace CMMSAPIs.Repositories.Permits
             string responseText = "";
             if (request.TBT_Done_By != 0)
             {
-                responseText = $"Permit Updated Successfully with tbt ";
+                responseText = $"Permit Updated Successfully with TBT ";
             }
             else
             {
@@ -1862,10 +1879,9 @@ namespace CMMSAPIs.Repositories.Permits
             }
             if (request.resubmit == true)
             {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder(request.description);
-                sb.Append(" " + request.comment);
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_RESUBMIT, userID);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_CREATED, new[] { userID }, permitDetails);
+
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, request.comment, CMMS.CMMS_Status.PTW_RESUBMIT, userID);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_RESUBMIT, new[] { userID }, permitDetails);
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Resubmitted for Approval");
 
             }
@@ -1874,7 +1890,7 @@ namespace CMMSAPIs.Repositories.Permits
                 System.Text.StringBuilder sb = new System.Text.StringBuilder(request.physical_iso_remark);
                 sb.Append(" " + request.comment);
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PTW, request.permit_id, 0, 0, sb.ToString(), CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, userID);
-                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED, new[] { userID }, permitDetails);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PTW, CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT, new[] { userID }, permitDetails);
                 // response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, $"Permit Updated Successfully");
                 response = new CMDefaultResponse(request.permit_id, CMMS.RETRUNSTATUS.SUCCESS, responseText);
 

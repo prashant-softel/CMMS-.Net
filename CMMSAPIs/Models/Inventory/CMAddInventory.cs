@@ -39,6 +39,8 @@ namespace CMMSAPIs.Models.Inventory
         public int moduleQuantity { get; set; }
         public int photoId { get; set; }
         public int vendorId { get; set; }
+
+        public int Warranty_vendor_Id { get; set; }
         public DateTime? calibrationFirstDueDate { get; set; }
         public DateTime? calibrationNextDueDate { get; set; }
         public DateTime? calibrationLastDate { get; set; }
