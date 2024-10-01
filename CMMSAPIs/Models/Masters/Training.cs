@@ -107,6 +107,9 @@ namespace CMMSAPIs.Models.Masters
         public string notes { get; set; }
         public string designation { get; set; }
         public dynamic Attendend { get; set; }
+        public string name { get; set; }
+        public string email { get; set; }
+        public dynamic mobile { get; set; }
     }
 
     public class CMTrainingSummary
