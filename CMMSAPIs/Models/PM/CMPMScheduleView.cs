@@ -45,6 +45,7 @@ namespace CMMSAPIs.Models.PM
         public string category_name { get; set; }
         public int assigned_to_id { get; set; }
         public string assigned_to_name { get; set; }
+        public int Isolation { get; set; }
         public int permit_id { get; set; }
         public string permit_code { get; set; }
         public int status_plan { get; set; }
@@ -113,6 +114,7 @@ namespace CMMSAPIs.Models.PM
         public string closeRejectedbyName { get; set; }
         public DateTime rejected_at { get; set; }
         public int updated_by_id { get; set; }
+        public TimeSpan extendByMinutes { get; set; }
         public string updated_by_name { get; set; }
         public DateTime updated_at { get; set; }
         public string status_long { get; set; }
@@ -272,6 +274,7 @@ namespace CMMSAPIs.Models.PM
         public int is_ok { get; set; }
         public int boolean { get; set; }
         public string text { get; set; }
+        public int is_job_deleted { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
     public class PMFileUpload

@@ -292,21 +292,31 @@ namespace CMMSAPIs.Repositories.Masters
                             "Left JOIN mis_training_schedule as cor on cor.Schid= U.module_ref_id" +
                             " where module_ref_id =" + schedule_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.TRAINNING_SCHEDULE + ";";
             List<CMTRAININGFILE> _fileUpload = await Context.GetData<CMTRAININGFILE>(myQuery17).ConfigureAwait(false);
-            Schedules[0].external_employee = externalemployee;
-            Schedules[0].internal_employee = internalemployee;
-            Schedules[0].uploadfile_ids = _fileUpload;
+            if (externalemployee.Count > 0)
+            {
+                Schedules[0].external_employee = externalemployee;
+            }
+            if (internalemployee.Count > 0)
+            {
+                Schedules[0].internal_employee = internalemployee;
+            }
+            if (_fileUpload.Count > 0)
+            {
+                Schedules[0].uploadfile_ids = _fileUpload; ;
+            }
             return Schedules;
         }
         internal async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL request)
         {
             foreach (INTERNALEMPLOYEES item in request.internal_employee)
             {
-                string execute = $"update mis_schedule_invites set Attendend={item.Attendend},notes={item.notes},RSVP_Datetime='{UtilsRepository.GetUTCTime()}',Rsvp={1},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
+                string execute = $"update mis_schedule_invites set Attendend={item.attended},notes={item.notes},RSVP_Datetime='{UtilsRepository.GetUTCTime()}',Rsvp='{UtilsRepository.GetUTCTime()}',status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
                 await Context.ExecuteNonQry<int>(execute).ConfigureAwait(false);
             }
             foreach (ExternalEmployee item1 in request.external_employee)
             {
-                string execute2 = $"update mis_visitor_details set Attendend={item1.Attendend},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
+
+                string execute2 = $"update mis_visitor_details set Attendend={item1.attended},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
                 await Context.ExecuteNonQry<int>(execute2).ConfigureAwait(false);
 
             }

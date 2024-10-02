@@ -15,6 +15,7 @@ using CMMSAPIs.BS.JC;
 using CMMSAPIs.BS.Jobs;
 using CMMSAPIs.BS.Masters;
 using CMMSAPIs.BS.MFM;
+using CMMSAPIs.BS.MISEvaluation;
 using CMMSAPIs.BS.MISMasters;
 using CMMSAPIs.BS.MoM;
 using CMMSAPIs.BS.Permits;
@@ -125,6 +126,7 @@ namespace CMMSAPIs
             services.AddScoped<IDashboardBS, DashboardBS>();
             services.AddScoped<IInverterBS, InverterBS>();
             services.AddScoped<IMFMBS, MFMBS>();
+            services.AddScoped<IMISEvaluationBS, MISEvaluationBS>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

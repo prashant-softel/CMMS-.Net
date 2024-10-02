@@ -11,6 +11,7 @@ namespace CMMSAPIs.Models.Jobs
         public int facilityId { get; set; }
         public string facilityName { get; set; }
         public dynamic jobDate { get; set; }
+        public int categoryId { get; set; }
         public string equipmentCat { get; set; }
         public string workingArea { get; set; }
         public string description { get; set; }
@@ -19,7 +20,9 @@ namespace CMMSAPIs.Models.Jobs
         public dynamic breakdownTime { get; set; }
         public string breakdownType { get; set; }
         public int ptw_id { get; set; }
+        public string permitType { get; set; }
         public string permitId { get; set; }
+        public int Isolation { get; set; }
         public int raisedBy { get; set; }
         public string raisedByName { get; set; }
         public string assignedToName { get; set; }
