@@ -155,14 +155,14 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("DeletePMPlan")]
         [HttpPut]
-        public async Task<IActionResult> DeletePMPlan(int planId, int facility_id)
+        public async Task<IActionResult> DeletePMPlan(CMApproval request, int facility_id)
 
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facility_id)?.timezone;
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _PMBS.DeletePMPlan(planId, userID, facilitytimeZone);
+                var data = await _PMBS.DeletePMPlan(request, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (ArgumentException ex)

@@ -18,7 +18,7 @@ namespace CMMSAPIs.BS.PM
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID);
         Task<CMDefaultResponse> ApprovePMPlan(CMApproval request, int userID, string facilitytime);
         Task<CMDefaultResponse> RejectPMPlan(CMApproval request, int userID, string facilitytime);
-        Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilitytime);
+        Task<CMDefaultResponse> DeletePMPlan(CMApproval request, int userID, string facilitytime);
         Task<CMDefaultResponse> UpdatePMPlan(CMPMPlanDetail request, int userID, string facilitytime);
 
         Task<CMImportFileResponse> ImportPMPlanFile(int file_id, int facility_id, int userID, string facilitytime);
@@ -139,13 +139,13 @@ namespace CMMSAPIs.BS.PM
             }
         }
 
-        public async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilitytime)
+        public async Task<CMDefaultResponse> DeletePMPlan(CMApproval request, int userID, string facilitytime)
         {
             try
             {
                 using (var repos = new PMRepository(getDB, _environment))
                 {
-                    return await repos.DeletePMPlan(planId, userID, facilitytime);
+                    return await repos.DeletePMPlan(request , userID, facilitytime);
                 }
             }
             catch (Exception ex)
