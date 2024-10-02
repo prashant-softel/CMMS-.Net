@@ -205,6 +205,16 @@ namespace CMMSAPIs.Models.Masters
         public string water_type { get; set; }
         public int show_opening { get; set; }
     }
+
+    public class CMMISMonthWiseResult
+    {
+        public int month_id { get; set; }
+        public string month_name { get; set; }
+        public int year { get; set; }
+        public string waste_type { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+    }
     public class WaterDataResult
     {
         public int facility_id { get; set; }
@@ -1018,6 +1028,7 @@ namespace CMMSAPIs.Models.Masters
         public string RatingOfPSS { get; set; }
         public string NoOfPowerTransformerInPSS { get; set; }
         public string TransformerCapacity { get; set; }
+        public List<CMMISMonthWiseResult> WaterData { get; set; }
         public List<ManPowerData> MonthlyData { get; set; }
         public List<OccupationalHealthData> healthDatas { get; set; }
         public List<VisitsAndNotices> visitsAndNotices { get; set; }

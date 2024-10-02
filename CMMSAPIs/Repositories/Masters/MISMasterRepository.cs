@@ -2979,6 +2979,45 @@ namespace CMMSAPIs.Repositories.Masters
             string visitnotice = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
             List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
 
+            string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
+           $"sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type,mw.show_opening" +
+           $" from mis_waterdata" +
+           $" LEFT JOIN facilities fc ON fc.id = mis_waterdata.plantId" +
+           $" LEFT JOIN mis_watertype mw on mw.id = mis_waterdata.waterTypeId" +
+           $" where  mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y') = '{year}'" +
+           $" group by MONTH(month_id) , mis_waterdata.waterTypeId  " +
+           $"  ;";
+
+            List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
+
+            //var groupedWaterDataResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
+            //    .SelectMany(group => group.Select(r => new CMMISMonthWiseResult
+            //    {
+            //        month_id = (int)r.month_id,  // Explicit cast to int
+            //        month_name = r.month_name,
+            //        year = (int)r.year,  // Explicit cast to int
+            //        waste_type = r.water_type,
+            //        procured_qty = r.procured_qty,
+            //        consumed_qty = r.consumed_qty,
+            //    }).Distinct()) // Ensuring unique entries
+            //    .ToList();
+
+            var groupedResult = ListResult.GroupBy(r => r.water_type)
+    .Select(group => new
+    {
+        waste_type = group.Key,
+        detail = group.Select(r => new
+        {
+            month_name = r.month_name,
+            month_id = (int)r.month_id,  // Explicit cast to int
+            year = (int)r.year,  // Explicit cast to int
+            procured_qty = r.procured_qty,
+            consumed_qty = r.consumed_qty,
+            closing_qty = r.opening + r.procured_qty - r.consumed_qty
+        }).ToList()
+    }).ToList();
+
+
             List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
 
             foreach (var item in data)
@@ -2991,6 +3030,7 @@ namespace CMMSAPIs.Repositories.Masters
                     District = item.District,
                     ContractorName = item.ContractorName,
                     ContractorSiteInChargeName = item.ContractorSiteInChargeName,
+                    //WaterData = groupedWaterDataResult,
                     MonthlyData = hfedata,
                     healthDatas = occupational_Helath,
                     visitsAndNotices = Regulatory_visit_notice
