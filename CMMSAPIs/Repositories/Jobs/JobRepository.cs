@@ -83,7 +83,7 @@ namespace CMMSAPIs.Repositories.Jobs
         }
 
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
-        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, int userId, string status, string facilitytimeZone)
+        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytimeZone)
 
         {
             /*
@@ -121,9 +121,9 @@ namespace CMMSAPIs.Repositories.Jobs
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
                                         "users as user ON user.id = job.assignedId ";
-            if (!string.IsNullOrEmpty(facility_id))
+            if (facility_id != null)
             {
-                myQuery += $" and job.facilityId IN ({facility_id})";
+                myQuery += $" Where job.facilityId IN ({facility_id})";
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;
@@ -137,11 +137,10 @@ namespace CMMSAPIs.Repositories.Jobs
                         myQuery += " AND DATE_FORMAT(job.createdAt,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
                 }
 
-                if (selfView > 0)
+                if (selfView)
                 {
                     myQuery += " AND (user.id = " + userId + " OR job.createdBy = " + userId + " OR job.assignedId = " + userId + ")";
                 }
-
 
                 if (status?.Length > 0)
                     myQuery += " AND job.status IN (" + status + ")";
@@ -156,7 +155,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (CMJobModel _Job in _JobList)
             {
-                if (_Job.ptw_id == 0)
+                if (_Job.status == 3)
+                {
+                    _Job.latestJCStatusShort = "Job Cancelled ";
+                }
+                else if (_Job.ptw_id == 0)
                 {
                     _Job.latestJCStatusShort = "Permit not linked";
                 }
@@ -569,7 +572,19 @@ namespace CMMSAPIs.Repositories.Jobs
              * AssignedID/PermitID/CancelJob. Out of 3 we can update any one fields based on request
              * Re-assigned employee/ link permit / Cancel Permit. 3 different end points call this function.
              * return boolean true/false*/
-            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}, updatedBy = {updatedBy} where id = {job_id} ";
+
+            string getstatusqry = $"select status from jobs where id = {job_id} ";
+            List<CMJobView> status = await Context.GetData<CMJobView>(getstatusqry).ConfigureAwait(false);
+
+            string updateQry = $"update jobs set assignedId = {assignedTo}, statusUpdatedAt = '{UtilsRepository.GetUTCTime()}', updatedBy = {updatedBy}";
+
+            if (status[0].status == (int)CMMS.CMMS_Status.JOB_CREATED)
+            {
+                updateQry += $", status = {(int)CMMS.CMMS_Status.JOB_ASSIGNED}";
+            }
+
+            updateQry += $" where id = {job_id}";
+
             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;

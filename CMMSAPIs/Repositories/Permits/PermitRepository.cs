@@ -1290,7 +1290,7 @@ namespace CMMSAPIs.Repositories.Permits
                 string fileIds = "";
                 fileIds += (request?.fileIds?.Length > 0 ? " " + string.Join(" , ", request.fileIds) + " " : string.Empty);
 
-                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}, extendFile = '{fileIds}', extendRequestById = '{userID}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
+                string updateQry = $"update permits set extendReason = '{request.comment}', extendByMinutes = '{extendMinutes}', extendTime = '{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}', extendFile = '{fileIds}', extendRequestById = '{userID}', extendStatus = 0, status = {(int)CMMS.CMMS_Status.PTW_EXTEND_REQUESTED} where id = {request.id}";
 
                 await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
 

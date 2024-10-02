@@ -165,7 +165,7 @@ namespace CMMSAPIs.Repositories.PM
 
         }
 
-        internal async Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, int self_view, string facilitytimeZone)
+        internal async Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytimeZone)
         {
             /*
              * Primary Table - PMExecution & PMSchedule
@@ -218,7 +218,7 @@ namespace CMMSAPIs.Repositories.PM
 
                     myQuery += $"AND pm_task.category_id in ({categoryIds}) ";
                 }
-                if (self_view > 0)
+                if (self_view == true)
                     myQuery += $"AND (pm_task.assigned_to={userID});";
 
                 scheduleViewList = await Context.GetData<CMPMTaskList>(myQuery).ConfigureAwait(false);

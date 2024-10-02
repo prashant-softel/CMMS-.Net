@@ -45,7 +45,10 @@ namespace CMMSAPIs.Models.JC
         public int status { get; set; }
         public int approvedStatus { get; set; }
         public string status_short { get; set; }
-
+        public Int64 isExpired { get; set; }
+        public int TBT_Done_By_id { get; set; }
+        public string TBT_Done_By { get; set; }
+        public DateTime? TBT_Done_At { get; set; }
 
     }
 

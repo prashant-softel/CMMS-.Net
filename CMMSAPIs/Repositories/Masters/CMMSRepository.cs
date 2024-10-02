@@ -1337,7 +1337,7 @@ namespace CMMSAPIs.Repositories.Masters
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
-            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SUBMIT).ToList().Count;
+            result.submitted = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_SCHEDULED).ToList().Count;
             result.pm_closed_count = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED).ToList().Count;
             result.approved = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_APPROVED).ToList().Count;
 
@@ -1348,10 +1348,32 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour <= 8)).ToList().Count;
-            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour > 8)).ToList().Count;
-            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.start_date.Value.Hour > 8)).ToList().Count;
+            /* int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8)).ToList().Count;
+             int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;
+             int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;*/
+            int completed_on_time = itemList
+    .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                x.schedule_time.HasValue &&
+                x.end_date.HasValue &&
+                (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8))
+    .ToList()
+    .Count();
 
+            int wo_delay = itemList
+                .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                            x.schedule_time.HasValue &&
+                            x.end_date.HasValue &&
+                            (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8))
+                .ToList()
+                .Count();
+
+            int wo_backlog = itemList
+                .Where(x => x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                            x.schedule_time.HasValue &&
+                            x.end_date.HasValue &&
+                            (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8))
+                .ToList()
+                .Count();
             if (result.total > 0)
             {
                 result.wo_on_time = completed_on_time;

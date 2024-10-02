@@ -152,6 +152,7 @@ namespace CMMSAPIs.Models.PM
         public string skip_approved_by_name { get; set; }
         public DateTime? skip_approved_at { get; set; }
         public string facility_name { get; set; }
+        public Int64 isExpired { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView
@@ -271,6 +272,7 @@ namespace CMMSAPIs.Models.PM
         public int is_ok { get; set; }
         public int boolean { get; set; }
         public string text { get; set; }
+        public int is_job_deleted { get; set; }
         public List<PMFileUpload> pm_files { get; set; }
     }
     public class PMFileUpload

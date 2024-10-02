@@ -70,7 +70,7 @@ namespace CMMSAPIs.Controllers.PM
         //[Authorize]
         [Route("GetPMTaskList")]
         [HttpGet]
-        public async Task<IActionResult> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int self_view)
+        public async Task<IActionResult> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, bool self_view)
         {
             try
             {

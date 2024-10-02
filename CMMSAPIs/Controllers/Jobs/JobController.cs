@@ -27,7 +27,7 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, int selfView, string status)
+        public async Task<IActionResult> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, string status)
         {
             try
             {
