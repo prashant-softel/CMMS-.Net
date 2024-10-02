@@ -281,7 +281,12 @@ namespace CMMSAPIs.Repositories.Masters
             string Exteremployee = $"SELECT id , Name as employeeName,  Email as employeeEmail, Mobile as employeeNumber,Company as  companyName,Attendend,notes, Rsvp from mis_visitor_details where Schid={schedule_id}";
             List<ExternalEmployee> externalemployee = await Context.GetData<ExternalEmployee>(Exteremployee).ConfigureAwait(false);
 
-            string interemployee = $" SELECT Schid as schid, employee_id, Visitor_id, Rsvp, notes, Attendend, designation from mis_schedule_invites where Schid={schedule_id}";
+            string interemployee = $" SELECT Schid as schid, employee_id," +
+                $"Visitor_id, Rsvp, notes,u.mobileNumber as mobile, " +
+                $"concat(u.firstName, ' ', u.lastname) as name,u.loginId as email, designation from " +
+                $"mis_schedule_invites " +
+                $"LEFT JOIN users u on u.id = mis_schedule_invites.employee_id " +
+                $"where Schid={schedule_id}";
             List<INTERNALEMPLOYEES> internalemployee = await Context.GetData<INTERNALEMPLOYEES>(interemployee).ConfigureAwait(false);
             string myQuery17 = "SELECT U.id as id, file_path as fileName,U.description FROM uploadedfiles AS U " +
                             "Left JOIN mis_training_schedule as cor on cor.Schid= U.module_ref_id" +
