@@ -163,8 +163,8 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
         Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
-        Task<List<ProjectDetails>> GetMisSummary(string year, int userID);
-        Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID);
+        Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id);
+        Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id);
     }
     public class MISMasterBS : IMISMasterBS
     {
@@ -279,7 +279,7 @@ namespace CMMSAPIs.BS.MISMasters
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.RejectObservation(request, userId, facilitytimeZone,check_point_type_id);
+                    return await repos.RejectObservation(request, userId, facilitytimeZone, check_point_type_id);
                 }
             }
             catch (Exception ex)
@@ -2238,13 +2238,13 @@ namespace CMMSAPIs.BS.MISMasters
             throw new NotImplementedException();
         }
 
-        public async Task<List<ProjectDetails>> GetMisSummary(string year, int userID)
+        public async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GetMisSummary(year, userID);
+                    return await repos.GetMisSummary(year, facility_id);
                 }
             }
             catch (Exception ex)
@@ -2253,13 +2253,13 @@ namespace CMMSAPIs.BS.MISMasters
             }
         }
 
-        public async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID)
+        public async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id)
         {
             try
             {
                 using (var repos = new MISMasterRepository(getDB))
                 {
-                    return await repos.GeEnvironmentalSummary(year, userID);
+                    return await repos.GeEnvironmentalSummary(year, facility_id);
                 }
             }
             catch (Exception ex)

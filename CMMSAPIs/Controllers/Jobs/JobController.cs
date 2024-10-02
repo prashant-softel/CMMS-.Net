@@ -27,7 +27,7 @@ namespace CMMSAPIs.Controllers.Jobs
         //[Authorize]
         [Route("GetJobList")]
         [HttpGet]
-        public async Task<IActionResult> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, string status)
+        public async Task<IActionResult> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, string status, string categoryid)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace CMMSAPIs.Controllers.Jobs
                     .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
 
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JobBS.GetJobList(facility_id, startDate, endDate, jobType, selfView, userID, status, facilitytimeZone);
+                var data = await _JobBS.GetJobList(facility_id, startDate, endDate, jobType, selfView, userID, status, facilitytimeZone, categoryid);
                 return Ok(data);
             }
             catch (Exception ex)

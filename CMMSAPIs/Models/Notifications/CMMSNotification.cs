@@ -187,23 +187,37 @@ namespace CMMSAPIs.Models.Notifications
             string strMessage = "mail with subject <" + subject + "> sent";
             try
             {
-                var res = MailService.SendEmailAsync(request, _settings);
+                /*var res = MailService.SendEmailAsync(request, _settings);
 
-                if (res != null && res.Exception != null)
+                 if (res != null && res.Exception != null)
+                 {
+                     if (res.Exception.InnerExceptions.Count > 0)
+                     {
+                         strMessage = res.Exception.Message;
+                     }
+                     else
+                     {
+                         strMessage = "Some error";
+                     }
+                 }
+                 else
+                 {
+                     retCode = CMMS.RETRUNSTATUS.SUCCESS;
+                 }*/
+                Task.Run(async () =>
                 {
-                    if (res.Exception.InnerExceptions.Count > 0)
+                    try
                     {
-                        strMessage = res.Exception.Message;
+                        await MailService.SendEmailAsync(request, _settings);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        strMessage = "Some error";
+                        // Log or handle the exception (if needed)
+                        Console.WriteLine($"Error sending email: {ex.Message}");
                     }
-                }
-                else
-                {
-                    retCode = CMMS.RETRUNSTATUS.SUCCESS;
-                }
+                });
+                //Assume success (since we are not awaiting the result)
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
             catch (Exception e)
             {

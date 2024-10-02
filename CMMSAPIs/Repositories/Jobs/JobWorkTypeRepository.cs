@@ -120,7 +120,6 @@ namespace CMMSAPIs.Repositories.Jobs
                 myQuery = "SELECT a.id as id,jws.name as Equipment_name,wt.WorkTypeId ,jwt.equipmentCategoryId as equipmentCategoryId,jwt.workTypeName as workTypeName, a.assetName as linkedToolName FROM worktypeassociatedtools as wt JOIN jobworktypes as jwt ON jwt.id= wt.workTypeId JOIN worktypemasterassets as a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId where a.status =1 ";
                 // "a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId where a.status =1 ";
             }
-
             else
             {
                 myQuery = "SELECT a.id as id,jws.name as Equipment_name,wt.WorkTypeId ,jwt.equipmentCategoryId as equipmentCategoryId,jwt.workTypeName as workTypeName, a.assetName as linkedToolName FROM worktypeassociatedtools as wt JOIN jobworktypes as jwt ON jwt.id= wt.workTypeId JOIN worktypemasterassets as a ON a.id = wt.ToolId LEFT join assetcategories as jws ON jws.id=jwt.equipmentCategoryId";

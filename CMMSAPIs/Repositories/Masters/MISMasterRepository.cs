@@ -2702,7 +2702,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     "LEFT JOIN permits AS per ON jc.PTW_id =per.id " +
-                                    $"Where js.facilityId in({facility_id}) or js.createdAt BETWEEN '{start_date}' and '{end_date}'  group by js.facilityId ;";
+                                    $"Where js.facilityId in({facility_id}) or js.createdAt BETWEEN '{start_date}' and '{end_date}' ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
@@ -2717,7 +2717,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     "LEFT JOIN pm_task AS jc ON js.id = jc.plan_id " +
                                     "LEFT join permits AS permit on jc.ptw_id = permit.id " +
                                     "LEFT JOIN facilities AS fc ON js.facility_id = fc.id " +
-                                    $"Where jc.facility_id in({facility_id}) or js.plan_date BETWEEN '{start_date}' AND '{end_date}' group by jc.facility_Id;";
+                                    $"Where jc.facility_id in({facility_id}) or js.plan_date BETWEEN '{start_date}' AND '{end_date}' ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
@@ -2745,7 +2745,7 @@ namespace CMMSAPIs.Repositories.Masters
                                        "ON mc.id = sub2.executionId " +
                                        "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
                                        "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                       $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 1 or mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' group by mc.facilityId;";
+                                       $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 1 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' ;";
 
 
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
@@ -2775,7 +2775,7 @@ namespace CMMSAPIs.Repositories.Masters
                                       "ON mc.id = sub2.executionId " +
                                       "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
                                       "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                      $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 2 or mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' group by mc.facilityId;";
+                                      $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 2 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
 
                 return data;
@@ -2965,18 +2965,18 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<ProjectDetails>> GetMisSummary(string year, int userID)
+        internal async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
         {
-            string facility = "Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where parentId=0 group by f.id;";
+            string facility = $"Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where f.id={facility_id} group by f.id;";
             List<ProjectDetails> data = await Context.GetData<ProjectDetails>(facility).ConfigureAwait(false);
 
-            string hfedat = "SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth,      COUNT( e.employee_id) AS AvgHFEEmployee,      COUNT(e.employee_id) AS ManDaysHFEEmployee,      COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee,     COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM      employee_attendance AS e LEFT JOIN      facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1  GROUP BY      f.id,  YEAR(e.Date), MONTH(e.Date);";
+            string hfedat = $"SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth,      COUNT( e.employee_id) AS AvgHFEEmployee,      COUNT(e.employee_id) AS ManDaysHFEEmployee,      COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee,     COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM      employee_attendance AS e LEFT JOIN      facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1 and facility_id={facility_id} GROUP BY   f.id,  YEAR(e.Date), MONTH(e.Date);";
             List<ManPowerData> hfedata = await Context.GetData<ManPowerData>(hfedat).ConfigureAwait(false);
 
-            string occupationaldata = "select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata group by month_id; ";
+            string occupationaldata = $"select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata where facility_id={facility_id}  group by month_id; ";
             List<OccupationalHealthData> occupational_Helath = await Context.GetData<OccupationalHealthData>(occupationaldata).ConfigureAwait(false);
 
-            string visitnotice = "SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices group by month_id;";
+            string visitnotice = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
             List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
 
             List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
@@ -2999,14 +2999,14 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return projectDetailsList;
         }
-        internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int userID)
+        internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id)
         {
-            string facility = "Select name as facilty_name from facilities where  parentId=0 group by id;";
+            string facility = $"Select name as facilty_name from facilities where  id={facility_id};";
             List<EnviromentalSummary> data = await Context.GetData<EnviromentalSummary>(facility).ConfigureAwait(false);
-            string occupationaldata = "select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata group by month_id; ";
+            string occupationaldata = $"select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata where facility_id={facility_id}  group by month_id; ";
             List<OccupationalHealthData> occupational_Helath = await Context.GetData<OccupationalHealthData>(occupationaldata).ConfigureAwait(false);
 
-            string visitnotice = "SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices group by month_id;";
+            string visitnotice = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id} group by month_id;";
             List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
 
             List<EnviromentalSummary> projectDetailsList = new List<EnviromentalSummary>();

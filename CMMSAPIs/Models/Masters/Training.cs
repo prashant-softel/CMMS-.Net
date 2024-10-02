@@ -39,11 +39,16 @@ namespace CMMSAPIs.Models.Masters
 
         public int id { get; set; }
         public string employeeName { get; set; }
+        public string name { get; set; }
         public string employeeEmail { get; set; }
+        public string email { get; set; }
+        public DateTime rsvps { get; set; }
+        public int employee_id { get; set; }
         public dynamic employeeNumber { get; set; }
+        public dynamic mobile { get; set; }
         public string designation { get; set; }
         public DateTime Rsvp { get; set; }
-        public int attended { get; set; }
+        public int attendend { get; set; }
         public string notes { get; set; }
         public string companyName { get; set; }
     }
@@ -76,6 +81,7 @@ namespace CMMSAPIs.Models.Masters
         public string Date_of_Trainig { get; set; }
         public string Training_course { get; set; }
         public string Trainer { get; set; }
+        public int hfeEmployeeId { get; set; }
         public string Mode { get; set; }
         public string Venue { get; set; }
         public string Training_Agency { get; set; }
@@ -103,16 +109,17 @@ namespace CMMSAPIs.Models.Masters
         public int Schid { get; set; }
         public int employee_id { get; set; }
         public int Visitor_id { get; set; }
-        public DateTime Rsvp { get; set; }
+        public DateTime rsvp { get; set; }
         public string notes { get; set; }
         public string designation { get; set; }
-        public dynamic Attendend { get; set; }
+        public dynamic attendend { get; set; }
         public string name { get; set; }
         public string email { get; set; }
         public dynamic mobile { get; set; }
         public dynamic attended { get; set; }
 
     }
+
 
     public class CMTrainingSummary
     {

@@ -177,8 +177,6 @@ namespace CMMSAPIs.Repositories.Masters
 
             foreach (InternalEmployee item in request.internalEmployees)
             {
-
-
                 string inviteschdule = $"INSERT INTO mis_schedule_invites ( Schid, employee_id, Visitor_id, Rsvp, designation, Attendend, CreatedAt, CreatedBy) values " +
                                        $"('{schid}', {item.EmpId}, {Exterid}, 0, '{item.empDesignation}', '{item.Attendence}', '{UtilsRepository.GetUTCTime()}', {userID}) ; " +
                                        $"SELECT LAST_INSERT_ID();";
@@ -268,7 +266,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
         {
 
-            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID , course_name as course,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency, Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue  " +
+            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as course,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency, Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue  " +
                 $" from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
@@ -306,19 +304,36 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return Schedules;
         }
-        internal async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL request)
+
+        internal async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL request, int userid)
         {
+
+            string updateQry = $"UPDATE mis_training_schedule SET status_code = {(int)CMMS.CMMS_Status.COURSE_ENDED},  " +
+                    $"Mode='{request.Mode.Replace("+", "-")}',Trainer='{request.Trainer}', hfeEmployeeId = {request.hfeEmployeeId},Venue = '{request.Venue}', " +
+                    $"facility_id={request.facility_id},Course_name='{request.Training_course}', UpdateBy = {userid},UpdatedAt = '{UtilsRepository.GetUTCTime()}' " +
+                    $"WHERE Schid = {request.ScheduleID};";
+
+
+            await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+
+
+
             foreach (INTERNALEMPLOYEES item in request.internal_employee)
             {
-                string execute = $"update mis_schedule_invites set Attendend={item.attended},notes={item.notes},RSVP_Datetime='{UtilsRepository.GetUTCTime()}',Rsvp='{UtilsRepository.GetUTCTime()}',status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item.id}";
+
+                //id, Schid, employee_id, Visitor_id, Rsvp, notes, Attendend, designation, CreatedAt, CreatedBy
+                string execute = $"update mis_schedule_invites set Attendend={item.attendend},notes='{item.notes}',  " +
+                    $"Rsvp='{item.rsvp}' where employee_id={item.employee_id}";
                 await Context.ExecuteNonQry<int>(execute).ConfigureAwait(false);
             }
             foreach (ExternalEmployee item1 in request.external_employee)
             {
-
-                string execute2 = $"update mis_visitor_details set Attendend={item1.attended},notes={item1.notes},status_code={(int)CMMS.CMMS_Status.COURSE_ENDED} where id={item1.id}";
+                //id, Schid, Name, Email, Mobile, Company, Address, Rsvp, notes, Attendend, CreatedBy, CreatedAt
+                string execute2 = $"update mis_visitor_details set Attendend={item1.attendend},notes='{item1.notes}' ,  " +
+                                  $" Rsvp='{item1.rsvps}', Email='{item1.email}' , " +
+                                   $"Mobile ={item1.mobile},Name='{item1.name}' " +
+                                  $"where id={item1.employee_id}";
                 await Context.ExecuteNonQry<int>(execute2).ConfigureAwait(false);
-
             }
             return new CMDefaultResponse(request.ScheduleID, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Coures Executed");
         }
@@ -508,7 +523,9 @@ namespace CMMSAPIs.Repositories.Masters
         public async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userid)
         {
             CMDefaultResponse response = new CMDefaultResponse();
-            string approve = $"update from  mis_training_schedule set approvedby={userid} and approvedat='{UtilsRepository.GetUTCTime()}' where Schid={request.id}";
+            string approve = $"update from  mis_training_schedule set approvedby={userid} ," +
+                $" approvedat='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.APPROVED} " +
+                $" where Schid={request.id}";
             int id = await Context.CheckGetData(approve).ConfigureAwait(false);
             return response;
         }

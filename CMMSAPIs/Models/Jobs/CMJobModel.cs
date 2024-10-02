@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CMMSAPIs.Models.Jobs
+﻿namespace CMMSAPIs.Models.Jobs
 {
     public class CMJobModel
     {
@@ -12,6 +7,7 @@ namespace CMMSAPIs.Models.Jobs
         public string facilityName { get; set; }
         public dynamic jobDate { get; set; }
         public int categoryId { get; set; }
+        public dynamic Isolation { get; set; }
         public string equipmentCat { get; set; }
         public string workingArea { get; set; }
         public string description { get; set; }
@@ -22,7 +18,7 @@ namespace CMMSAPIs.Models.Jobs
         public int ptw_id { get; set; }
         public string permitType { get; set; }
         public string permitId { get; set; }
-        public int Isolation { get; set; }
+
         public int raisedBy { get; set; }
         public string raisedByName { get; set; }
         public string assignedToName { get; set; }

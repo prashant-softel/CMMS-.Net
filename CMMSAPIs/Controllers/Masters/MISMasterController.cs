@@ -2380,12 +2380,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GetMisSummary")]
         [HttpGet]
-        public async Task<IActionResult> GetMisSummary(string year)
+        public async Task<IActionResult> GetMisSummary(string year, int facility_id)
         {
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GetMisSummary(year, userID);
+
+                var data = await _IMISMasterBS.GetMisSummary(year, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)
@@ -2398,12 +2398,12 @@ namespace CMMSAPIs.Controllers.Masters
         }
         [Route("GeEnvironmentalSummary")]
         [HttpGet]
-        public async Task<IActionResult> GeEnvironmentalSummary(string year)
+        public async Task<IActionResult> GeEnvironmentalSummary(string year, int facility_id)
         {
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _IMISMasterBS.GeEnvironmentalSummary(year, userID);
+
+                var data = await _IMISMasterBS.GeEnvironmentalSummary(year, facility_id);
                 return Ok(data);
             }
             catch (Exception ex)

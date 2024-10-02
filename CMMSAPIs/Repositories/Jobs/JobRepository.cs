@@ -7,7 +7,6 @@ using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
@@ -84,7 +83,7 @@ namespace CMMSAPIs.Repositories.Jobs
         }
 
         //internal async Task<List<CMJobModel>> GetJobList(int facility_id, int userId)
-        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytimeZone)
+        internal async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytimeZone, string categoryid)
 
         {
             /*
@@ -144,7 +143,11 @@ namespace CMMSAPIs.Repositories.Jobs
                 {
                     myQuery += " AND (user.id = " + userId + " OR job.createdBy = " + userId + " OR job.assignedId = " + userId + ")";
                 }
+                if (categoryid != "" && categoryid != null)
+                {
 
+                    myQuery += $"AND mapAssets.categoryId in ({categoryid}) ";
+                }
 
                 if (status?.Length > 0)
                     myQuery += " AND job.status IN (" + status + ")";
@@ -323,9 +326,9 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             ////get equipmentCat list
-            //string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
-            //    "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
-            //List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
+                "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
+            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
 
             //get workingArea_name list 
             string myQuery2 = "SELECT asset.id as id, asset.name as name FROM assets as asset " +
@@ -359,9 +362,9 @@ namespace CMMSAPIs.Repositories.Jobs
                 "LEFT JOIN jobworktypes AS workType ON mapWorkTypes.workTypeId = workType.id " +
                 "LEFT JOIN worktypeassociatedtools AS mapTools ON mapTools.workTypeId=workType.id " +
                 "LEFT JOIN worktypemasterassets AS tools ON tools.id=mapTools.ToolId " +
-                $"WHERE job.id = {job_id} AND tools.id IS NOT NULL AND tools.assetName IS NOT NULL GROUP BY tools.id, tools.assetName";
+                $"WHERE job.id = {job_id} AND  tools.status=1 group by tools.id ;";
             List<CMWorkTypeTool> _Tools = await Context.GetData<CMWorkTypeTool>(myQuery5).ConfigureAwait(false);
-
+            //$" tools.id IS NOT NULL AND tools.assetName IS NOT NULL GROUP BY tools.id, tools.assetName";
 
             if (_ViewJobList[0].current_ptw_id == 0)
             {
@@ -401,11 +404,11 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             //get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
-                "FROM assetcategories as asset_cat" +
-                " where asset_cat.id in ( select distinct equipmentCategoryId from " +
-                "jobworktypes where id in ("+ String.Join(",",_WorkType.Select(x=>x.id).ToList()) + "));";
-            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            /*  string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
+                  "FROM assetcategories as asset_cat" +
+                  " where asset_cat.id in ( select distinct equipmentCategoryId from " +
+                  "jobworktypes where id in (" + String.Join(",", _WorkType.Select(x => x.id).ToList()) + "));";
+              List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);*/
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
             _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;
@@ -475,11 +478,9 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (var data in request.WorkType_Ids)
             {
-                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId ) value ( {newJobID}, {data});";
+                string qryCategoryIds = $"insert into jobassociatedworktypes(jobId, workTypeId) value ( {newJobID}, {data});";
                 await Context.ExecuteNonQry<int>(qryCategoryIds).ConfigureAwait(false);
             }
-
-
             CMJobView _ViewJobList = await GetJobDetails(newJobID, "");
 
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.JOB, newJobID, 0, 0, "Job Created", CMMS.CMMS_Status.JOB_CREATED, userId);

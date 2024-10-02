@@ -152,7 +152,7 @@ namespace CMMSAPIs.Controllers.Masters
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await TrainingCourseBS.ExecuteScheduleCourse(requset);
+                var data = await TrainingCourseBS.ExecuteScheduleCourse(requset, userID);
                 return Ok(data);
             }
             catch (Exception ex)

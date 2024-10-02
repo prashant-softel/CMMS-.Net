@@ -2,8 +2,6 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.PM;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,7 +10,7 @@ namespace CMMSAPIs.BS.PM
 {
     public interface IPMScheduleViewBS
     {
-        Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds,string categoryIds, int userID, bool self_view,string facilitytime);
+        Task<List<CMPMTaskList>> GetPMTaskList(string facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string categoryIds, int userID, bool self_view, string facilitytime);
         Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID, string facilitytime);
         Task<CMPMTaskView> GetPMTaskDetail(int task_id, string facilitytime);
         Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID, string facilitytime);
@@ -27,7 +25,7 @@ namespace CMMSAPIs.BS.PM
         Task<CMDefaultResponse> AssignPMTask(int task_id, int assign_to, int userID, string facilitytime);
         Task<List<CMDefaultResponse>> UpdatePMScheduleExecution(CMPMExecutionDetail request, int userID, string facilitytime);
         Task<CMPMScheduleExecutionDetail> GetPMTaskScheduleDetail(int task_id, int schedule_id, string facilitytime);
-        Task<List<CMDefaultResponse>> cloneSchedule(int facility_id,int task_id, int from_schedule_id, int to_schedule_id,int cloneJobs, int userID);
+        Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id, int cloneJobs, int userID);
         Task<List<AssetList>> getAssetListForClone(int task_id, int schedule_id);
         Task<List<CMScheduleData>> GetScheduleData(int facility_id, int category_id, string facilitytime);
         Task<List<CMDefaultResponse>> SetScheduleData(CMSetScheduleData request, int userID, int task_id, int schedule_id, string facilitytime);
@@ -49,7 +47,7 @@ namespace CMMSAPIs.BS.PM
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds,userID,self_view, facilitytime);
+                    return await repos.GetPMTaskList(facility_id, start_date, end_date, frequencyIds, categoryIds, userID, self_view, facilitytime);
                 }
             }
             catch (Exception)
@@ -79,7 +77,7 @@ namespace CMMSAPIs.BS.PM
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskDetail(task_id,  facilitytime);
+                    return await repos.GetPMTaskDetail(task_id, facilitytime);
                 }
             }
             catch (Exception)
@@ -92,12 +90,12 @@ namespace CMMSAPIs.BS.PM
         {
             try
             {
-                using(var repos = new PMScheduleViewRepository(getDB))
+                using (var repos = new PMScheduleViewRepository(getDB))
                 {
                     return await repos.LinkPermitToPMTask(task_id, permit_id, userID, facilitytime);
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -106,7 +104,7 @@ namespace CMMSAPIs.BS.PM
         public async Task<CMDefaultResponse> AddCustomCheckpoint(CMCustomCheckPoint request, int userID, string facilitytime)
         {
             try
-            {   
+            {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
                     return await repos.AddCustomCheckpoint(request, userID, facilitytime);
@@ -243,7 +241,7 @@ namespace CMMSAPIs.BS.PM
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.GetPMTaskScheduleDetail(task_id, schedule_id,  facilitytime);
+                    return await repos.GetPMTaskScheduleDetail(task_id, schedule_id, facilitytime);
                 }
             }
             catch (Exception)
@@ -265,13 +263,13 @@ namespace CMMSAPIs.BS.PM
                 throw;
             }
         }
-        public async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id,int cloneJobs, int userID)
+        public async Task<List<CMDefaultResponse>> cloneSchedule(int facility_id, int task_id, int from_schedule_id, int to_schedule_id, int cloneJobs, int userID)
         {
             try
             {
                 using (var repos = new PMScheduleViewRepository(getDB))
                 {
-                    return await repos.cloneSchedule( facility_id,  task_id,  from_schedule_id,  to_schedule_id, cloneJobs, userID);
+                    return await repos.cloneSchedule(facility_id, task_id, from_schedule_id, to_schedule_id, cloneJobs, userID);
                 }
             }
             catch (Exception ex)
@@ -288,7 +286,7 @@ namespace CMMSAPIs.BS.PM
                 {
                     return await repos.getAssetListForClone(task_id, schedule_id);
 
-      
+
                 }
             }
             catch (Exception)

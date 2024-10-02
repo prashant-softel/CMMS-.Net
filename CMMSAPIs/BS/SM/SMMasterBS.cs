@@ -1,12 +1,10 @@
 ﻿using CMMSAPIs.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CMMSAPIs.Repositories.SM;
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Models.Users;
+using CMMSAPIs.Repositories.SM;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.SM
 {
@@ -27,7 +25,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdateUnitMeasurement(CMUnitMeasurement request, int userID);
         Task<CMDefaultResponse> DeleteUnitMeasurement(int umID, int userID);
 
-        Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID);
+        Task<List<CMASSETMASTERLIST>> GetAssetMasterList(string ID);
         Task<CMDefaultResponse> AddAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID);
         Task<CMDefaultResponse> DeleteAssetMaster(CMSMMaster request, int UserID);
@@ -39,7 +37,7 @@ namespace CMMSAPIs.BS.SM
         Task<CMDefaultResponse> UpdatePaidBy(CMPaidBy request, int UserID);
         Task<CMDefaultResponse> DeletePaidBy(CMPaidBy request, int UserID);
         Task<CMImportFileResponse> ImportMaterialFile(int file_id, int facility_id, int userID);
-      
+
     }
 
     public class SMMasterBS : ISMMasterBS
@@ -232,7 +230,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<List<CMASSETMASTERLIST>> GetAssetMasterList(int ID)
+        public async Task<List<CMASSETMASTERLIST>> GetAssetMasterList(string ID)
         {
             try
             {
@@ -262,7 +260,7 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData,int UserID)
+        public async Task<CMDefaultResponse> UpdateAssetMaster(CMSMMaster request, CMAssetMasterFiles fileData, int UserID)
         {
             try
             {
@@ -335,7 +333,7 @@ namespace CMMSAPIs.BS.SM
                 throw;
             }
         }
-         public async Task<List<CMPaidBy>> GetPaidByList(int ID)
+        public async Task<List<CMPaidBy>> GetPaidByList(int ID)
         {
             try
             {
@@ -409,6 +407,6 @@ namespace CMMSAPIs.BS.SM
             }
         }
 
-      
+
     }
 }

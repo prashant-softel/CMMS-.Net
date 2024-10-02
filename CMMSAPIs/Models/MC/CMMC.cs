@@ -348,6 +348,7 @@ namespace CMMSAPIs.Models.MC
         public DateTime lastDoneDate { get; set; }
         public DateTime Abondond_done_date { get; set; }
         public int status { get; set; }
+
         public string status_short { get; set; }
         public int water_used { get; set; }
         public string permit_code { get; set; }
@@ -357,7 +358,7 @@ namespace CMMSAPIs.Models.MC
         public int permit_tbt_done_by { get; set; }
         public int ptw_id { get; set; }
         public string title { get; set; }
-        public string cleaningType { get; set; }
+        public int cleaningType { get; set; }
         public dynamic waterused { get; set; }
         public dynamic Scheduled_Qnty { get; set; }
         public dynamic Actual_Qnty { get; set; }

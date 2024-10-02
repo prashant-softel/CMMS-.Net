@@ -4,7 +4,6 @@ using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.PM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.JC;
 using CMMSAPIs.Repositories.Utils;
@@ -120,8 +119,8 @@ namespace CMMSAPIs.Repositories.Audits
             int InsertedValue = 0;
 
             int status = 0;
-            if(request.Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-            {               
+            if (request.Module_Type_id == (int)CMMS.checklist_type.Evaluation)
+            {
                 status = (int)CMMS.CMMS_Status.EVAL_PLAN_CREATED;
             }
             else
@@ -152,7 +151,8 @@ namespace CMMSAPIs.Repositories.Audits
 
             // for Evaluation we are setting checklist map here
 
-            if(request.Module_Type_id == (int)CMMS.checklist_type.Evaluation && request.map_checklist.Count > 0) {
+            if (request.Module_Type_id == (int)CMMS.checklist_type.Evaluation && request.map_checklist.Count > 0)
+            {
                 string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id, checklist_id, weightage,comments,created_by,created_at) VALUES ";
                 foreach (var map in request.map_checklist)
                 {
@@ -178,7 +178,7 @@ namespace CMMSAPIs.Repositories.Audits
                 " from evalution_checklist_map e" +
                 " LEFT JOIN users AS createdByUser ON createdByUser.id = e.created_by" +
                 " LEFT JOIN users AS updatedByUser ON updatedByUser.id = e.updated_by " +
-                " where evalution_plan_id = "+id+"; ";
+                " where evalution_plan_id = " + id + "; ";
 
             List<CMEvaluationAuditList> list = await Context.GetData<CMEvaluationAuditList>(SelectQ).ConfigureAwait(false);
             foreach (var item in list)
@@ -1355,7 +1355,7 @@ namespace CMMSAPIs.Repositories.Audits
                     break;
                 case CMMS.CMMS_Status.EVAL_PLAN_DELETED:
                     retValue = String.Format("EVAL{0} Deleted by {1}", PlanObj.plan_id, PlanObj.deleted_by_name);
-                    break;              
+                    break;
                 default:
                     break;
             }
@@ -2109,7 +2109,7 @@ namespace CMMSAPIs.Repositories.Audits
                                                 $"SELECT LAST_INSERT_ID();";
                         DataTable dt2 = await Context.FetchData(executeQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dt2.Rows[0][0]);
-                     
+
                     }
                     string startQry = $"UPDATE pm_schedule SET PM_Execution_Started_by_id = {userID}, PM_Execution_Started_date = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.PM_START}, status_updated_at = '{UtilsRepository.GetUTCTime()}' WHERE id = {schedule.schedule_id};";
                     await Context.ExecuteNonQry<int>(startQry).ConfigureAwait(false);

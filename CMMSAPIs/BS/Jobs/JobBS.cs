@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CMMSAPIs.Helper;
+﻿using CMMSAPIs.Helper;
+using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Jobs;
-using CMMSAPIs.Models.Jobs;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.BS.Jobs
 {
     public interface IJobBS
     {
-		Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status,string facilitytime);
+        Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytime, string categoryid);
         Task<List<CMJobList>> GetJobListByPermitId(int permitId, string facilitytime);
-        Task<CMJobView> GetJobDetails(int job_id,string facilitytime);
+        Task<CMJobView> GetJobDetails(int job_id, string facilitytime);
         Task<CMDefaultResponse> CreateNewJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId);
         Task<CMDefaultResponse> ReAssignJob(int job_id, int assignedTo, int userId);
@@ -30,13 +30,13 @@ namespace CMMSAPIs.BS.Jobs
             databaseProvider = dbProvider;
         }
 
-        public async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytime)
+        public async Task<List<CMJobModel>> GetJobList(string facility_id, string startDate, string endDate, CMMS.CMMS_JobType jobType, bool selfView, int userId, string status, string facilitytime, string categoryid)
         {
             try
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobList(facility_id, startDate, endDate, jobType, selfView, userId, status,facilitytime);
+                    return await repos.GetJobList(facility_id, startDate, endDate, jobType, selfView, userId, status, facilitytime, categoryid);
                 }
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace CMMSAPIs.BS.Jobs
             {
                 using (var repos = new JobRepository(getDB))
                 {
-                    return await repos.GetJobDetails(job_id,facilitytime);
+                    return await repos.GetJobDetails(job_id, facilitytime);
                 }
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace CMMSAPIs.BS.Jobs
                 throw;
             }
         }
-       
+
         public async Task<CMDefaultResponse> UpdateJob(CMCreateJob request, int userId)
         {
             try
