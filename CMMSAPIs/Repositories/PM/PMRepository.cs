@@ -280,7 +280,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name, plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name,task.id as task_id, plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
                         $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                         $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -588,11 +588,19 @@ namespace CMMSAPIs.Repositories.PM
             return response;
         }
 
-        internal async Task<CMDefaultResponse> DeletePMPlan(int planId, int userID, string facilityTimeZone)
+        internal async Task<CMDefaultResponse> DeletePMPlan(CMApproval request, int userID, string facilityTimeZone)
         {
+            
+            string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_DELETED} , " +
+                $"remarks = '{request.comment}',  " +
+                $"deleted_by = {userID}, deleted_at = '{UtilsRepository.GetUTCTime()}' " +
+                $" where id = {request.id} ";
+            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
+
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, request.id, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
             try
             {
-                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(planId, facilityTimeZone);
+                CMPMPlanDetail _ViewPMPlan = await GetPMPlanDetail(request.id, facilityTimeZone);
                 await CMMSNotification.sendNotification(CMMS.CMMS_Modules.PM_PLAN, CMMS.CMMS_Status.PM_PLAN_DELETED, new[] { userID }, _ViewPMPlan);
             }
 
@@ -600,12 +608,8 @@ namespace CMMSAPIs.Repositories.PM
             {
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
             }
-            string approveQuery = $"update pm_plan set deleted_by = {userID}, status_id = 0 where id = {planId}; ";
-            await Context.ExecuteNonQry<int>(approveQuery).ConfigureAwait(false);
 
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, planId, 0, 0, $"PM Plan Deleted by user {userID}", CMMS.CMMS_Status.PM_PLAN_DELETED);
-
-            CMDefaultResponse response = new CMDefaultResponse(planId, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $" PM Plan Deleted");
             return response;
         }
 

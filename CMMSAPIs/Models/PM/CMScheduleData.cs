@@ -60,6 +60,7 @@ namespace CMMSAPIs.Models.PM
     {
         public int isDraft { get; set; }
         public int type_id { get; set; }
+        public int task_id { get; set; }
 
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
