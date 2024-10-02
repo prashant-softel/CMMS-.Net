@@ -297,7 +297,7 @@ namespace CMMSAPIs.Repositories.Jobs
                                     "job.description as job_description, job.breakdownTime as breakdown_time, ptw.id as current_ptw_id, ptw.title as current_ptw_title, ptw.description as current_ptw_desc, jc.id as latestJCid, " +
                                     " passt.name as Isolated_equipments, CONCAT(tbtDone.firstName, ' ', tbtDone.lastName) as TBT_conducted_by_name, ptw.TBT_Done_At as TBT_done_time,ptw.startDate Start_time, job.cancelledAt as cancelled_at, job.cancelledBy as cancelled_by_id, " +
                                     " jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, jc.JC_Date_Stop as Job_closed_on, CONCAT(cancelledByUser.firstName, ' ', cancelledByUser.lastName) as cancelled_by_name, " +
-                                    " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, CONCAT(isotak.firstName, ' ', isotak.lastName) as Isolation_taken  " +
+                                    " jc.JC_Date_Stop as Breakdown_end_time,job.breakdownTime as Breakdown_start_time,ptw.status as status_PTW, job.JC_End_By_id, CONCAT(isotak.firstName, ' ', isotak.lastName) as Isolation_taken, CONCAT(closedByUser.firstName, ' ', closedByUser.lastName) as closedByName   " +
                                       "FROM " +
                                             "jobs as job " +
                                       "LEFT JOIN " +
@@ -312,6 +312,10 @@ namespace CMMSAPIs.Repositories.Jobs
                                             "users as created_user ON created_user.id = job.createdby " +
                                       "LEFT JOIN " +
                                             "business as bus_user ON bus_user.id = job.createdby " +
+                                      "LEFT JOIN " +
+                                            "jobcards as jobC ON jobC.jobId = job.id " +
+                                      "LEFT JOIN " +
+                                            "users as closedByUser ON jobC.JC_End_By_id = closedByUser.id " +
                                             "LEFT join  assets as passt on ptw.physicalIsoEquips = passt.id " +
                                             "Left join users as isotak on ptw.physicalIsolation = isotak.id  " +
                                             "left join users as tbtDone on ptw.TBT_Done_By = tbtDone.id " +
