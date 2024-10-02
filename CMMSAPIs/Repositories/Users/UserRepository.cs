@@ -214,7 +214,7 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> roles = new Dictionary<string, int>();
             roles.Merge(roleNames, roleIds);
 
-            string desigqry = "SELECT id, UPPER(designationName) as name FROM userdesignation ";
+            string desigqry = "SELECT id, UPPER(designationName) as name FROM userdesignation where status=1 ";
             DataTable dgRole = await Context.FetchData(desigqry).ConfigureAwait(false);
             List<string> Designame = dgRole.GetColumn<string>("name");
             List<int> desigid = dgRole.GetColumn<int>("id");
@@ -416,9 +416,15 @@ namespace CMMSAPIs.Repositories.Users
                             catch (KeyNotFoundException)
                             {
                                 if (Convert.ToString(newR["role_name"]) == null || Convert.ToString(newR["role_name"]) == "")
+                                {
                                     m_errorLog.SetError($"Role Name cannot be empty. [Row: {rN}]");
+                                }
                                 else
+                                {
                                     m_errorLog.SetError($"Invalid Role Name. [Row: {rN}]");
+                                }
+                                newR.Delete();
+                                continue;
                             }
                             try
                             {

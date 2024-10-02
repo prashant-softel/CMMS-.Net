@@ -7,6 +7,7 @@ using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
@@ -96,8 +97,8 @@ namespace CMMSAPIs.Repositories.Jobs
             /*Your code goes here*/
             string myQuery = "SELECT " +
                                  //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
-                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, job.breakdownTime as breakdownTime, IF(job.breakdownTime = null, 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, jc.PTW_id as ptw_id, jc.PTW_Code as permitId, permit.status as  latestJCPTWstatus" +
-                                 " FROM " +
+                                 "job.id, job.facilityId as facilityId, facilities.name as facilityName,mapAssets.categoryId, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, job.description as description, job.createdBy as raisedBy, CONCAT(rasiedByUser.firstName , ' ' , rasiedByUser.lastName) as raisedByName, job.createdAt as jobDate, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, job.status as status, jc.id as latestJCid, jc.JC_Status as latestJCStatus, jc.JC_Approved as latestJCApproval, job.breakdownTime as breakdownTime, IF(job.breakdownTime = null, 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType, group_concat(distinct workType.workTypeName order by workType.id separator ', ') as workType, jc.PTW_id as ptw_id, jc.PTW_Code as permitId, permit.status as  latestJCPTWstatus" +
+                                 " ,permittypelists.title as permitType,Isolation FROM " +
                                         "jobs as job " +
                                 "LEFT JOIN " +
                                         "jobcards as jc ON job.latestJC = jc.id " +
@@ -120,10 +121,12 @@ namespace CMMSAPIs.Repositories.Jobs
                                  "LEFT JOIN " +
                                         "users as rasiedByUser ON rasiedByUser.id = job.createdBy " +
                                  "LEFT JOIN " +
-                                        "users as user ON user.id = job.assignedId ";
-            if (!string.IsNullOrEmpty(facility_id))
+                                        "users as user ON user.id = job.assignedId " +
+                                 "LEFT JOIN " +
+                                        "permittypelists on permittypelists.id = permit.typeId";
+            if (facility_id != null)
             {
-                myQuery += $" and job.facilityId IN ({facility_id})";
+                myQuery += $" Where job.facilityId IN ({facility_id})";
                 if ((int)jobType > 0)
                 {
                     myQuery += " AND job.JobType = " + (int)jobType;
@@ -156,7 +159,11 @@ namespace CMMSAPIs.Repositories.Jobs
 
             foreach (CMJobModel _Job in _JobList)
             {
-                if (_Job.ptw_id == 0)
+                if (_Job.status == 3)
+                {
+                    _Job.latestJCStatusShort = "Job Cancelled ";
+                }
+                else if (_Job.ptw_id == 0)
                 {
                     _Job.latestJCStatusShort = "Permit not linked";
                 }
@@ -315,10 +322,10 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].status_short = _shortStatus;
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
-            //get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
-                "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
-            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            ////get equipmentCat list
+            //string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
+            //    "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
+            //List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
 
             //get workingArea_name list 
             string myQuery2 = "SELECT asset.id as id, asset.name as name FROM assets as asset " +
@@ -393,6 +400,12 @@ namespace CMMSAPIs.Repositories.Jobs
                     _ViewJobList[0].latestJCStatusShort = "Permit - Pending";
                 }
             }
+            //get equipmentCat list
+            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
+                "FROM assetcategories as asset_cat" +
+                " where asset_cat.id in ( select distinct equipmentCategoryId from " +
+                "jobworktypes where id in ("+ String.Join(",",_WorkType.Select(x=>x.id).ToList()) + "));";
+            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
             _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;

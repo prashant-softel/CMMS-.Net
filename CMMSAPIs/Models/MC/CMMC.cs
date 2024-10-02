@@ -171,6 +171,7 @@ namespace CMMSAPIs.Models.MC
         public decimal Scheduled { get; set; }
         public decimal cleaned { get; set; }
         public decimal abandoned { get; set; }
+        public TimeSpan extendByMinutes { get; set; }
         public decimal pending { get; set; }
         public string remark_of_schedule { get; set; }
         public int waterUsed { get; set; }
@@ -297,7 +298,7 @@ namespace CMMSAPIs.Models.MC
 
         public int facility_id { get; set; }
         public string facilityidName { get; set; }
-        
+
         // public string siteName { get; set; }
         //public List<CMMCEquipmentDetails> smbIds;
         public List<CMMCExecutionSchedule> schedules { get; set; }
