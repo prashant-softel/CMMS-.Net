@@ -2702,7 +2702,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     "LEFT JOIN permits AS per ON jc.PTW_id =per.id " +
-                                    $"Where js.facilityId in({facility_id}) or js.createdAt BETWEEN '{start_date}' and '{end_date}' ;";
+                                    $"Where js.facilityId in({facility_id}) or js.createdAt BETWEEN '{start_date}' and '{end_date}' GROUP BY js.facilityId;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
@@ -2717,65 +2717,36 @@ namespace CMMSAPIs.Repositories.Masters
                                     "LEFT JOIN pm_task AS jc ON js.id = jc.plan_id " +
                                     "LEFT join permits AS permit on jc.ptw_id = permit.id " +
                                     "LEFT JOIN facilities AS fc ON js.facility_id = fc.id " +
-                                    $"Where jc.facility_id in({facility_id}) or js.plan_date BETWEEN '{start_date}' AND '{end_date}' ;";
+                                    $"Where jc.facility_id in({facility_id}) or js.plan_date BETWEEN '{start_date}' AND '{end_date}' GROUP BY js.facility_id ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
             if (43 == module_id)
             {
-                string myQueryJob = "SELECT f.name AS Site_name, " +
-                                    "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
-                                       "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
-                                       "sub1.TotalWaterUsed AS waterUsed, " +
-                                       "SUM(css.moduleQuantity) AS scheduledQuantity, " +
-                                       "sub2.no_of_cleaned AS actualQuantity, " +
-                                       "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
-                                       "mc.reasonForAbandon AS remark, " +
-                                       "(SUM(css.moduleQuantity) - sub2.no_of_cleaned) AS deviation, " +
-                                       "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate,mc.endedAt) " +
-                                       "ELSE TIMESTAMPDIFF(MINUTE,mc.startDate,mc.endedAt) END AS timeTaken " +
-                                       "FROM cleaning_execution AS mc " +
-                                       "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
-                                       "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
-                                       "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
-                                       "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
-                                       "ON mc.id = sub1.executionId " +
-                                       "LEFT JOIN (SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned " +
-                                       "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
-                                       "ON mc.id = sub2.executionId " +
-                                       "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
-                                       "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                       $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 1 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' ;";
-
-
+                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                    $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.moduleQuantity) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
+                                    $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.moduleQuantity) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
+                                    $" AVG(CASE WHEN mc.startDate IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)        ELSE TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)     END) AS TimeTaken " +
+                                    $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                    $" LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
+                                    $" LEFT JOIN(SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
+                                    $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                    $" WHERE mc.facilityId IN({facility_id}) AND mc.moduleType = 1 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}'  GROUP BY mc.facilityId;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
             if (44 == module_id)
             {
-                string myQueryJob = "SELECT f.name AS Site_name, " +
-                                   "CASE WHEN mc.moduleType = 1 THEN 'Wet' " +
-                                      "WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
-                                      "sub1.TotalWaterUsed AS WaterUsed, " +
-                                      "SUM(css.area) AS ScheduledQuantity, " +
-                                      "sub2.no_of_cleaned AS actualQuantity, " +
-                                      "CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, " +
-                                      "mc.reasonForAbandon AS remark, " +
-                                      "(SUM(css.area) - sub2.no_of_cleaned) AS deviation, " +
-                                      "CASE WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE,mc.startDate,mc.endedAt) " +
-                                      "ELSE TIMESTAMPDIFF(MINUTE,mc.startDate,mc.endedAt) END AS timeTaken " +
-                                      "FROM cleaning_execution AS mc " +
-                                      "LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId " +
-                                      "LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
-                                      "LEFT JOIN (SELECT executionId, SUM(waterUsed) AS TotalWaterUsed " +
-                                      "FROM cleaning_execution_schedules GROUP BY executionId) sub1 " +
-                                      "ON mc.id = sub1.executionId " +
-                                      "LEFT JOIN (SELECT executionId, SUM(area) AS no_of_cleaned " +
-                                      "FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 " +
-                                      "ON mc.id = sub2.executionId " +
-                                      "LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId " +
-                                      "LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                      $"WHERE mc.facilityId IN ({facility_id}) AND mc.moduleType = 2 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}' ;";
+                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                                    $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.moduleQuantity) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
+                                    $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.moduleQuantity) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
+                                     $" AVG(CASE WHEN mc.startDate IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)        ELSE TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)     END) AS TimeTaken " +
+                                    $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
+                                    $" LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
+                                    $" LEFT JOIN(SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
+                                    $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
+                                    $" WHERE mc.facilityId IN({facility_id}) AND mc.moduleType = 2 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}'  GROUP BY mc.facilityId;";
+
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
 
                 return data;
@@ -2879,9 +2850,9 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> CreateEvaluation(CMEvaluationCreate request, int user_id)
         {
 
-            string addPlanQry = $"INSERT INTO evaluation_plan(plan_name, facility_id, frequency_id, plan_date, assigned_to, " +
+            string addPlanQry = $"INSERT INTO evaluation_plan(plan_name, facility_id, frequency_id,max_score, plan_date, assigned_to, " +
                     $"status, created_by, created_at, remarks,status) VALUES " +
-                    $"('{request.plan_name}', {request.facility_id}, {request.frequency_id}, " +
+                    $"('{request.plan_name}', {request.facility_id}, {request.frequency_id},{request.max_score} " +
                     $"'{request.plan_date.ToString("yyyy-MM-dd")}', {request.assigned_to}, {user_id},'{UtilsRepository.GetUTCTime()}' , " +
                     $"'{request.remarks}',{(int)CMMS.CMMS_Status.EVAL_PLAN_CREATED}); " +
                     $"SELECT LAST_INSERT_ID();";
@@ -2889,11 +2860,12 @@ namespace CMMSAPIs.Repositories.Masters
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
 
-            string mapChecklistQry = "INSERT INTO evalution_auditmap(evalution_id, audit_id, weightage,comments,created_by,created_at) VALUES ";
-            /*   foreach (var map in request.mapauditlist)
-               {
-                   mapChecklistQry += $"({id}, {map.audit_id}, {map.weightage}), ";
-               }*/
+            string mapChecklistQry = "INSERT INTO evalution_auditmap(evalution_plan_id, checklist_id, weightage,ptw_req,comments,created_by,created_at) VALUES ";
+            foreach (var map in request.map_checklist)
+            {
+
+                mapChecklistQry += $"({id}, {map.checklist_id}, {map.weightage},{map.ptw_req}, '{map.comment}',{user_id},'{UtilsRepository.GetUTCTime()}'), ";
+            }
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
             await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "Eval Plan added", CMMS.CMMS_Status.EVAL_PLAN_CREATED, user_id);
@@ -2970,7 +2942,7 @@ namespace CMMSAPIs.Repositories.Masters
             string facility = $"Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where f.id={facility_id} group by f.id;";
             List<ProjectDetails> data = await Context.GetData<ProjectDetails>(facility).ConfigureAwait(false);
 
-            string hfedat = $"SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth,      COUNT( e.employee_id) AS AvgHFEEmployee,      COUNT(e.employee_id) AS ManDaysHFEEmployee,      COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee,     COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM      employee_attendance AS e LEFT JOIN      facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1 and facility_id={facility_id} GROUP BY   f.id,  YEAR(e.Date), MONTH(e.Date);";
+            string hfedat = $"SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth, COUNT( e.employee_id) AS AvgHFEEmployee, COUNT(e.employee_id) AS ManDaysHFEEmployee, COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee, COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM  employee_attendance AS e LEFT JOIN  facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1 and facility_id={facility_id} GROUP BY   f.id,  YEAR(e.Date), MONTH(e.Date);";
             List<ManPowerData> hfedata = await Context.GetData<ManPowerData>(hfedat).ConfigureAwait(false);
 
             string occupationaldata = $"select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata where facility_id={facility_id}  group by month_id; ";

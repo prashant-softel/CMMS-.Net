@@ -320,13 +320,30 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
         [Route("ApproveScheduleCourse")]
-        [HttpPost]
+        [HttpPut]
         public async Task<IActionResult> ApproveScheduleCourse(CMApproval request)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = TrainingCourseBS.ApproveScheduleCourse(request, userID);
+                var data = await TrainingCourseBS.ApproveScheduleCourse(request, userID);
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        [Route("RejectScheduleCourse")]
+        [HttpPut]
+        public async Task<IActionResult> RejectScheduleCourse(CMApproval request)
+        {
+            try
+            {
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
+                var data = await TrainingCourseBS.RejectScheduleCourse(request, userID);
+
                 return Ok(data);
             }
             catch (Exception ex)

@@ -10,11 +10,13 @@ namespace CMMSAPIs.Models.Permits
         public int permit_site_no { get; set; }
         public int permit_type { get; set; }
         public string PermitTypeName { get; set; }
+        public int exentedbyid { get; set; }
         public string equipment_categories { get; set; }
         public int workingAreaId { get; set; }
         public string workingAreaName { get; set; }
         public string description { get; set; }
         public int jc_id { get; set; }
+        public DateTime endDatetime { get; set; }
         public int jc_status { get; set; }
         public int request_by_id { get; set; }
         public string request_by_name { get; set; }

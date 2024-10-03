@@ -1099,7 +1099,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
                             string myQuery11 = $"UPDATE cleaning_plan_schedules SET updatedAt = '{UtilsRepository.GetUTCTime()}', updatedById = {userId}, plannedDay = {schedule.cleaningDay}  " +
                                        $"WHERE  planId = {request.planId} AND scheduleId = {schedule.scheduleId};";
-                            await Context.ExecuteNonQry<int>(myQuery11).ConfigureAwait(false);
+                            await Context.CheckGetData(myQuery11).ConfigureAwait(false);
 
                             var equipmentQry1 = $"INSERT INTO `cleaning_plan_items` (`planId`, `moduleType`, `scheduleId`, `assetId`, `plannedDay`, `createdById`, `createdAt`) VALUES ";
                             var values = new List<string>();
@@ -1123,11 +1123,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                         }
                         else
                         {
-                            string myQuery1 = $"INSERT INTO cleaning_plan_schedules (planId,plannedDay,moduleType,cleaningType, updatedAt, updatedById, createdAt, createdById) " +
-                                              $"VALUES ({request.planId}, {schedule.cleaningDay},{(int)moduleType},{request.cleaningType}, '{UtilsRepository.GetUTCTime()}', {userId}, '{UtilsRepository.GetUTCTime()}', {userId});" +
+                            string myQuery1 = $"INSERT INTO cleaning_plan_schedules (planId,plannedDay,moduleType,cleaningType, updatedAt, updatedById) " +
+                                              $"VALUES ({request.planId}, {schedule.cleaningDay},{(int)moduleType},{request.cleaningType},  '{UtilsRepository.GetUTCTime()}', {userId});" +
                                               $"SELECT LAST_INSERT_ID();";
                             DataTable dt = await Context.FetchData(myQuery1).ConfigureAwait(false);
                             schedule_Id = Convert.ToInt32(dt.Rows[0][0]);
+
 
                             string myQuery18 = $"DELETE FROM cleaning_plan_items WHERE scheduleId = {schedule_Id};";
                             await Context.ExecuteNonQry<int>(myQuery18).ConfigureAwait(false);

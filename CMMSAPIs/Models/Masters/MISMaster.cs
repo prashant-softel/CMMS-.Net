@@ -928,6 +928,7 @@ namespace CMMSAPIs.Models.Masters
         public string plan_name { get; set; }
         public int facility_id { get; set; }
         public int frequency_id { get; set; }
+        public int max_score { get; set; }
         public DateTime plan_date { get; set; }
         public int assigned_to { get; set; }
         public string remarks { get; set; }
@@ -944,7 +945,7 @@ namespace CMMSAPIs.Models.Masters
         public int audit_id { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
-
+        public int ptw_req { get; set; }
         public DateTime created_at { get; set; }
         public int updated_by { get; set; }
         public DateTime updated_at { get; set; }
@@ -956,7 +957,7 @@ namespace CMMSAPIs.Models.Masters
         public int checklist_id { get; set; }
         public decimal weightage { get; set; }
         public string comments { get; set; }
-
+        public int ptw_required { get; set; }
         public string created_by_name { get; set; }
         public DateTime created_at { get; set; }
         public string updated_by_name { get; set; }

@@ -41,6 +41,7 @@ namespace CMMSAPIs.Models.Audit
         public string frequency_name { get; set; }
         public int status { get; set; }
         public string short_status { get; set; }
+        public int max_score { get; set; }
         public string FrequencyApplicable { get; set; }
         public int Checklist_id { get; set; }
         public string checklist_name { get; set; }

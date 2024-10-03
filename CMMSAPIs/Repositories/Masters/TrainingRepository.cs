@@ -308,8 +308,8 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> ExecuteScheduleCourse(GETSCHEDULEDETAIL request, int userid)
         {
 
-            string updateQry = $"UPDATE mis_training_schedule SET status_code = {(int)CMMS.CMMS_Status.COURSE_ENDED},  " +
-                    $"Mode='{request.Mode.Replace("+", "-")}',Trainer='{request.Trainer}', hfeEmployeeId = {request.hfeEmployeeId},Venue = '{request.Venue}', " +
+            string updateQry = $"UPDATE mis_training_schedule SET status_code = {(int)CMMS.CMMS_Status.COURSE_ENDED},Course_name='{request.course_name}' ,  " +
+                    $" Mode='{request.Mode.Replace("+", "-")}',Trainer='{request.Trainer}', hfeEmployeeId = {request.hfeEmployeeId},Venue = '{request.Venue}', " +
                     $"facility_id={request.facility_id},Course_name='{request.Training_course}', UpdateBy = {userid},UpdatedAt = '{UtilsRepository.GetUTCTime()}' " +
                     $"WHERE Schid = {request.ScheduleID};";
 
@@ -321,9 +321,9 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (INTERNALEMPLOYEES item in request.internal_employee)
             {
 
-                //id, Schid, employee_id, Visitor_id, Rsvp, notes, Attendend, designation, CreatedAt, CreatedBy
+
                 string execute = $"update mis_schedule_invites set Attendend={item.attendend},notes='{item.notes}',  " +
-                    $"Rsvp='{item.rsvp}' where employee_id={item.employee_id}";
+                                    $"Rsvp='{item.rsvp}' where employee_id={item.employee_id}";
                 await Context.ExecuteNonQry<int>(execute).ConfigureAwait(false);
             }
             foreach (ExternalEmployee item1 in request.external_employee)
@@ -417,7 +417,7 @@ namespace CMMSAPIs.Repositories.Masters
             $" FROM mis_training_schedule " +
             $" ts LEFT JOIN mis_training_course c ON c.id = ts.courseId LEFT JOIN mis_course_category cc ON cc.id = c.Traning_category_id  " +
             $" LEFT JOIN mis_targeted_group tg ON tg.id = c.Targated_group_id WHERE ts.facility_id = {facility_id} " +
-            $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
+            $" or ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
 
 
 
@@ -520,14 +520,26 @@ namespace CMMSAPIs.Repositories.Masters
 
             return monthlyTrainingSummary.Values.ToList();
         }
-        public async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userid)
+
+
+        internal async Task<CMDefaultResponse> RejectScheduleCourse(CMApproval request, int userid)
         {
-            CMDefaultResponse response = new CMDefaultResponse();
-            string approve = $"update from  mis_training_schedule set approvedby={userid} ," +
+            string approve = $"update  mis_training_schedule set RejectedBy={userid} ," +
+               $" RejectedAt='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.REJECTED} " +
+               $" where Schid={request.id}";
+            int id = await Context.CheckGetData(approve).ConfigureAwait(false);
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Rejected");
+            return null;
+        }
+
+        internal async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userID)
+        {
+
+            string approve = $"update  mis_training_schedule set approvedby={userID} ," +
                 $" approvedat='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.APPROVED} " +
                 $" where Schid={request.id}";
             int id = await Context.CheckGetData(approve).ConfigureAwait(false);
-            return response;
+            return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Approved");
         }
     }
 

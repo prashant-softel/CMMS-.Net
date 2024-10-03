@@ -82,6 +82,7 @@ namespace CMMSAPIs.Models.Masters
         public string Training_course { get; set; }
         public string Trainer { get; set; }
         public int hfeEmployeeId { get; set; }
+        public string course_name { get; set; }
         public string Mode { get; set; }
         public string Venue { get; set; }
         public string Training_Agency { get; set; }

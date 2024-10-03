@@ -172,7 +172,7 @@ namespace CMMSAPIs.Repositories.Audits
         internal async Task<List<CMEvaluationAuditList>> GetEvaluationChecklistByID(int id, string facilitytimeZone)
         {
 
-            string SelectQ = "select e.id,evalution_plan_id,checklist_id,weightage,comments," +
+            string SelectQ = "select e.id,evalution_plan_id,checklist_id,weightage,comments,e.ptw_req as ptw_required," +
                 " CONCAT(createdByUser.firstName, ' ', createdByUser.lastName) AS created_by_name, " +
                 " CONCAT(updatedByUser.firstName, ' ', updatedByUser.lastName) AS updated_by_name,created_at,updated_at " +
                 " from evalution_checklist_map e" +
