@@ -414,10 +414,14 @@ namespace CMMSAPIs.Repositories.Masters
 
             string getsch = $" SELECT ts.Schid AS ScheduleID, ts.courseId, ts.ScheduleDate, MONTHNAME(ts.ScheduleDate) AS month_name, " +
             $" c.Traning_category_id, c.No_Of_Days, c.Duration_in_Minutes, cc.name AS mis_course_category, ts.status_code AS status_code " +
-            $" FROM mis_training_schedule " +
-            $" ts LEFT JOIN mis_training_course c ON c.id = ts.courseId LEFT JOIN mis_course_category cc ON cc.id = c.Traning_category_id  " +
-            $" LEFT JOIN mis_targeted_group tg ON tg.id = c.Targated_group_id WHERE ts.facility_id = {facility_id} " +
-            $" or ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
+            $" FROM mis_training_schedule ts " +
+            $" LEFT JOIN mis_training_course c ON c.id = ts.courseId " +
+            $" LEFT JOIN mis_course_category cc ON cc.id = c.Traning_category_id  " +
+            $" LEFT JOIN mis_targeted_group tg ON tg.id = c.Targated_group_id " +
+            $" LEFT JOIN mis_training_course status ON status.id = ts.CourseId " +
+            $" WHERE ts.facility_id = {facility_id} " +
+            $" AND status.Status = 1 " +   
+            $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
 
 
 
