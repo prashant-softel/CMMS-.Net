@@ -420,9 +420,11 @@ namespace CMMSAPIs.Repositories.Grievance
 
 
             string myQuery =
-                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.resolutionLevel, g.status_id as statusId " +
-                ", g.createdAt, g.createdBy, g.updatedBy, g.description, g.status, MONTHNAME(createdAt) AS month_name" +
-                " FROM mis_grievance g ";
+            "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, g.concern, g.resolutionLevel, g.status_id as statusId " +
+            ", g.createdAt, g.createdBy, g.updatedBy, g.description, g.status, MONTHNAME(createdAt) AS month_name" +
+            " FROM mis_grievance g WHERE g.facilityId IN (" + facilityId + ") AND g.status = 1 " +
+            " AND DATE_FORMAT(g.createdAt, '%Y-%m-%d') BETWEEN '" + fromDate + "' AND '" + toDate + "'";
+
 
             List<CMGrievance> response = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
 
