@@ -1184,7 +1184,7 @@ namespace CMMSAPIs.Controllers.Masters
             }
         }
 
-        [Route("GetChecklistInspectionReport")]
+        [Route("GetChecklistInspection")]
         [HttpGet]
         public async Task<IActionResult> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
@@ -1674,9 +1674,9 @@ namespace CMMSAPIs.Controllers.Masters
                 throw;
             }
         }
-        [Route("GetChecklistInspection")]
+        /*[Route("GetChecklistInspection")]
         [HttpGet]
-        public async Task<IActionResult> GetChecklistInspection()
+        public async Task<IActionResult> GetChecklistInspectionReport()
         {
             try
             {
@@ -1687,7 +1687,7 @@ namespace CMMSAPIs.Controllers.Masters
             {
                 throw ex;
             }
-        }
+        }*/
         //Chags for MIs MIS_OccupationalHealthData
         [Route("CreateHealthData")]
         [HttpPost]

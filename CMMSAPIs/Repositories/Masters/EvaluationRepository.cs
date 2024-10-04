@@ -1,16 +1,12 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Models.Notifications;
-using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
-using static CMMSAPIs.Helper.CMMS;
 
 namespace CMMSAPIs.Repositories.Masters
 {
@@ -68,7 +64,7 @@ namespace CMMSAPIs.Repositories.Masters
         }
 
 
-        
+
         internal async Task<CMDefaultResponse> CreateEvaluationPlan(CMEvaluationCreate request, int user_id)
         {
 
@@ -126,7 +122,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"LEFT JOIN users AS deletedByUser ON deletedByUser.id = ep.deleted_by " +
                 $"LEFT JOIN evalution_auditmap AS ea ON ea.evalution_id = ep.id " +
                 $"LEFT JOIN st_audit AS sta ON sta.id = ea.audit_id " + // Join with audit table
-                $"WHERE ep.facility_id IN(" + facility_Id + ")  AND ep.Deleted = 0 "+
+                $"WHERE ep.facility_id IN(" + facility_Id + ")  AND ep.Deleted = 0 " +
                 $"AND DATE_FORMAT(ep.created_at, '%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
                 $"GROUP BY ep.id;";
             List<CMEvaluation> Result = await Context.GetData<CMEvaluation>(myQuery).ConfigureAwait(false);
@@ -217,6 +213,8 @@ namespace CMMSAPIs.Repositories.Masters
                         // Construct the UPDATE query for each audit record
                         if (audit.weightage > 0)
                             auditListQry += $"weightage = {audit.weightage}, ";
+                        if (audit.title != null)
+                            auditListQry += $"title =' {audit.title}', ";
                         if (!string.IsNullOrEmpty(audit.comment))
                             auditListQry += $"comments = '{audit.comment?.Replace("'", "''") ?? ""}' ";
                         else
@@ -227,7 +225,7 @@ namespace CMMSAPIs.Repositories.Masters
                             }
                         }
                         auditListQry += $"WHERE id = {audit.id}; ";
-                        
+
                         await Context.ExecuteNonQry<int>(auditListQry).ConfigureAwait(false);
 
                     }
@@ -241,7 +239,7 @@ namespace CMMSAPIs.Repositories.Masters
             // Return the response after all requests are processed
             return response ?? new CMDefaultResponse(0, CMMS.RETRUNSTATUS.FAILURE, "No plans were updated");
         }
-    
+
         internal async Task<CMDefaultResponse> ApproveEvaluationPlan(CMApproval request, int userID)
         {
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.EVAL_PLAN;

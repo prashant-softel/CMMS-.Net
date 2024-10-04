@@ -24,8 +24,9 @@ namespace CMMSAPIs.Repositories.WC
             { 198, "Item Replenished" },
             { 199, "Close Waiting for Approval" },
             { 200, "Closed-Approved" },
-            { 201, "Closed- Reject" },            
-            { 202, "Cancelled" }
+            { 201, "Closed- Reject" },
+            { 202, "Cancelled" },
+            {203,"Updated" }
         };
         public WCRepository(MYSQLDBHelper sqlDBHelper) : base(sqlDBHelper)
         {
@@ -93,9 +94,9 @@ namespace CMMSAPIs.Repositories.WC
                     //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.dispatched_by, WCObj.dispatched_at);
                     //retValue = String.Format("Warranty Claim Dispachted by {0} at {1}", WCObj.created_by, WCObj.closed_at);
                     break;
-               /* case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
-                    retValue = String.Format("Warranty Claim {0} Rejected by Manufacturer {1}", WCObj.wc_id, WCObj.reje);
-                    break;*/
+                /* case CMMS.CMMS_Status.WC_REJECTED_BY_MANUFACTURER:
+                     retValue = String.Format("Warranty Claim {0} Rejected by Manufacturer {1}", WCObj.wc_id, WCObj.reje);
+                     break;*/
                 /*case CMMS.CMMS_Status.WC_APPROVED_BY_MANUFACTURER:
                     retValue = String.Format("Warranty Claim {0} Approved by Manufacturer {1}", WCObj.approver_name);
                     break;*/
@@ -144,7 +145,7 @@ namespace CMMSAPIs.Repositories.WC
                 statusOut += $"WHEN wc.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
-            string myQuery = "SELECT  wc.id as wc_id, wc.facilityID as facility_Id, f.name as facility_name,approxdailyloss,wc.cost_of_replacement as estimated_cost, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
+            string myQuery = "SELECT  wc.id as wc_id, wc.facilityID as facility_Id,a.id as asste_id, f.name as facility_name,approxdailyloss,wc.cost_of_replacement as estimated_cost, ac.name AS equipment_category, a.name AS equipment_name, equipment_sr_no," +
                 "b1.name AS supplier_name, good_order_id, affected_part, order_reference_number, affected_sr_no,wc.date_of_claim, cost_of_replacement, wc.currency," +
                 " warranty_start_date, warranty_end_date, warranty_claim_title, warranty_description, " +
                 "corrective_action_by_buyer, request_to_supplier, concat(user.firstName , ' ' , user.lastName) AS approver_name," +
@@ -298,11 +299,11 @@ namespace CMMSAPIs.Repositories.WC
                     CMWCDetail _WCObj = await GetWCDetails(cw_id, facilitytimeZone);
                     CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.WC_SUBMITTED, new[] { userID }, _WCObj);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Failed to send WC Notification ",ex.ToString());
+                    Console.WriteLine("Failed to send WC Notification ", ex.ToString());
                 }
-                
+
             }
             if (count > 0)
             {
@@ -447,7 +448,7 @@ namespace CMMSAPIs.Repositories.WC
             }
             string updateQry = "UPDATE wc SET ";
             if (request.facilityId > 0)
-                updateQry += $"facilityId = {request.facilityId}, wc_fac_code = 'FAC{1000 + request.facilityId}', updatedbyId = {userID}, status = {(int)CMMS.CMMS_Status.WC_UPDATED}";
+                updateQry += $"facilityId = {request.facilityId}, wc_fac_code = 'FAC{1000 + request.facilityId}', updatedbyId = {userID}, status = {(int)CMMS.CMMS_Status.WC_SUBMITTED}";
             if (request.equipmentId > 0)
                 updateQry += $" , equipment_id = {request.equipmentId}, " +
                                 $"equipment_cat_id = (SELECT categoryId FROM assets WHERE assets.id = {request.equipmentId}), " +
@@ -455,7 +456,7 @@ namespace CMMSAPIs.Repositories.WC
                                 $"supplier_id = (SELECT supplierId FROM assets WHERE assets.id = {request.equipmentId}), ";
             if (request.status == 1)
             {
-                updateQry += $"status = {(int)CMMS.CMMS_Status.WC_UPDATED}, ";
+                updateQry += $"status = {(int)CMMS.CMMS_Status.WC_SUBMITTED}, ";
             }
             if (request.status == 0)
             {
@@ -760,8 +761,8 @@ namespace CMMSAPIs.Repositories.WC
             }
             catch (Exception ex)
             {
-                Console.Write("Failed to send WC Notification ", ex.ToString());   
-            } 
+                Console.Write("Failed to send WC Notification ", ex.ToString());
+            }
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "WC Closed Successfully");
             return response;
@@ -831,7 +832,7 @@ namespace CMMSAPIs.Repositories.WC
             {
                 Console.WriteLine("Failed to send Calibration Notification ,", ex.ToString());
             }
-            
+
 
             CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, $"Reject closed successfully");
             return response;

@@ -394,12 +394,18 @@ namespace CMMSAPIs.Models.Masters
 
     }
 
+    // CMChecklistInspectionReport class, representing the main report for each facility
     public class CMChecklistInspectionReport
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+        public dynamic year_id { get; set; }
         public List<Checklist1> checklist { get; set; }
     }
+
+
     public class ChecklistDetails
     {
         public string checklist_name { get; set; }
@@ -416,9 +422,10 @@ namespace CMMSAPIs.Models.Masters
         public dynamic month { get; set; }
         public dynamic month_id { get; set; }
         public dynamic year_id { get; set; }
+        public int facility_id { get; set; }
         public List<ChecklistDetails> Details { get; set; }
-
     }
+
     public class CMObservationReport
     {
         public int id { get; set; }
@@ -854,7 +861,6 @@ namespace CMMSAPIs.Models.Masters
     public class OccupationalHealthData
     {
         public int id { get; set; }
-
         public int month_id { get; set; }
         public string month_name { get; set; }
         public int facility_id { get; set; }
@@ -928,6 +934,7 @@ namespace CMMSAPIs.Models.Masters
         public string plan_name { get; set; }
         public int facility_id { get; set; }
         public int frequency_id { get; set; }
+
         public int max_score { get; set; }
         public DateTime plan_date { get; set; }
         public int assigned_to { get; set; }
@@ -942,6 +949,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int evalution_id { get; set; }
         public int checklist_id { get; set; }
+        public string title { get; set; }
         public int audit_id { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
@@ -953,15 +961,17 @@ namespace CMMSAPIs.Models.Masters
     public class CMEvaluationAuditList
     {
         public int id { get; set; }
+        public int map_checlist { get; set; }
         public int evalution_plan_id { get; set; }
-        public int checklist_id { get; set; }
+        public string checklist_number { get; set; }
         public decimal weightage { get; set; }
+        public string title { get; set; }
         public string comments { get; set; }
         public int ptw_required { get; set; }
-        public string created_by_name { get; set; }
-        public DateTime created_at { get; set; }
+        public string createdByName { get; set; }
+        public DateTime createdAt { get; set; }
         public string updated_by_name { get; set; }
-        public DateTime updated_at { get; set; }
+        public DateTime updatedAt { get; set; }
     }
 
 
@@ -1002,7 +1012,8 @@ namespace CMMSAPIs.Models.Masters
 
     public class ProjectDetails
     {
-        public string SpvName { get; set; }
+
+        public string spv_name { get; set; }
         public string sitename { get; set; }
         public string State { get; set; }
         public string District { get; set; }
@@ -1010,39 +1021,49 @@ namespace CMMSAPIs.Models.Masters
         public string ContractorName { get; set; }
         public string ContractorSiteInChargeName { get; set; }
         public string HfeSiteInChargeName { get; set; }
-        public string CapacityAC { get; set; }
-        public string TotalLandArea { get; set; }
-        public string LengthOfInternalTransmissionLineKm { get; set; }
-        public string NoOfWTGs { get; set; }
-        public string NoOfInternalPoles { get; set; }
-        public string LengthOfExternalTransmissionLineKm { get; set; }
-        public string RatingOfPSS { get; set; }
-        public string NoOfPowerTransformerInPSS { get; set; }
-        public string TransformerCapacity { get; set; }
-        public List<ManPowerData> MonthlyData { get; set; }
-        public List<OccupationalHealthData> healthDatas { get; set; }
-        public List<VisitsAndNotices> visitsAndNotices { get; set; }
+        public int CapacityAC { get; set; }
+        public int TotalLandArea { get; set; }
+        public int LengthOfInternalTransmissionLineKm { get; set; }
+        public int NoOfWTGs { get; set; }
+        public int NoOfInternalPoles { get; set; }
+        public int LengthOfExternalTransmissionLineKm { get; set; }
+        public int RatingOfPSS { get; set; }
+        public int NoOfPowerTransformerInPSS { get; set; }
+        public int TransformerCapacity { get; set; }
 
 
     }
 
-
-    /*
     public class MapAuditlist
-        {
-            public int id { get; set; }
-            public int evalution_id { get; set; }
-            public int audit_id { get; set; }
-            public decimal weightage { get; set; }
-            public string comments { get; set; }
-            public int created_by { get; set; }
-            public DateTime created_at { get; set; }
-            public int updated_by { get; set; }
-            public DateTime updated_at { get; set; }
-        }
-    */
+    {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
+        public List<ManPowerData> manPowerData { get; set; }
+        public List<CMWaterDataReport> waterData { get; set; }
+        public List<IncidentAccidentData> incidentAccidentData { get; set; }
+        public List<HseTrainingData> hseTrainingData { get; set; }
+        public List<HseInspectionAuditData> hseInspectionAuditData { get; set; }
+        public List<ReportChecklistData> reportChecklistData { get; set; }
+        public List<GrievanceData> grievanceData { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
+    }
+
+    public class MISSUMMARY
+    {
+        public string year { get; set; }
+        public ProjectDetails projectdetails { get; set; }
+        public List<MapAuditlist> MonthlyData { get; set; }
+
+    }
     public class ManPowerData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public dynamic AvgHFEEmployee { get; set; }
         public dynamic ManDaysHFEEmployee { get; set; }
         public dynamic ManHoursWorkedHFEEmployee { get; set; }
@@ -1053,6 +1074,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class IncidentAccidentData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int FatalIncidents { get; set; }
         public int LostTimeInjuries { get; set; }
         public int MedicalTreatmentInjuries { get; set; }
@@ -1065,6 +1090,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class HseTrainingData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int TotalTrainings { get; set; }
         public int TrainingManHours { get; set; }
         public int MockDrillsConducted { get; set; }
@@ -1073,6 +1102,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class HseInspectionAuditData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int ObservationsRaised { get; set; }
         public int ObservationsClosed { get; set; }
         public int MajorObservationsRaised { get; set; }
@@ -1083,6 +1116,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class ReportChecklistData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int ReportsToBeInspected { get; set; }
         public int ReportsInspectedInMonth { get; set; }
         public int ReportsNotInspected { get; set; }
@@ -1090,6 +1127,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class GrievanceData
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int TotalGrievancesRaised { get; set; }
         public int GrievancesResolved { get; set; }
         public int WorkforceGrievancesPending { get; set; }
@@ -1098,6 +1139,10 @@ namespace CMMSAPIs.Models.Masters
 
     public class EnviromentalSummary
     {
+        public dynamic year { get; set; }
+        public dynamic month { get; set; }
+        public dynamic month_id { get; set; }
+
         public int facility_id { get; set; }
         public string facilty_name { get; set; }
         public List<OccupationalHealthData> healthDatas { get; set; }

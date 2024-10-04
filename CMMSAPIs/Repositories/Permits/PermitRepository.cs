@@ -999,7 +999,7 @@ namespace CMMSAPIs.Repositories.Permits
             List<CMSaftyQuestion> _QuestionList = await Context.GetData<CMSaftyQuestion>(myQuery5).ConfigureAwait(false);
 
             //get Associated Job
-            string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto,jcd.id as jc_id , " +
+            string joblist = $"Select job.id as jobid, job.status as status, concat(user.firstname, ' ', user.lastname) as assignedto,jcd.id as jc_id ,jcd.jc_status as jc_status , " +
                              $"job.title as title,  job.breakdowntime, job.linkedpermit as permitid, group_concat(distinct asset_cat.name " +
                              $" order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment  " +
                              $"from jobs as job   left join jobcards as jcd on job.id=jcd.jobId " +

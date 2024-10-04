@@ -1276,33 +1276,40 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
-            string facilityQuery = $"SELECT DISTINCT f.id as facility_id, f.name AS facility_name FROM st_audit st LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id IN ({facility_id});";
+            string facilityQuery = $"SELECT DISTINCT  f.id as facility_id, f.name AS facility_name , " +
+                                   "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
+                                   "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id  " +
+                                   "FROM st_audit st " +
+                                   "LEFT JOIN pm_task task ON task.plan_id = st.id  " +
+                                   "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
+                                   $"LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id IN ({facility_id});";
             List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false);
 
 
-            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, '' AS SOP_number, " +
-                                    "frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
-                                    "PM_Schedule_Observation_add_date AS date_of_inspection, MONTHNAME(PM_Schedule_Observation_add_date) AS month, " +
-                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id, YEAR(PM_Schedule_Observation_add_date) AS year_id, " +
-                                    "CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment " +
-                                    "FROM st_audit st " +
-                                    "LEFT JOIN pm_task task ON task.plan_id = st.id " +
+            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, " +
+                                    "st.plan_number AS SOP_number,  frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
+                                    " PM_Schedule_Observation_add_date AS date_of_inspection, " +
+                                    "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
+                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id,  " +
+                                    " CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment  " +
+                                    "FROM st_audit st   LEFT JOIN pm_task task ON task.plan_id = st.id  " +
                                     "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
                                     "LEFT JOIN checklist_number checklist_number ON checklist_number.id = st.Checklist_id " +
-                                    "LEFT JOIN frequency frequency ON frequency.id = st.Frequency " +
-                                    "LEFT JOIN facilities f ON f.id = st.facility_id " +
-                                    "WHERE st.facility_id IN (" + facility_id + ") AND st.module_type_id = " + module_type + " " +
-                                    "AND DATE_FORMAT(PM_Schedule_Observation_add_date, '%Y-%m-%d') BETWEEN '" + fromDate.ToString("yyyy-MM-dd") + "' AND '" + toDate.ToString("yyyy-MM-dd") + "' " +
-                                    "GROUP BY st.id ORDER BY st.id DESC;";
+                                    " LEFT JOIN frequency frequency ON frequency.id = st.Frequency  " +
+                                    " LEFT JOIN facilities f ON f.id = st.facility_id " +
+                                    $" WHERE st.facility_id IN ({facility_id}) AND st.module_type_id ={module_type}  " +
+                                    " GROUP BY  st.id ;";
             List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false);
 
+            // Group checklist data by facility_id, month, month_id, and year_id
             var groupedChecklistData = checklistData
-                .GroupBy(cd => new { cd.month, cd.month_id, cd.year_id })
+                .GroupBy(cd => new { cd.facility_id, cd.month, cd.month_id, cd.year_id })
                 .Select(g => new Checklist1
                 {
                     month = g.Key.month,
                     month_id = g.Key.month_id,
                     year_id = g.Key.year_id,
+                    facility_id = g.Key.facility_id,
                     Details = g.Select(cd => new ChecklistDetails
                     {
                         checklist_name = cd.checklist_name,
@@ -1312,15 +1319,22 @@ namespace CMMSAPIs.Repositories.Masters
                         date_of_inspection = cd.date_of_inspection,
                         checklist_attachment = cd.checklist_attachment,
                         no_of_unsafe_observation = 0
-                    }).ToList()
+                    }).ToList() // Convert to list after selecting
                 }).ToList();
+
 
             var response = facilities.Select(facility => new CMChecklistInspectionReport
             {
                 facility_id = facility.facility_id,
                 facility_name = facility.facility_name,
+                month = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.month,  // Set month
+                month_id = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.month_id,  // Set month_id
+                year_id = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.year_id,  // Set year_id
                 checklist = groupedChecklistData
+                    .Where(g => g.facility_id == facility.facility_id) // Filter by facility
+                    .ToList() // Get the list of Checklist1 for the facility
             }).ToList();
+
 
             return response;
 
@@ -2139,7 +2153,7 @@ namespace CMMSAPIs.Repositories.Masters
             return Result[0];
         }
 
-        public async Task<GetChecklistInspection> GetChecklistInspection()
+        public async Task<GetChecklistInspection> GetChecklistInspection1()
         {
             var _GetChecklistInspection = new GetChecklistInspection
             {
@@ -2860,18 +2874,16 @@ namespace CMMSAPIs.Repositories.Masters
             int id = Convert.ToInt32(dt3.Rows[0][0]);
 
 
-            string mapChecklistQry = "INSERT INTO evalution_auditmap(evalution_plan_id, checklist_id, weightage,ptw_req,comments,created_by,created_at) VALUES ";
+            string mapChecklistQry = "INSERT INTO evalution_auditmap(evalution_plan_id,title, checklist_id, weightage,ptw_req,comments,created_by,created_at) VALUES ";
             foreach (var map in request.map_checklist)
             {
 
-                mapChecklistQry += $"({id}, {map.checklist_id}, {map.weightage},{map.ptw_req}, '{map.comment}',{user_id},'{UtilsRepository.GetUTCTime()}'), ";
+                mapChecklistQry += $"({id}, '{map.title}',{map.checklist_id}, {map.weightage},{map.ptw_req}, '{map.comment}',{user_id},'{UtilsRepository.GetUTCTime()}'), ";
             }
             mapChecklistQry = mapChecklistQry.Substring(0, mapChecklistQry.Length - 2) + ";";
             await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.PM_PLAN, id, 0, 0, "Eval Plan added", CMMS.CMMS_Status.EVAL_PLAN_CREATED, user_id);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, id, 0, 0, "Eval Plan added", CMMS.CMMS_Status.EVAL_PLAN_CREATED, user_id);
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, request.remarks);
-
-            return null;
         }
 
         internal async Task<CMDefaultResponse> ApproveEvaluation(CMApproval request, int userID)
@@ -2881,7 +2893,12 @@ namespace CMMSAPIs.Repositories.Masters
         }
         public async Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID)
         {
-            return null;
+            string evalution = $"Select  id,plan_name, facility_id, frequency_id, plan_date, assigned_to, status ," +
+                               $" created_by, created_at, updated_by, updated_at, approved_by, approved_at, approveRemark , " +
+                               $"rejected_by, rejected_at, rejectRemark, remarks , " +
+                               $"deleted_by, Deleted, deleted_at, type_id, category_id, status_updated_at, max_score where facility_id={id} ;";
+            List<CMEvaluationCreate> data = await Context.GetData<CMEvaluationCreate>(evalution).ConfigureAwait(false);
+            return data;
         }
         internal async Task<CMDefaultResponse> ApproveObservation(CMApproval request, int userID, string facilitytimeZone, int check_point_type_id)
         {
@@ -2937,39 +2954,65 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-        internal async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
+        internal async Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id)
         {
-            string facility = $"Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where f.id={facility_id} group by f.id;";
-            List<ProjectDetails> data = await Context.GetData<ProjectDetails>(facility).ConfigureAwait(false);
+            string y = year;
+            string facility = $"Select f.name as sitename, f.state as state,f.city as district,f.city as talukMandal,bus1.name as contractorName,bus2.name as hfeSiteInChargeName,  bus.name AS ContractorSiteInChargeName,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus1.id=f.operatorId  left join business as bus2 on bus2.id=f.customerId   left join spv as spv1 on spv1.id=f.spvId where f.id={facility_id} group by f.id;";
+            ProjectDetails data = await Context.GetDataFirst<ProjectDetails>(facility).ConfigureAwait(false);
 
-            string hfedat = $"SELECT  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth, COUNT( e.employee_id) AS AvgHFEEmployee, COUNT(e.employee_id) AS ManDaysHFEEmployee, COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee, COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM  employee_attendance AS e LEFT JOIN  facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1 and facility_id={facility_id} GROUP BY   f.id,  YEAR(e.Date), MONTH(e.Date);";
+            string hfedat = $"SELECT YEAR(e.Date) AS year,  MONTH(e.Date) AS month,MONTH(e.Date) AS month_id,  CONCAT(YEAR(e.Date), '-', LPAD(MONTH(e.Date), 2, '0')) AS YearMonth, COUNT( e.employee_id) AS AvgHFEEmployee, COUNT(e.employee_id) AS ManDaysHFEEmployee, COUNT(DISTINCT e.Date) AS ManHoursWorkedHFEEmployee, COUNT(e.employee_id) * 8 AS ManHoursWorkedHFEEmployee FROM  employee_attendance AS e LEFT JOIN  facilities AS f ON f.id = e.facility_id LEFT JOIN      (SELECT DISTINCT Date FROM contractor_attendnace) AS cd ON cd.Date = e.Date     where e.present=1 and facility_id={facility_id} GROUP BY   f.id,  YEAR(e.Date), MONTH(e.Date);";
             List<ManPowerData> hfedata = await Context.GetData<ManPowerData>(hfedat).ConfigureAwait(false);
 
-            string occupationaldata = $"select NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata where facility_id={facility_id}  group by month_id; ";
+            string occupationaldata = $"select month_id,NoOfHealthExamsOfNewJoiner,PeriodicTests,OccupationaIllnesses from mis_occupationalhealthdata where facility_id={facility_id}  group by month_id; ";
             List<OccupationalHealthData> occupational_Helath = await Context.GetData<OccupationalHealthData>(occupationaldata).ConfigureAwait(false);
 
             string visitnotice = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
             List<VisitsAndNotices> Regulatory_visit_notice = await Context.GetData<VisitsAndNotices>(visitnotice).ConfigureAwait(false);
 
-            List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
+            string Water = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<CMWaterDataReport> waterData = await Context.GetData<CMWaterDataReport>(Water).ConfigureAwait(false);
 
-            foreach (var item in data)
-            {
-                ProjectDetails projectDetail = new ProjectDetails
-                {
-                    SpvName = item.SpvName,
-                    sitename = item.sitename,
-                    State = item.State,
-                    District = item.District,
-                    ContractorName = item.ContractorName,
-                    ContractorSiteInChargeName = item.ContractorSiteInChargeName,
-                    MonthlyData = hfedata,
-                    healthDatas = occupational_Helath,
-                    visitsAndNotices = Regulatory_visit_notice
-                };
-                projectDetailsList.Add(projectDetail);
-            }
-            return projectDetailsList;
+            string incident = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<IncidentAccidentData> incidentNew = await Context.GetData<IncidentAccidentData>(Water).ConfigureAwait(false);
+            string trainingdata = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<HseTrainingData> trainingdatanew = await Context.GetData<HseTrainingData>(trainingdata).ConfigureAwait(false);
+            string Auditdata = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<HseInspectionAuditData> Auditdatanew = await Context.GetData<HseInspectionAuditData>(Auditdata).ConfigureAwait(false);
+            string Checklistdata = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<ReportChecklistData> Checklistdatanew = await Context.GetData<ReportChecklistData>(Checklistdata).ConfigureAwait(false);
+            string Graviencedata = $"SELECT GovtAuthVisits,NoOfFineByThirdParty,NoOfShowCauseNoticesByThirdParty,NoticesToContractor,NoticesToContractor, AmountOfPenaltiesToContractors,AnyOther FROM mis_visitsandnotices where facility_id={facility_id}  group by month_id;";
+            List<GrievanceData> Graviencedatanew = await Context.GetData<GrievanceData>(Graviencedata).ConfigureAwait(false);
+
+
+            var monthlyData = hfedata.GroupBy(h => new { h.month_id, h.month })
+        .Select(g => new MapAuditlist
+        {
+            year = year,
+            month_id = g.Key.month_id,
+            month = g.Key.month,
+            manPowerData = g.ToList(),
+            waterData = waterData.Where(w => w.facilityID == g.Key.month_id).ToList(), // Filter water data by month
+            incidentAccidentData = incidentNew.Where(i => i.month_id == g.Key.month_id).ToList(), // Filter incident data by month
+            hseTrainingData = trainingdatanew.Where(t => t.month_id == g.Key.month_id).ToList(), // Filter training data by month
+            hseInspectionAuditData = Auditdatanew.Where(a => a.month_id == g.Key.month_id).ToList(), // Filter audit data by month
+            reportChecklistData = Checklistdatanew.Where(c => c.month_id == g.Key.month_id).ToList(), // Filter checklist data by month
+            grievanceData = Graviencedatanew.Where(y => y.month_id == g.Key.month_id).ToList(), // Filter grievance data by month
+            healthDatas = occupational_Helath.Where(o => o.month_id == g.Key.month_id).ToList(), // Filter health data by month
+            visitsAndNotices = Regulatory_visit_notice.Where(v => v.month_id == g.Key.month_id).ToList() // Filter visits and notices by month
+        })
+        .OrderBy(md => md.month_id)
+        .ToList();
+
+            var summary = new List<MISSUMMARY>
+    {
+        new MISSUMMARY
+        {
+            year = year,
+            projectdetails = data,
+            MonthlyData = monthlyData
+        }
+    };
+            return summary;
         }
         internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id)
         {

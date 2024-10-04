@@ -180,6 +180,7 @@ namespace CMMSAPIs.Models.Permits
         public dynamic breakdownTime { get; set; }
         public string assignedTo { get; set; }
         public int status { get; set; }
+        public int jc_status { get; set; }
         public string status_short { get; set; }
     }
     public class CMAssociatedPMList

@@ -12,6 +12,7 @@ namespace CMMSAPIs.Models.WC
         public string warranty_claim_title { get; set; }
         public DateTime date_of_claim { get; set; }
         public string equipment_category { get; set; }
+        public int asste_id { get; set; }
         public string equipment_name { get; set; }
         public string equipment_sr_no { get; set; }
         public string supplier_name { get; set; }

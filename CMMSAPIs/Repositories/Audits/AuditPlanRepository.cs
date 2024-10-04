@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.Audits
         {
 
             string filter = " where st.id = " + id + "";
-            string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
+            string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name,st.max_score as max_score , " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
                 " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by_name, st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
                 " from st_audit st " +
@@ -137,8 +137,8 @@ namespace CMMSAPIs.Repositories.Audits
             }
             else
             {
-                string InsertQ = $"insert into st_audit(plan_number, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at,assignedTo,Employees,is_PTW,module_type_id) " +
-                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id}) ; SELECT LAST_INSERT_ID();";
+                string InsertQ = $"insert into st_audit(plan_number, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at,assignedTo,Employees,is_PTW,module_type_id,max_score) " +
+                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id},{request.max_score}) ; SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
                 response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " created successfully.");
@@ -153,10 +153,10 @@ namespace CMMSAPIs.Repositories.Audits
 
             if (request.Module_Type_id == (int)CMMS.checklist_type.Evaluation && request.map_checklist.Count > 0)
             {
-                string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id, checklist_id, weightage,comments,created_by,created_at) VALUES ";
+                string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id,title, checklist_id, weightage,comments,created_by,created_at) VALUES ";
                 foreach (var map in request.map_checklist)
                 {
-                    mapChecklistQry += $"({InsertedValue}, {map.checklist_id}, {map.weightage},'{map.comment}',{userID},'{UtilsRepository.GetUTCTime()}'), ";
+                    mapChecklistQry += $"({InsertedValue},'{map.title}', {map.checklist_id}, {map.weightage},'{map.comment}',{userID},'{UtilsRepository.GetUTCTime()}'), ";
                 }
                 if (mapChecklistQry.Length > 0)
                 {
@@ -172,10 +172,11 @@ namespace CMMSAPIs.Repositories.Audits
         internal async Task<List<CMEvaluationAuditList>> GetEvaluationChecklistByID(int id, string facilitytimeZone)
         {
 
-            string SelectQ = "select e.id,evalution_plan_id,checklist_id,weightage,comments,e.ptw_req as ptw_required," +
-                " CONCAT(createdByUser.firstName, ' ', createdByUser.lastName) AS created_by_name, " +
-                " CONCAT(updatedByUser.firstName, ' ', updatedByUser.lastName) AS updated_by_name,created_at,updated_at " +
+            string SelectQ = "select e.id as map_checlist,evalution_plan_id ,checklist_id as id,ck.checklist_number as checklist_number, weightage,comments,e.ptw_req as ptw_required,e.title as title ," +
+                " CONCAT(createdByUser.firstName, ' ', createdByUser.lastName) AS createdByName, " +
+                " CONCAT(updatedByUser.firstName, ' ', updatedByUser.lastName) AS updated_by_name,e.created_at as createdAt,e.updated_at as updatedAt " +
                 " from evalution_checklist_map e" +
+                 " LEFT JOIN checklist_number AS ck ON ck.id = e.checklist_id" +
                 " LEFT JOIN users AS createdByUser ON createdByUser.id = e.created_by" +
                 " LEFT JOIN users AS updatedByUser ON updatedByUser.id = e.updated_by " +
                 " where evalution_plan_id = " + id + "; ";
@@ -183,8 +184,8 @@ namespace CMMSAPIs.Repositories.Audits
             List<CMEvaluationAuditList> list = await Context.GetData<CMEvaluationAuditList>(SelectQ).ConfigureAwait(false);
             foreach (var item in list)
             {
-                item.created_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, item.created_at);
-                item.updated_at = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, item.updated_at);
+                item.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, item.createdAt);
+                item.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, item.updatedAt);
             }
             return list;
         }

@@ -9,7 +9,9 @@ namespace CMMSAPIs.Models.Audit
         public int id { get; set; }
         public int Facility_id { get; set; }
         public string plan_number { get; set; }
+        public int max_score { get; set; }
         public int auditee_id { get; set; }
+        public string title { get; set; }
         public string auditee_name { get; set; }
         public int auditor_id { get; set; }
         public int Status { get; set; }
@@ -38,10 +40,11 @@ namespace CMMSAPIs.Models.Audit
         public string Auditee_Emp_Name { get; set; }
         public string Auditor_Emp_Name { get; set; }
         public int frequency { get; set; }
+        public int max_score { get; set; }
         public string frequency_name { get; set; }
         public int status { get; set; }
         public string short_status { get; set; }
-        public int max_score { get; set; }
+
         public string FrequencyApplicable { get; set; }
         public int Checklist_id { get; set; }
         public string checklist_name { get; set; }

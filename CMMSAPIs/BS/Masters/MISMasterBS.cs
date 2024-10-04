@@ -119,7 +119,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> UpdateObservation(CMObservation request, int UserID);
         Task<CMDefaultResponse> CreateObservation(CMObservation request, int UserID);
 
-        Task<GetChecklistInspection> GetChecklistInspection();
+        //  Task<GetChecklistInspection> GetChecklistInspection();
         Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID);
         Task<List<CMDocumentVersionList>> getDocuementList(int facility_id, string fromDate, string toDate);
         Task<List<CMDocumentVersionList>> getDocuementListById(int id, string sub_doc_name, string fromDate, string toDate);
@@ -163,7 +163,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
         Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
-        Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id);
+        Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id);
         Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id);
     }
     public class MISMasterBS : IMISMasterBS
@@ -1738,21 +1738,21 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<GetChecklistInspection> GetChecklistInspection()
-        {
-            try
-            {
-                using (var repos = new MISMasterRepository(getDB))
-                {
-                    return await repos.GetChecklistInspection();
+        /* public async Task<GetChecklistInspection> GetChecklistInspection()
+         {
+             try
+             {
+                 using (var repos = new MISMasterRepository(getDB))
+                 {
+                     return await repos.GetChecklistInspection();
 
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
+                 }
+             }
+             catch (Exception ex)
+             {
+                 throw;
+             }
+         }*/
 
         public async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int userID)
         {
@@ -2238,7 +2238,7 @@ namespace CMMSAPIs.BS.MISMasters
             throw new NotImplementedException();
         }
 
-        public async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
+        public async Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id)
         {
             try
             {

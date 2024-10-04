@@ -482,15 +482,8 @@ namespace CMMSAPIs.Repositories.PM
                     string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                 }*/
-                TimeSpan permitDuration = TimeSpan.Parse("08:00:00");
-                if (taskViewDetail[0].extendByMinutes == permitDuration)
-                {
-                    taskViewDetail[0].status_short = "Permit - Expired";
-                }
-                else
-                {
-                    taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
-                }
+
+                taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
                 taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
 
                 string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
