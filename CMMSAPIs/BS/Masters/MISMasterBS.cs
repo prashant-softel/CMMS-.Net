@@ -163,7 +163,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
         Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
-        Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id);
+        Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id);
         Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id);
     }
     public class MISMasterBS : IMISMasterBS
@@ -2238,7 +2238,7 @@ namespace CMMSAPIs.BS.MISMasters
             throw new NotImplementedException();
         }
 
-        public async Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id)
+        public async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
         {
             try
             {
