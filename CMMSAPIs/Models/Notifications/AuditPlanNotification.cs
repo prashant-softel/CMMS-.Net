@@ -72,7 +72,7 @@ namespace CMMSAPIs.Models.Notifications
 
                 retValue += String.Format("<table style='width: 50%; margin:0 auto; border-collapse: collapse ; border-spacing: 10px; ' border='1'>");
                 retValue += String.Format(template, "Audit ID", "AUD" + m_AuditPlanObj.plan_id);
-                retValue += String.Format(template, "Plan Title", m_AuditPlanObj.plan_name);
+                retValue += String.Format(template, "Plan Title", m_AuditPlanObj.title);
                 retValue += String.Format(template, "Frequency", m_AuditPlanObj.plan_freq_name);
                 retValue += String.Format(template, "checklist", m_AuditPlanObj.checklist_name);
                 retValue += String.Format(template, "Schedule Date", m_AuditPlanObj.schedule_Date);

@@ -16,7 +16,6 @@ namespace CMMSAPIs.Models.Audit
     {
         public int id { get; set; }
         public string audit_order_number { get; set; }
-        public string plan_number { get; set; }
         public DateTime schedule_date { get; set; }
         public string auditee_name { get; set; }
         public string auditor_name { get; set; }
