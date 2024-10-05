@@ -3022,7 +3022,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 ProjectDetails projectDetail = new ProjectDetails
                 {
-                    SpvName = item.SpvName,
+                    
                     sitename = item.sitename,
                     State = item.State,
                     District = item.District,
