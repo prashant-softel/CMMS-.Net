@@ -8,7 +8,6 @@ namespace CMMSAPIs.Models.Audit
     {
         public int id { get; set; }
         public int Facility_id { get; set; }
-        public string plan_number { get; set; }
         public int max_score { get; set; }
         public int auditee_id { get; set; }
         public string title { get; set; }
@@ -32,13 +31,14 @@ namespace CMMSAPIs.Models.Audit
 
         public int plan_id { get; set; }
         public string title { get; set; }
+        public int assign_to { get; set; }
         public List<CMEvaluationAudit> map_checklist { get; set; }
     }
 
     public class CMAuditPlanList
     {
         public int id { get; set; }
-        public string plan_number { get; set; }
+        public string title { get; set; }
         public string facility_name { get; set; }
         public string Auditee_Emp_Name { get; set; }
         public string Auditor_Emp_Name { get; set; }

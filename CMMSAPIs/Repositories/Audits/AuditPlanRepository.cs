@@ -49,7 +49,7 @@ namespace CMMSAPIs.Repositories.Audits
             {
                 filter = filter + " and st.module_type_id = " + module_type_id + "";
             }
-            string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
+            string SelectQ = "select st.id,title,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name, " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name,checklist_number as checklist_name, frequency.name as frequency_name,st.frequency,st.checklist_id, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable " +
                 " ,st.Description,st.Schedule_Date,module_type_id as Module_Type_id from st_audit st " +
                 "inner join facilities f ON st.Facility_id = f.id " +
@@ -81,7 +81,7 @@ namespace CMMSAPIs.Repositories.Audits
         {
 
             string filter = " where st.id = " + id + "";
-            string SelectQ = "select st.id,plan_number,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name,st.max_score as max_score , " +
+            string SelectQ = "select st.id,title,  f.name as facility_name, concat(au.firstName, ' ', au.lastName)  Auditee_Emp_Name,st.max_score as max_score , " +
                 "concat(u.firstName, ' ', u.lastName) Auditor_Emp_Name , st.frequency, st.status, case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date, st.checklist_id, " +
                 " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by_name, st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
                 " from st_audit st " +
@@ -119,29 +119,23 @@ namespace CMMSAPIs.Repositories.Audits
             int InsertedValue = 0;
 
             int status = 0;
-            if (request.Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-            {
-                status = (int)CMMS.CMMS_Status.EVAL_PLAN_CREATED;
-            }
-            else
-            {
-                status = (int)CMMS.CMMS_Status.AUDIT_SCHEDULE;
-            }
+            status = (int)CMMS.CMMS_Status.AUDIT_SCHEDULE;
 
-            string SelectQ = "select id from st_audit where plan_number = '" + request.plan_number + "'";
+
+            string SelectQ = "select id from st_audit where title = '" + request.title + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
             if (auditPlanList != null && auditPlanList.Count > 0)
             {
-                response = new CMDefaultResponse(auditPlanList[0].id, CMMS.RETRUNSTATUS.FAILURE, "Audit plan with plan number : " + request.plan_number + " already exists.");
+                response = new CMDefaultResponse(auditPlanList[0].id, CMMS.RETRUNSTATUS.FAILURE, "Audit plan with plan number : " + request.title + " already exists.");
             }
             else
             {
-                string InsertQ = $"insert into st_audit(plan_number, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at,assignedTo,Employees,is_PTW,module_type_id,max_score) " +
-                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id},{request.max_score}) ; SELECT LAST_INSERT_ID();";
+                string InsertQ = $"insert into st_audit(title, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at,assignedTo,Employees,is_PTW,module_type_id,max_score) " +
+                                $"values('{request.title}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id},{request.max_score}) ; SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
-                response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " created successfully.");
+                response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.title + " created successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, InsertedValue, 0, 0, " Audit plan schduled ", CMMS.CMMS_Status.AUDIT_SCHEDULE);
                 CMPMPlanDetail _AuditList = await GetAuditPlanDetail(InsertedValue, facilitytimeZone);
 
@@ -163,7 +157,7 @@ namespace CMMSAPIs.Repositories.Audits
                     mapChecklistQry = mapChecklistQry.TrimEnd(',', ' ') + ";";
                 }
                 await Context.ExecuteNonQry<int>(mapChecklistQry).ConfigureAwait(false);
-                response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Plan with plan number : " + request.plan_number + " created successfully.");
+                response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Plan with plan number : " + request.title + " created successfully.");
             }
 
             return response;
@@ -199,7 +193,7 @@ namespace CMMSAPIs.Repositories.Audits
             if (auditPlanList != null && auditPlanList.Count > 0)
             {
                 string UpdateQ = $"update st_audit " +
-                 $"set plan_number = '{request.plan_number}', " +
+                 $"set title = '{request.title}', " +
                  $"Facility_id = {request.Facility_id}, " +
                  $"Audit_Added_date = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', " +
                  $"Frequency = {request.ApplyFrequency}, " +
@@ -211,7 +205,7 @@ namespace CMMSAPIs.Repositories.Audits
                  $"Schedule_Date = '{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}' " +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
-                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.plan_number + " updated successfully.");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.title + " updated successfully.");
             }
             else
             {
@@ -227,14 +221,7 @@ namespace CMMSAPIs.Repositories.Audits
             string SelectQ = "select id,module_type_id as Module_Type_id  from st_audit where ID = '" + request.id + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
             int status = 0;
-            if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-            {
-                status = (int)CMMS.CMMS_Status.EVAL_PLAN_DELETED;
-            }
-            else
-            {
-                status = (int)CMMS.CMMS_Status.AUDIT_DELETED;
-            }
+            status = (int)CMMS.CMMS_Status.AUDIT_DELETED;
             if (auditPlanList != null && auditPlanList.Count > 0)
             {
                 string UpdateQ = $"update st_audit " +
@@ -245,18 +232,10 @@ namespace CMMSAPIs.Repositories.Audits
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
                 CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
 
-                if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-                {
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " deleted.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, 0, 0, " Evaluation plan deleted ", CMMS.CMMS_Status.EVAL_PLAN_DELETED);
-                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_PLAN_DELETED, new[] { userId }, _AuditList);
-                }
-                else
-                {
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " deleted.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, " Audit plan deleted ", CMMS.CMMS_Status.AUDIT_DELETED);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_DELETED, new[] { userId }, _AuditList);
-                }
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].title + " deleted.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, " Audit plan deleted ", CMMS.CMMS_Status.AUDIT_DELETED);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_DELETED, new[] { userId }, _AuditList);
+
 
             }
             else
@@ -312,27 +291,7 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
                     retValue = "Audit link with permit";
                     break;
-                case CMMS.CMMS_Status.EVAL_PLAN_CREATED:
-                    retValue = String.Format(" Created");
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_UPDATED:
-                    retValue = String.Format(" Updated");
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_APPROVED:
-                    retValue = String.Format(" Approved");
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_REJECTED:
-                    retValue = String.Format(" Rejected");
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_DELETED:
-                    retValue = String.Format(" Deleted");
-                    break;
-                case CMMS.CMMS_Status.EVAL_APPROVED:
-                    retValue = String.Format(" Approved");
-                    break;
-                case CMMS.CMMS_Status.EVAL_REJECTED:
-                    retValue = String.Format(" Rejected");
-                    break;
+        
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -348,14 +307,8 @@ namespace CMMSAPIs.Repositories.Audits
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
             int status = 0;
 
-            if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-            {
-                status = (int)CMMS.CMMS_Status.EVAL_APPROVED;
-            }
-            else
-            {
-                status = (int)CMMS.CMMS_Status.AUDIT_APPROVED;
-            }
+            status = (int)CMMS.CMMS_Status.AUDIT_APPROVED;
+
             if (auditPlanList != null && auditPlanList.Count > 0)
             {
                 string UpdateQ = $"update st_audit " +
@@ -366,23 +319,11 @@ namespace CMMSAPIs.Repositories.Audits
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
 
-                if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-                {
-                    status = (int)CMMS.CMMS_Status.EVAL_APPROVED;
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Evaluation plan with plan number : " + auditPlanList[0].plan_number + " approved successfully.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, CMMS.CMMS_Modules.EVAL_PLAN, 0, request.comment, CMMS.CMMS_Status.EVAL_APPROVED);
-                    CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_APPROVED, new[] { userId }, _AuditList);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].title + " approved successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, CMMS.CMMS_Modules.AUDIT_PLAN, 0, request.comment, CMMS.CMMS_Status.AUDIT_APPROVED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_APPROVED, new[] { userId }, _AuditList);
 
-                }
-                else
-                {
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " approved successfully.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, CMMS.CMMS_Modules.AUDIT_PLAN, 0, request.comment, CMMS.CMMS_Status.AUDIT_APPROVED);
-                    CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_APPROVED, new[] { userId }, _AuditList);
-
-                }
 
             }
             else
@@ -424,14 +365,8 @@ namespace CMMSAPIs.Repositories.Audits
             string SelectQ = "select id,Module_Type_id from st_audit where ID = '" + request.id + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
             int status = 0;
-            if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-            {
-                status = (int)CMMS.CMMS_Status.EVAL_REJECTED;
-            }
-            else
-            {
-                status = (int)CMMS.CMMS_Status.AUDIT_REJECTED;
-            }
+            status = (int)CMMS.CMMS_Status.AUDIT_REJECTED;
+
             if (auditPlanList != null && auditPlanList.Count > 0)
             {
                 string UpdateQ = $"update st_audit " +
@@ -439,21 +374,12 @@ namespace CMMSAPIs.Repositories.Audits
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
 
-                if (auditPlanList[0].Module_Type_id == (int)CMMS.checklist_type.Evaluation)
-                {
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Evalutaion plan with plan number : " + auditPlanList[0].plan_number + " rejected successfully.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.EVAL_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.EVAL_REJECTED);
-                    CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.EVAL_PLAN, CMMS.CMMS_Status.EVAL_REJECTED, new[] { userId }, _AuditList);
-                }
-                else
-                {
-                    response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " rejected successfully.");
-                    await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
-                    CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
-                    await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_REJECTED, new[] { userId }, _AuditList);
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].title + " rejected successfully.");
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_REJECTED);
+                CMPMPlanDetail _AuditList = await GetAuditPlanDetail(request.id, facilitytimeZone);
+                await CMMSNotification.sendNotification(CMMS.CMMS_Modules.AUDIT_PLAN, CMMS.CMMS_Status.AUDIT_REJECTED, new[] { userId }, _AuditList);
 
-                }
+
 
 
             }
@@ -492,7 +418,7 @@ namespace CMMSAPIs.Repositories.Audits
 
             string addPlanQry = $"INSERT INTO pm_plan(plan_name, facility_id, category_id, frequency_id, " +
                                 $"status, plan_date,assigned_to, created_by, created_at, updated_by, updated_at, type_id) VALUES " +
-                                $"('{pm_plan.plan_name}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
+                                $"('{pm_plan.title}', {pm_plan.facility_id}, {pm_plan.category_id}, {pm_plan.plan_freq_id}, " +
                                 $"{status}, '{pm_plan.plan_date.ToString("yyyy-MM-dd")}',{pm_plan.assigned_to_id}, " +
                                 $"{userID}, '{UtilsRepository.GetUTCTime()}', {userID}, '{UtilsRepository.GetUTCTime()}', {pm_plan.type_id}); " +
                                 $"SELECT LAST_INSERT_ID(); ";
@@ -1224,7 +1150,7 @@ namespace CMMSAPIs.Repositories.Audits
         {
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_number plan_name, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date,plan.description, plan.checklist_id,Employees, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.title title, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date,plan.description, plan.checklist_id,Employees, " +
                 " checklist_number as checklist_name,plan.Schedule_Date, " +
                 $" facilities.id as facility_id, facilities.name as facility_name," +
                 $" frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
@@ -1342,21 +1268,6 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
                     retValue = String.Format("AUD{0} Linked With Permit by {1}", PlanObj.plan_id);
                     break;
-                case CMMS.CMMS_Status.EVAL_PLAN_CREATED:
-                    retValue = String.Format("{0} Created by {1}", PlanObj.plan_id, PlanObj.created_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_UPDATED:
-                    retValue = String.Format("{0} Updated by {1}", PlanObj.plan_id, PlanObj.updated_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_APPROVED:
-                    retValue = String.Format("{0} Approved by {1}", PlanObj.plan_id, PlanObj.approved_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_REJECTED:
-                    retValue = String.Format("{0} Rejected by {1}", PlanObj.plan_id, PlanObj.rejected_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_DELETED:
-                    retValue = String.Format("{0} Deleted by {1}", PlanObj.plan_id, PlanObj.deleted_by_name);
-                    break;
                 default:
                     break;
             }
@@ -1378,7 +1289,7 @@ namespace CMMSAPIs.Repositories.Audits
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
             //statusQry += "ELSE 'Unknown Status' END";
 
-            string myQuery = $"SELECT pm_task.id,pm_task.category_id,'' as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,st_audit.plan_number as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, st_audit.status as status_plan, pm_task.Status status  " +
+            string myQuery = $"SELECT pm_task.id,pm_task.category_id,'' as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,st_audit.title as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, st_audit.status as status_plan, pm_task.Status status  " +
                                "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join st_audit  on pm_task.plan_id = st_audit.id " +
@@ -1471,7 +1382,7 @@ namespace CMMSAPIs.Repositories.Audits
             //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
-            string myQuery = $"SELECT pm_plan.Schedule_Date, pm_task.id,pm_plan.id as plan_id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.plan_number as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, pm_task.assigned_to_audit  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , " +
+            string myQuery = $"SELECT pm_plan.Schedule_Date, pm_task.id,pm_plan.id as plan_id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.title as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, pm_task.assigned_to_audit  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , " +
                 $"CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as closedApprovedByName, pm_task.approved_at ," +
                 $"facilities.name as facility_name," +
                 $"CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as closeRejectedbyName,checklist_number as checklist_name, pm_task.rejected_at ," +
@@ -1661,21 +1572,6 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
                     retValue = $"Audit linked with permit By {Obj.closed_by_name}";
                     break;
-                case CMMS.CMMS_Status.EVAL_PLAN_CREATED:
-                    retValue = String.Format("{0} Created by {1}", Obj.id, Obj.createdbyName);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_UPDATED:
-                    retValue = String.Format("{0} Updated by {1}", Obj.id, Obj.updated_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_APPROVED:
-                    retValue = String.Format("{0} Approved by {1}", Obj.id, Obj.approved_by_name);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_REJECTED:
-                    retValue = String.Format("{0} Rejected by {1}", Obj.id, Obj.closeRejectedbyName);
-                    break;
-                case CMMS.CMMS_Status.EVAL_PLAN_DELETED:
-                    retValue = String.Format("{0} Deleted by {1}", Obj.id, Obj.deletedbyName);
-                    break;
                 default:
                     break;
             }
@@ -1844,7 +1740,7 @@ namespace CMMSAPIs.Repositories.Audits
                  $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_SKIP_APPROVED}' , skip_approved_by = {userId}, skip_approved_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', approve_remarks = '{request.comment}'" +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
-                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan task : " + auditPlanList[0].plan_number + " skip approved successfully.");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan task : " + auditPlanList[0].title + " skip approved successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_SKIP_APPROVED);
 
                 CMPMTaskView _AuditList = await GetTaskDetail(request.id, facilitytimeZone);
@@ -1922,7 +1818,7 @@ namespace CMMSAPIs.Repositories.Audits
                  $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED_REJECT}' , rejected_by = {userId}, rejected_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', reject_remarks = '{request.comment}'" +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
-                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].plan_number + " close rejected.");
+                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + auditPlanList[0].title + " close rejected.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED_REJECT);
 
                 CMPMTaskView _AuditList = await GetTaskDetail(request.id, facilitytimeZone);
@@ -2138,15 +2034,14 @@ namespace CMMSAPIs.Repositories.Audits
                     await Context.ExecuteNonQry<int>(startQry).ConfigureAwait(false);
                 }
             }
-            string startQry2 = $"UPDATE pm_task SET started_by = {userID}, started_at = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.EVAL_START} WHERE id = {task_id};";
-            await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
+
 
             if (parent_task_id > 0)
             {
                    string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date,  " +
-                    $" assigned_to_audit, PTW_id, status,parent_task_id)  " +
+                    $" assigned_to_audit, PTW_id, status,parent_task_id,assigned_to)  " +
                     $"  select   plan_id, category_id, facility_id, frequency_id, plan_date, '{UtilsRepository.GetUTCTime()}',  " +
-                    $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.EVAL_APPROVED}',{parent_task_id}  " +
+                    $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.AUDIT_APPROVED}',{parent_task_id},{auditPlanList.assign_to}  " +
                     $" from pm_task where id = {task_id};SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                     task_id = Convert.ToInt32(dt2.Rows[0][0]);

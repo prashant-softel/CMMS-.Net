@@ -1281,14 +1281,14 @@ namespace CMMSAPIs.Repositories.Masters
                                    $"LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id = {facility_id} group by f.id;";
             List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false) ?? new List<CMChecklistInspectionReport>();
 
-            string checklistQuery = "SELECT f.id AS facility_id, f.name AS facility_name, st.id,checklist_number.id as checklist_id ,checklist_number AS checklist_name, " +
-                                    "st.plan_number AS SOP_number, frequency.name AS frequency, " +
-                                    "CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
-                                    "PM_Schedule_Observation_add_date AS date_of_inspection, " +
-                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id, YEAR(PM_Schedule_Observation_add_date) AS year_id, " +
-                                    "CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment " +
-                                    "FROM st_audit st " +
-                                    "LEFT JOIN pm_task task ON task.plan_id = st.id " +
+
+            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, " +
+                                    "st.title AS SOP_number,  frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
+                                    " PM_Schedule_Observation_add_date AS date_of_inspection, " +
+                                    "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
+                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id,  " +
+                                    " CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment  " +
+                                    "FROM st_audit st   LEFT JOIN pm_task task ON task.plan_id = st.id  " +
                                     "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
                                     "LEFT JOIN checklist_number checklist_number ON checklist_number.id = st.Checklist_id " +
                                     "LEFT JOIN frequency frequency ON frequency.id = st.Frequency " +

@@ -6,7 +6,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMPlanList
     {
         public int plan_id { get; set; }
-        public string plan_name { get; set; }
+        public string title { get; set; }
         public int status_id { get; set; }
         public string status_short { get; set; }
         public string status_long { get; set; }
@@ -48,7 +48,6 @@ namespace CMMSAPIs.Models.PM
         public string deleted_by_name { get; set; }
         public string checklist_name { get; set; }
         public string description { get; set; }
-        public string plan_number { get; set; }
         public DateTime? schedule_Date { get; set; }
         public string Employees { get; set; }
         public int deleted_by { get; set; }
@@ -61,6 +60,7 @@ namespace CMMSAPIs.Models.PM
         public int isDraft { get; set; }
         public int type_id { get; set; }
         public int task_id { get; set; }
+        public string plan_name { get; set; }
 
         public List<AssetCheckList> mapAssetChecklist { get; set; }
     }
