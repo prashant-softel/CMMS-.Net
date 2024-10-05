@@ -61,14 +61,16 @@ namespace CMMSAPIs.Models.Masters
         public string Trainer { get; set; }
         public string Mode { get; set; }
         public string Venue { get; set; }
+        public int status { get; set; }
         public int Traning_category_id { get; set; }
         public int No_Of_Days { get; set; }
         public int Targeted_Group_Id { get; set; }
         public int Duration_in_Minutes { get; set; }
         public string Course_Category { get; set; }
         public string Targeted_Group { get; set; }
+        public string short_status { get; set; }
         public string month_name { get; set; }
-        public string status_code { get; set; }
+        public int status_code { get; set; }
 
 
 
@@ -81,8 +83,11 @@ namespace CMMSAPIs.Models.Masters
         public string Date_of_Trainig { get; set; }
         public string Training_course { get; set; }
         public string Trainer { get; set; }
+        public string Training_company { get; set; }
         public int hfeEmployeeId { get; set; }
         public string course_name { get; set; }
+        public int status { get; set; }
+        public string short_status { get; set; }
         public string Mode { get; set; }
         public string Venue { get; set; }
         public string Training_Agency { get; set; }

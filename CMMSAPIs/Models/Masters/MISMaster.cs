@@ -278,7 +278,7 @@ namespace CMMSAPIs.Models.Masters
         public decimal opening { get; set; }
         public List<CMWaterDataMonthWiseDetails_Month> details { get; set; }
     }
-        public class CMMISMonthWiseResult
+    public class CMMISMonthWiseResult
     {
         public int month_id { get; set; }
         public string month_name { get; set; }
@@ -408,33 +408,25 @@ namespace CMMSAPIs.Models.Masters
     {
         public int facility_id { get; set; }
         public string facility_name { get; set; }
-        public dynamic month { get; set; }
-        public dynamic month_id { get; set; }
-        public dynamic year_id { get; set; }
         public List<Checklist1> checklist { get; set; }
     }
-
-
-    public class ChecklistDetails
+    public class Checklist1
     {
+        public int checklist_id { get; set; }
         public string checklist_name { get; set; }
         public string SOP_number { get; set; }
         public string frequency { get; set; }
+        public List<ChecklistDetails> monthlyInspection { get; set; }
+    }
+
+    public class ChecklistDetails
+    {
+        public int inspectionMonth { get; set; }
         public string inspection_status { get; set; }
         public DateTime? date_of_inspection { get; set; }
         public string checklist_attachment { get; set; }
         public int no_of_unsafe_observation { get; set; }
     }
-
-    public class Checklist1 : ChecklistDetails
-    {
-        public dynamic month { get; set; }
-        public dynamic month_id { get; set; }
-        public dynamic year_id { get; set; }
-        public int facility_id { get; set; }
-        public List<ChecklistDetails> Details { get; set; }
-    }
-
     public class CMObservationReport
     {
         public int id { get; set; }

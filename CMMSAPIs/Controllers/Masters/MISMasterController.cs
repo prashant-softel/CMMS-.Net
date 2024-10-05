@@ -1186,7 +1186,7 @@ namespace CMMSAPIs.Controllers.Masters
 
         [Route("GetChecklistInspection")]
         [HttpGet]
-        public async Task<IActionResult> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
+        public async Task<IActionResult> GetChecklistInspectionReport(int facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
             try
             {

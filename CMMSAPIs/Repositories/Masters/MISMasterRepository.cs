@@ -1059,9 +1059,6 @@ namespace CMMSAPIs.Repositories.Masters
                 }
 
             }
-
-
-
             return groupedResult;
         }
 
@@ -1274,71 +1271,70 @@ namespace CMMSAPIs.Repositories.Masters
             return groupedResult_new;
         }
 
-        internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
+        internal async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(int facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
-            string facilityQuery = $"SELECT DISTINCT  f.id as facility_id, f.name AS facility_name , " +
-                                   "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
-                                   "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id  " +
+
+            string facilityQuery = $"SELECT f.id AS facility_id, f.name AS facility_name " +
                                    "FROM st_audit st " +
-                                   "LEFT JOIN pm_task task ON task.plan_id = st.id  " +
+                                   "LEFT JOIN pm_task task ON task.plan_id = st.id " +
                                    "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
-                                   $"LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id IN ({facility_id});";
-            List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false);
+                                   $"LEFT JOIN facilities f ON f.id = st.facility_id WHERE st.facility_id = {facility_id} group by f.id;";
+            List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false) ?? new List<CMChecklistInspectionReport>();
 
-
-            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, " +
-                                    "st.plan_number AS SOP_number,  frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
-                                    " PM_Schedule_Observation_add_date AS date_of_inspection, " +
-                                    "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
-                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id,  " +
-                                    " CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment  " +
-                                    "FROM st_audit st   LEFT JOIN pm_task task ON task.plan_id = st.id  " +
+            string checklistQuery = "SELECT f.id AS facility_id, f.name AS facility_name, st.id,checklist_number.id as checklist_id ,checklist_number AS checklist_name, " +
+                                    "st.plan_number AS SOP_number, frequency.name AS frequency, " +
+                                    "CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
+                                    "PM_Schedule_Observation_add_date AS date_of_inspection, " +
+                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id, YEAR(PM_Schedule_Observation_add_date) AS year_id, " +
+                                    "CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment " +
+                                    "FROM st_audit st " +
+                                    "LEFT JOIN pm_task task ON task.plan_id = st.id " +
                                     "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
                                     "LEFT JOIN checklist_number checklist_number ON checklist_number.id = st.Checklist_id " +
-                                    " LEFT JOIN frequency frequency ON frequency.id = st.Frequency  " +
-                                    " LEFT JOIN facilities f ON f.id = st.facility_id " +
-                                    $" WHERE st.facility_id IN ({facility_id}) AND st.module_type_id ={module_type}  " +
-                                    " GROUP BY  st.id ;";
-            List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false);
+                                    "LEFT JOIN frequency frequency ON frequency.id = st.Frequency " +
+                                    "LEFT JOIN facilities f ON f.id = st.facility_id " +
+                                    $"WHERE st.facility_id = {facility_id} AND st.module_type_id = {module_type} group by st.id;";
 
-            // Group checklist data by facility_id, month, month_id, and year_id
-            var groupedChecklistData = checklistData
-                .GroupBy(cd => new { cd.facility_id, cd.month, cd.month_id, cd.year_id })
-                .Select(g => new Checklist1
+            List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false) ?? new List<Checklist1>();
+
+
+            var list = checklistData
+                 .Where(a => a != null)
+     .Select(a => new Checklist1
+     {
+         checklist_id = a.checklist_id,
+         checklist_name = a.checklist_name,
+         SOP_number = a.SOP_number,
+         frequency = a.frequency,
+         monthlyInspection = a.monthlyInspection?
+             .Where(b => b != null)
+             .Select(b => new ChecklistDetails
+             {
+                 inspectionMonth = b.inspectionMonth,
+                 inspection_status = b.inspection_status,
+                 date_of_inspection = b.date_of_inspection,
+                 checklist_attachment = b.checklist_attachment,
+                 no_of_unsafe_observation = b.no_of_unsafe_observation
+
+             }).ToList()
+     })
+     .ToList();
+
+
+            List<CMChecklistInspectionReport> response = facilities
+                .Where(z => z != null)
+                .Select(z => new CMChecklistInspectionReport
                 {
-                    month = g.Key.month,
-                    month_id = g.Key.month_id,
-                    year_id = g.Key.year_id,
-                    facility_id = g.Key.facility_id,
-                    Details = g.Select(cd => new ChecklistDetails
-                    {
-                        checklist_name = cd.checklist_name,
-                        SOP_number = cd.SOP_number,
-                        frequency = cd.frequency,
-                        inspection_status = cd.inspection_status,
-                        date_of_inspection = cd.date_of_inspection,
-                        checklist_attachment = cd.checklist_attachment,
-                        no_of_unsafe_observation = 0
-                    }).ToList() // Convert to list after selecting
-                }).ToList();
-
-
-            var response = facilities.Select(facility => new CMChecklistInspectionReport
-            {
-                facility_id = facility.facility_id,
-                facility_name = facility.facility_name,
-                month = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.month,  // Set month
-                month_id = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.month_id,  // Set month_id
-                year_id = groupedChecklistData.FirstOrDefault(g => g.facility_id == facility.facility_id)?.year_id,  // Set year_id
-                checklist = groupedChecklistData
-                    .Where(g => g.facility_id == facility.facility_id) // Filter by facility
-                    .ToList() // Get the list of Checklist1 for the facility
-            }).ToList();
-
-
+                    facility_id = z.facility_id,
+                    facility_name = z.facility_name,
+                    checklist = list
+                })
+                .ToList();
             return response;
 
         }
+
+
         internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = " select  distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation,st.id, " +
@@ -2338,6 +2334,8 @@ namespace CMMSAPIs.Repositories.Masters
              {11, "November"},
              {12, "December"}
         };
+
+
         //Chages For Mis Health Data
 
         //Plantation Data
@@ -2954,7 +2952,7 @@ namespace CMMSAPIs.Repositories.Masters
             return response;
         }
 
-       internal async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
+        internal async Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id)
         {
             string facility = $"Select f.name as sitename, f.state as state,f.city as district,bus1.name as contractor_name,bus.name AS contractor_site_incahrge_name,spv1.name as spv_name from facilities as f  left join business as bus on bus.id=f.ownerId left join business as bus1 on bus.id=f.operatorId left join spv as spv1 on spv1.id=f.spvId where f.id={facility_id} group by f.id;";
             List<ProjectDetails> data = await Context.GetData<ProjectDetails>(facility).ConfigureAwait(false);
@@ -2979,8 +2977,8 @@ namespace CMMSAPIs.Repositories.Masters
 
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
 
-            var groupedWaterDataResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
-          .SelectMany(group => group.Select(r => new CMMISMonthWiseResult
+            /*var groupedWaterDataResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
+          SelectMany(group => group.Select(r => new CMMISMonthWiseResult
           {
               month_id = (int)r.month_id,  // Explicit cast to int
               month_name = r.month_name,
@@ -2989,7 +2987,7 @@ namespace CMMSAPIs.Repositories.Masters
               procured_qty = r.procured_qty,
               consumed_qty = r.consumed_qty,
           }).Distinct()) // Ensuring unique entries
-          .ToList();
+          .ToList();*/
             // waste data
             string SelectQ_waste_data = $" select distinct waste_data.id, facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
@@ -3001,42 +2999,42 @@ namespace CMMSAPIs.Repositories.Masters
                $"  ;";
 
             List<CMWaterDataMonthWise> ListResult_waste_data = await Context.GetData<CMWaterDataMonthWise>(SelectQ_waste_data).ConfigureAwait(false);
+            /*
+                        var groupedWasteDataResult = ListResult_waste_data.GroupBy(r => new { r.facility_id, r.facility_name })
+                      .SelectMany(group => group.Select(r => new CMMISMonthWiseResult
+                      {
+                          month_id = (int)r.month_id,  // Explicit cast to int
+                          month_name = r.month_name,
+                          year = (int)r.year,  // Explicit cast to int
+                          waste_type = r.water_type,
+                          procured_qty = r.procured_qty,
+                          consumed_qty = r.consumed_qty,
+                      }).Distinct()) // Ensuring unique entries
+                      .ToList();
 
-            var groupedWasteDataResult = ListResult_waste_data.GroupBy(r => new { r.facility_id, r.facility_name })
-          .SelectMany(group => group.Select(r => new CMMISMonthWiseResult
-          {
-              month_id = (int)r.month_id,  // Explicit cast to int
-              month_name = r.month_name,
-              year = (int)r.year,  // Explicit cast to int
-              waste_type = r.water_type,
-              procured_qty = r.procured_qty,
-              consumed_qty = r.consumed_qty,
-          }).Distinct()) // Ensuring unique entries
-          .ToList();
 
 
+                        List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
 
-            List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
+                        foreach (var item in data)
+                        {
+                            ProjectDetails projectDetail = new ProjectDetails
+                            {
 
-            foreach (var item in data)
-            {
-                ProjectDetails projectDetail = new ProjectDetails
-                {
-                    
-                    sitename = item.sitename,
-                    State = item.State,
-                    District = item.District,
-                    ContractorName = item.ContractorName,
-                    ContractorSiteInChargeName = item.ContractorSiteInChargeName,
-                    WaterData = groupedWaterDataResult,
-                    WasteData = groupedWasteDataResult,
-                    MonthlyData = hfedata,
-                    healthDatas = occupational_Helath,
-                    visitsAndNotices = Regulatory_visit_notice
-                };
-                projectDetailsList.Add(projectDetail);
-            }
-            return projectDetailsList;
+                                sitename = item.sitename,
+                                State = item.State,
+                                District = item.District,
+                                ContractorName = item.ContractorName,
+                                ContractorSiteInChargeName = item.ContractorSiteInChargeName,
+                                WaterData = groupedWaterDataResult,
+                                WasteData = groupedWasteDataResult,
+                                MonthlyData = hfedata,
+                                healthDatas = occupational_Helath,
+                                visitsAndNotices = Regulatory_visit_notice
+                            };
+                            projectDetailsList.Add(projectDetail);
+                        }*/
+            return new List<MISSUMMARY>();
         }
         internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id)
         {

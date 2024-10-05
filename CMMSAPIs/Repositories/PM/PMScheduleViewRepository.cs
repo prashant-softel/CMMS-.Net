@@ -211,7 +211,7 @@ namespace CMMSAPIs.Repositories.PM
                     myQuery += $"AND pm_task.frequency_id in ({frequencyIds}) ";
                 }
 
-                if (categoryIds != null && categoryIds != "")
+                if (categoryIds != null && categoryIds != "" && categoryIds != "null")
                 {
 
                     myQuery += $"AND pm_task.category_id in ({categoryIds}) ";

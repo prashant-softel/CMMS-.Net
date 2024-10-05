@@ -599,6 +599,8 @@ namespace CMMSAPIs.Helper
             COURSE_DELETED,
             COURSE_SCHEDULE,
             COURSE_ENDED,
+            SCHEDULE_APPROVED,
+            SCHEDULE_REJECTED,
 
 
             STATUTORY_COMPILANCE_CREATED = 501,

@@ -89,7 +89,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<List<CMWasteDataResult>> GetWasteDataListMonthWise(DateTime fromDate, DateTime toDate, int Hazardous, int facility_id);
         Task<List<WaterDataResult_Month>> GetWaterDataMonthDetail(int Month, int Year, int facility_id);
         Task<List<CMWasteDataResult_Month>> GetWasteDataMonthDetail(int Month, int Year, int Hazardous, int facility_id);
-        Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate);
+        Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(int facility_id, int module_type, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate);
         Task<List<CMObservationSummary>> GetObservationSummaryReport(string facility_id, string fromDate, string toDate);
         Task<CMDefaultResponse> CloseObservation(CMApproval requset, int userId, int check_point_type_id);
@@ -163,7 +163,7 @@ namespace CMMSAPIs.BS.MISMasters
         Task<CMDefaultResponse> EvaluationTaskLinkPtw(CMApproval request, int userID);
         Task<CMDefaultResponse> EvaluationPlanDeleted(int id, int userID);
         Task<List<CMEvaluationCreate>> GetEvaluationPlan(int id, int userID);
-        Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id);
+        Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id);
         Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id);
     }
     public class MISMasterBS : IMISMasterBS
@@ -1289,7 +1289,7 @@ namespace CMMSAPIs.BS.MISMasters
                 throw;
             }
         }
-        public async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(string facility_id, int module_type, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMChecklistInspectionReport>> GetChecklistInspectionReport(int facility_id, int module_type, DateTime fromDate, DateTime toDate)
         {
             try
             {
@@ -2238,7 +2238,7 @@ namespace CMMSAPIs.BS.MISMasters
             throw new NotImplementedException();
         }
 
-        public async Task<List<ProjectDetails>> GetMisSummary(string year, int facility_id)
+        public async Task<List<MISSUMMARY>> GetMisSummary(string year, int facility_id)
         {
             try
             {

@@ -280,7 +280,7 @@ namespace CMMSAPIs.Repositories.PM
 
             if (id <= 0)
                 throw new ArgumentException("Invalid Plan ID");
-            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name,task.id as task_id, plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
+            string planListQry = $"SELECT plan.id as plan_id, plan.plan_name , plan.status as status_id, plan.plan_date,  statuses.statusName as status_short, plan.plan_date, " +
                         $"facilities.id as facility_id, facilities.name as facility_name, category.id as category_id, category.name as category_name, " +
                         $"frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                         $"CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at, " +
@@ -520,7 +520,7 @@ namespace CMMSAPIs.Repositories.PM
 
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
             int id = Convert.ToInt32(dt3.Rows[0][0]);
-
+            request.t_id = id;
             string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
                                 $"select distinct {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
@@ -547,7 +547,7 @@ namespace CMMSAPIs.Repositories.PM
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
             }
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, request.t_id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
             return response;
         }
 
@@ -590,7 +590,7 @@ namespace CMMSAPIs.Repositories.PM
 
         internal async Task<CMDefaultResponse> DeletePMPlan(CMApproval request, int userID, string facilityTimeZone)
         {
-            
+
             string approveQuery = $"Update pm_plan set status = {(int)CMMS.CMMS_Status.PM_PLAN_DELETED} , " +
                 $"remarks = '{request.comment}',  " +
                 $"deleted_by = {userID}, deleted_at = '{UtilsRepository.GetUTCTime()}' " +

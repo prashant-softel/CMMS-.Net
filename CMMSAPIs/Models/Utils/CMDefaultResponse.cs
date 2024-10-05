@@ -12,6 +12,7 @@ namespace CMMSAPIs.Models.Utils
     public class CMDefaultResponse : IResponse
     {
         public List<int> id { get; set; }
+        public int task_id { get; set; }
         public List<int> updatedId { get; set; }
         public List<int> insertedId { get; set; }
 
@@ -27,6 +28,14 @@ namespace CMMSAPIs.Models.Utils
         {
             this.id = new List<int>();
             this.id.Add(id);
+            this.return_status = return_status;
+            this.message = message;
+        }
+        public CMDefaultResponse(int id, int task_id, CMMS.RETRUNSTATUS return_status, string message)
+        {
+            this.id = new List<int>();
+            this.id.Add(id);
+            this.task_id = task_id;
             this.return_status = return_status;
             this.message = message;
         }

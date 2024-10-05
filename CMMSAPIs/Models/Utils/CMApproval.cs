@@ -10,6 +10,7 @@ namespace CMMSAPIs.Models.Utils
         public int claim_status { get; set; }
         public int status { get; set; }
         public int type { get; set; }
+        public int t_id { get; set; }
         public List<int> uploadfile_ids { get; set; }
         public List<CMWCSupplierActions> supplierActions { get; set; }
 

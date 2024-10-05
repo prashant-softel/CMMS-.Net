@@ -68,7 +68,35 @@ namespace CMMSAPIs.Repositories.Masters
             m_errorLog = new ErrorLog(_webHost);
             getDB = sqlDBHelper;
         }
-
+        internal static string getshortstatus(int statusID)
+        {
+            string retValue = "";
+            switch (statusID)
+            {
+                case (int)CMMS.CMMS_Status.COURSE_CREATED:
+                    retValue = "Waiting for Approval";
+                    break;
+                case (int)CMMS.CMMS_Status.COURSE_UPDATED:
+                    retValue = "Waiting for Approval";
+                    break;
+                case (int)CMMS.CMMS_Status.COURSE_DELETED:
+                    retValue = "Course Delted";
+                    break;
+                case (int)CMMS.CMMS_Status.COURSE_SCHEDULE:
+                    retValue = "Scheduled";
+                    break;
+                case (int)CMMS.CMMS_Status.SCHEDULE_APPROVED:
+                    retValue = "Schedule-Approved";
+                    break;
+                case (int)CMMS.CMMS_Status.SCHEDULE_REJECTED:
+                    retValue = "Schedule-Reject";
+                    break;
+                case (int)CMMS.CMMS_Status.COURSE_ENDED:
+                    retValue = "Schedule-End";
+                    break;
+            }
+            return retValue;
+        }
         internal async Task<CMDefaultResponse> CreateTrainingCourse(CMTrainingCourse request, int userID)
         {
             string ctq = $"INSERT INTO mis_training_course (Topic,facility_id, Description, Traning_category_id, No_Of_Days, Max_capacity, Targated_group_id, Duration_in_Minutes,Status,status_code,CreatedAt,CreatedBy) Values" +
@@ -96,18 +124,24 @@ namespace CMMSAPIs.Repositories.Masters
             string to = Convert.ToDateTime(to_date).ToString("yyyy-MM-dd");
             string gcl = $" SELECT c.id as id, c.facility_id as facility_id,c.Topic as name, c.Description as description ,c.Traning_category_id as category_id,cs.name as Traning_category , c.No_Of_Days as number_of_days, c.Max_capacity as max_cap ," +
                 $" c.Targated_group_id as group_id ,tg.name as Targated_group, " +
-                $" c.Duration_in_Minutes as duration ,c.Status as status,c.CreatedAt, c.CreatedBy  , c.UpdatedAt  , c.UpdatedBy from mis_training_course as c " +
+                $" c.Duration_in_Minutes as duration ,c.status_code as status,c.CreatedAt, c.CreatedBy  , c.UpdatedAt  , c.UpdatedBy from mis_training_course as c " +
                 $" Left join mis_course_category as cs on cs.id=c.Traning_category_id " +
                 $" Left join mis_targeted_group  as tg on tg.id=c.Targated_group_id " +
                 $" where c.facility_id={facility_id} and c.Status=1 or CreatedAt='{From}' or CreatedAt='{to}'  ";
             List<CMTrainingCourse> result = await Context.GetData<CMTrainingCourse>(gcl).ConfigureAwait(false);
+
+            foreach (var item in result)
+            {
+                string shortstatus = getshortstatus(item.status);
+                item.short_status = shortstatus;
+            }
             return result;
         }
         internal async Task<List<CMTrainingCourse>> GetCourseDetailById(int ids)
         {
             string gcl = $" SELECT c.id as Id, c.facility_id as facility_id,c.Topic as name, c.Description as description ," +
                          $" c.Traning_category_id as category_id ,cs.name as Traning_category , c.No_Of_Days as number_of_days, c.Max_capacity as max_cap, " +
-                         $" c.Targated_group_id as group_id,tg.name as Targated_group, c.Duration_in_Minutes as duration ,c.Status as status, c.CreatedAt  , c.CreatedBy  , c.UpdatedAt  , c.UpdatedBy from mis_training_course as c " +
+                         $" c.Targated_group_id as group_id,tg.name as Targated_group, c.Duration_in_Minutes as duration ,c.status_code as status, c.CreatedAt  , c.CreatedBy  , c.UpdatedAt  , c.UpdatedBy from mis_training_course as c " +
                          $" Left join mis_course_category as cs on cs.id=c.Traning_category_id " +
                          $" Left join mis_targeted_group  as tg on tg.id=c.Targated_group_id " +
                          $" where c.id={ids} and c.Status=1 ";
@@ -118,6 +152,11 @@ namespace CMMSAPIs.Repositories.Masters
                              " where module_ref_id =" + ids + " and U.module_type = " + (int)CMMS.CMMS_Modules.TRAINING_COURSE + ";";
             List<CMTRAININGFILE> _fileUpload = await Context.GetData<CMTRAININGFILE>(myQuery17).ConfigureAwait(false);
             result[0].ImageDetails = _fileUpload;
+            foreach (var item in result)
+            {
+                string shortstatus = getshortstatus(item.status);
+                item.short_status = shortstatus;
+            }
             return result;
         }
         internal async Task<CMDefaultResponse> UpdateCourseList(CMTrainingCourse request, int userID)
@@ -254,19 +293,24 @@ namespace CMMSAPIs.Repositories.Masters
         */
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
-            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID , course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +
-                $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as mis_course_category ,tg.name as targeted_group from  mis_training_schedule " +
+            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status, course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +
+                $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_Category ,tg.name as targeted_group from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
                 $" LEFT JOIN mis_targeted_group as tg on tg.id = c.Targated_group_id " +
                 $" where mis_training_schedule.facility_id={facility_id} ";
             List<GETSCHEDULE> Schedules = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
+            foreach (var item in Schedules)
+            {
+                string shortstatus = getshortstatus(item.status);
+                item.short_status = shortstatus;
+            }
             return Schedules;
         }
         internal async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
         {
 
-            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as course,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency, Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue  " +
+            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as training_course ,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency,case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End as Training_company , Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue,  mis_training_schedule.status_code as status  " +
                 $" from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
@@ -301,6 +345,11 @@ namespace CMMSAPIs.Repositories.Masters
             if (_fileUpload.Count > 0)
             {
                 Schedules[0].uploadfile_ids = _fileUpload; ;
+            }
+            foreach (var item in Schedules)
+            {
+                string shortstatus = getshortstatus(item.status);
+                item.short_status = shortstatus;
             }
             return Schedules;
         }
@@ -420,7 +469,7 @@ namespace CMMSAPIs.Repositories.Masters
             $" LEFT JOIN mis_targeted_group tg ON tg.id = c.Targated_group_id " +
             $" LEFT JOIN mis_training_course status ON status.id = ts.CourseId " +
             $" WHERE ts.facility_id = {facility_id} " +
-            $" AND status.Status = 1 " +   
+            $" AND status.Status = 1 " +
             $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
 
 
@@ -463,7 +512,7 @@ namespace CMMSAPIs.Repositories.Masters
                     }
 
                     forMonth.created++;
-                    int num = Int32.Parse(item.status_code);
+                    int num = Int32.Parse(item.short_status);
                     if (num == (int)CMMS.CMMS_Status.COURSE_SCHEDULE)
                     {
                         forMonth.scheduled++;
@@ -529,18 +578,18 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<CMDefaultResponse> RejectScheduleCourse(CMApproval request, int userid)
         {
             string approve = $"update  mis_training_schedule set RejectedBy={userid} ," +
-               $" RejectedAt='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.REJECTED} " +
+               $" RejectedAt='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.SCHEDULE_REJECTED} " +
                $" where Schid={request.id}";
             int id = await Context.CheckGetData(approve).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Rejected");
-            return null;
+
         }
 
         internal async Task<CMDefaultResponse> ApproveScheduleCourse(CMApproval request, int userID)
         {
 
             string approve = $"update  mis_training_schedule set approvedby={userID} ," +
-                $" approvedat='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.APPROVED} " +
+                $" approvedat='{UtilsRepository.GetUTCTime()}', status_code={(int)CMMS.CMMS_Status.SCHEDULE_APPROVED} " +
                 $" where Schid={request.id}";
             int id = await Context.CheckGetData(approve).ConfigureAwait(false);
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Schedule Approved");

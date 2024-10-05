@@ -174,13 +174,15 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "";
             if (return_all)
             {
-                myQuery = "SELECT * FROM features ";
+                myQuery = "SELECT  softwareId as software_id, moduleName, featureName, menuImage, `add` , edit, `delete`, `view`, issue, approve, selfView," +
+                          " escalate, isActive, serialNo FROM features ";
             }
             else
             {
-                myQuery = "SELECT * FROM features where isActive=1; ";
+                myQuery = "SELECT  softwareId as software_id , moduleName, featureName, menuImage, `add`, edit, `delete`," +
+                          " `view`, issue, approve, selfView, escalate, isActive, serialNo FROM features where isActive=1; ";
             }
-            myQuery = "SELECT * FROM features where isActive=1; ";
+
             List<CMModule> _moduleList = await Context.GetData<CMModule>(myQuery).ConfigureAwait(false);
             return _moduleList;
         }

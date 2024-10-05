@@ -22,6 +22,7 @@ namespace CMMSAPIs.Models.Masters
         public int UpdatedBy { get; set; }
         public string Traning_category { get; set; }
         public string Targated_group { get; set; }
+        public string short_status { get; set; }
         public List<int> uploadfile_ids { get; set; }
         public List<CMTRAININGFILE> ImageDetails { get; set; }
 
