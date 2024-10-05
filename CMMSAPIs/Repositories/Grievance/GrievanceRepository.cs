@@ -187,17 +187,17 @@ namespace CMMSAPIs.Repositories.Grievance
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE; // RETURN is defined as RETRUN
             string strRetMessage = "";
             int statusId = (int)CMMS.CMMS_Status.Grievance_ADDED;
-            //request.status = 1;
+            int status = 1;
             List<int> idList = new List<int>();
 
             {
 
 
-                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, resolutionLevel, status_id, createdAt, createdBy) VALUES ";
+                string qry = "INSERT INTO  mis_grievance (facilityId, grievanceType, concern, description, resolutionLevel, status_id, createdAt, createdBy, status) VALUES ";
 
                 //concern = request.concern;
 
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + request.resolutionLevel + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "'); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + request.resolutionLevel + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + status +"'); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 
