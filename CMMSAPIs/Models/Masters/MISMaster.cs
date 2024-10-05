@@ -278,6 +278,15 @@ namespace CMMSAPIs.Models.Masters
         public decimal opening { get; set; }
         public List<CMWaterDataMonthWiseDetails_Month> details { get; set; }
     }
+        public class CMMISMonthWiseResult
+    {
+        public int month_id { get; set; }
+        public string month_name { get; set; }
+        public int year { get; set; }
+        public string waste_type { get; set; }
+        public decimal procured_qty { get; set; }
+        public decimal consumed_qty { get; set; }
+    }
     public class CMWaterDataMonthWiseDetails_Month
     {
 
@@ -1030,7 +1039,11 @@ namespace CMMSAPIs.Models.Masters
         public int RatingOfPSS { get; set; }
         public int NoOfPowerTransformerInPSS { get; set; }
         public int TransformerCapacity { get; set; }
-
+        public List<CMMISMonthWiseResult> WaterData { get; set; }
+        public List<CMMISMonthWiseResult> WasteData { get; set; }
+        public List<ManPowerData> MonthlyData { get; set; }
+        public List<OccupationalHealthData> healthDatas { get; set; }
+        public List<VisitsAndNotices> visitsAndNotices { get; set; }
 
     }
 
