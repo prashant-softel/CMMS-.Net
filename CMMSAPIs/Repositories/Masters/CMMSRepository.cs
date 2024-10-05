@@ -80,7 +80,191 @@ namespace CMMSAPIs.Repositories.Masters
             m_errorLog = new ErrorLog(_webHost);
             getDB = sqlDBHelper;
         }
+        internal static CMDashboardStatus getDashboardStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retValue = "";
+            string retCurrentStatus = "";
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.JOB_CREATED:     //Created
+                    retValue = "Job Created";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JOB_ASSIGNED:     //Assigned
+                    retValue = "Job Assigned";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JOB_LINKED:     //Linked
+                    retValue = "Job Linked to PTW";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JOB_CLOSED:     //Closed
+                    retValue = "Job Closed";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JOB_CANCELLED:     //Cancelled
+                    retValue = "Job Cancelled";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JC_CREATED:
+                    retValue = "JC Created";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.JC_STARTED:
+                    retValue = "JC Started";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSED:
+                    retValue = "JC Closed Waiting for Approval";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSE_REJECTED:
+                    retValue = "JC Closed Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.JC_CLOSE_APPROVED:
+                    retValue = "JC Closed Approved";
+                    retCurrentStatus = "Close";
+                    break;
+                case CMMS.CMMS_Status.JC_CARRY_FORWARDED:
+                    retValue = "JC Carry Forwarded - Waiting for Approval";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.JC_CF_APPROVED:
+                    retValue = "JC Carry Forwarded Approved";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.JC_CF_REJECTED:
+                    retValue = "JC Carry Forwarded Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
 
+                case CMMS.CMMS_Status.PTW_CREATED:
+                    retValue = "Waiting for Approval"; // 121
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_ISSUED:
+                    retValue = "Issued"; // 122
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_ISSUER:
+                    retValue = "Rejected By Issuer"; // 123
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER: // 124
+                    retValue = "Rejected By Approver";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_APPROVED: // 125
+                    retValue = "Approved";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CLOSED: // 126
+                    retValue = "Closed";
+                    retCurrentStatus = "Closed";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_RESUBMIT:
+                    retValue = "Resubmitted"; // Corrected spelling
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_ISSUER:
+                    retValue = "Cancelled By Issuer";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_HSE:
+                    retValue = "Cancelled By HSE";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCELLED_BY_APPROVER:
+                    retValue = "Cancelled By Approver";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUESTED: // 130
+                    retValue = "Cancel Requested";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_REJECTED:
+                    retValue = "Cancel Request Rejected";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_CANCEL_REQUEST_APPROVED: // 132
+                    retValue = "Cancelled";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUESTED:
+                    retValue = "Requested for Extension"; // 133
+                    retCurrentStatus = "Inprogress";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_REJECTED:
+                    retValue = "Extension Rejected"; // 134
+                    retCurrentStatus = "Inprogress";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE: // 135
+                    retValue = "Extension Approved";
+                    retCurrentStatus = "Inprogress";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_LINKED_TO_JOB:
+                    retValue = "Linked to Job";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_LINKED_TO_PM:
+                    retValue = "Linked to PM";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
+                    retValue = "Linked to Audit";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_LINKED_TO_HOTO:
+                    retValue = "Linked to HOTO";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_EXPIRED:
+                    retValue = "Expired";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_UPDATED:
+                    retValue = "Updated";
+                    retCurrentStatus = "Open";
+                    break;
+
+                case CMMS.CMMS_Status.PTW_UPDATED_WITH_TBT:
+                    retValue = "Updated With TBT";
+                    retCurrentStatus = "Inprogress";
+                    break;
+
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    break;
+
+            }
+
+            CMDashboardStatus retDashboardValue = new CMDashboardStatus();
+            retDashboardValue.currentStatus = retCurrentStatus;
+            retDashboardValue.shortStatus = retValue;
+            return retDashboardValue;
+        }
         internal async Task<CMDefaultResponse> AddModule(CMModule request)
         {
             /*
@@ -1228,6 +1412,7 @@ namespace CMMSAPIs.Repositories.Masters
                     if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_APPROVED)
                     {
                         _Job.status_long = JCRepository.getShortStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCStatus, (CMMS.ApprovalStatus)_Job.latestJCApproval);
+
                     }
                     else if (_Job.latestJCPTWStatus == (int)CMMS.CMMS_Status.PTW_REJECTED_BY_APPROVER)
                     {
@@ -1259,11 +1444,17 @@ namespace CMMSAPIs.Repositories.Masters
                     //{
                     //    _Job.status_long = "Permit - Waiting For Approval";
                     //}
+                    CMDashboardStatus status = getDashboardStatus(CMMS.CMMS_Modules.JOBCARD, (CMMS.CMMS_Status)_Job.latestJCPTWStatus);
+                    _Job.short_status = status.shortStatus;
+                    _Job.current_status = status.currentStatus;
                 }
                 else
                 {
                     CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(_Job.status);
                     _Job.status_long = getShortStatus_JOB(CMMS.CMMS_Modules.JOB, _Status);
+                    CMDashboardStatus status = getDashboardStatus(CMMS.CMMS_Modules.JOBCARD, _Status);
+                    _Job.short_status = status.shortStatus;
+                    _Job.current_status = status.currentStatus;
                 }
             });
 

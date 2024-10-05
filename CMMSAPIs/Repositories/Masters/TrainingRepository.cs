@@ -293,7 +293,7 @@ namespace CMMSAPIs.Repositories.Masters
         */
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
-            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status, course_name, ScheduleDate, TraingCompany as TrainingCompany, Trainer, Mode as mode,  Venue , " +
+            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status, course_name, ScheduleDate, case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End  as TrainingCompany , Trainer, Mode as mode,  Venue , " +
                 $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_Category ,tg.name as targeted_group from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
@@ -310,7 +310,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
         {
 
-            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as training_course ,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig, TraingCompany as Training_Agency,case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End as Training_company , Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue,  mis_training_schedule.status_code as status  " +
+            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as training_course ,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig,case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End as Training_Agency , Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue,  mis_training_schedule.status_code as status  " +
                 $" from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +

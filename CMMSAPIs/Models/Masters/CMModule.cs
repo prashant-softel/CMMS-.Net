@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace CMMSAPIs.Models.Masters
 {
+    class CMDashboardStatus
+    {
+        public string shortStatus { get; set; }
+        public string currentStatus { get; set; }
+    }
     public class CMModule
     {
         public int id { get; set; }
@@ -94,6 +99,8 @@ namespace CMMSAPIs.Models.Masters
         public string assetsname { get; set; }
         public int status { get; set; }
         public string status_long { get; set; }
+        public string short_status { get; set; }
+        public string current_status { get; set; }
         public string asset_category { get; set; }
 
         public DateTime? start_date { get; set; }
