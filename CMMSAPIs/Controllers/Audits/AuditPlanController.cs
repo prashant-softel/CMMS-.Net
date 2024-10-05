@@ -521,17 +521,13 @@ namespace CMMSAPIs.Controllers.Audits
         
         [Route("CreateSubTaskForChecklist")]
         [HttpPost]
-        public async Task<IActionResult> CreateSubTaskForChecklist(List<CMCreateAuditPlan> auditPlanList)
+        public async Task<IActionResult> CreateSubTaskForChecklist(CMCreateAuditPlan auditPlanList)
         {
 
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                int task_id = auditPlanList[0].task_id;
-                int parent_task_id = auditPlanList[0].parent_task_id;
-                int plan_id = auditPlanList[0].plan_id;
-                string title = auditPlanList[0].title;
-                var data = await _AuditPlanBS.CreateSubTaskForChecklist(task_id, parent_task_id, plan_id, title, auditPlanList, userID);
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));     
+                var data = await _AuditPlanBS.CreateSubTaskForChecklist(auditPlanList, userID);
                 return Ok(data);
 
             }

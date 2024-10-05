@@ -2075,11 +2075,13 @@ namespace CMMSAPIs.Repositories.Audits
             return response;
         }
 
-        internal async Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id,int parent_task_id,int plan_id, string title, List<CMCreateAuditPlan> auditPlanList, int userID)
+        internal async Task<CMDefaultResponse> CreateSubTaskForChecklist(CMCreateAuditPlan auditPlanList, int userID)
         {
+            int task_id = auditPlanList.task_id;
+            int plan_id = auditPlanList.plan_id;
             CMDefaultResponse response = new CMDefaultResponse();
 
-         
+            int parent_task_id = 0;
 
             // check task is created or not
 
@@ -2105,18 +2107,19 @@ namespace CMMSAPIs.Repositories.Audits
             List<ScheduleIDData> schedule_details = await Context.GetData<ScheduleIDData>(getParamsQry).ConfigureAwait(false);
 
       
-            foreach (CMCreateAuditPlan schedule in auditPlanList)
+            foreach (CMEvaluationAudit schedule in auditPlanList.map_checklist)
             {
                 string checkpointsQuery = "SELECT checkpoint.id, checkpoint.check_point, checkpoint.check_list_id as checklist_id, checkpoint.requirement, checkpoint.is_document_required,checkpoint.status " +
                                             "FROM checkpoint " +
                                             "left JOIN checklist_mapping as map ON map.checklist_id = checkpoint.check_list_id " +
                                             "left JOIN checklist_number as checklist ON checklist.id = map.checklist_id " +
-                                            $"WHERE checkpoint.check_list_id in ({schedule.Checklist_id});";
+                                            $"WHERE checkpoint.check_list_id in ({schedule.checklist_id});";
 
                 List<CMCreateCheckPoint> checkpointList = await Context.GetData<CMCreateCheckPoint>(checkpointsQuery).ConfigureAwait(false);
                 if (checkpointList.Count == 0)
                 {
                     response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.FAILURE, "No checklist or checkpoints found");
+                    return response;
                 }
                 else
                 {
@@ -2141,9 +2144,9 @@ namespace CMMSAPIs.Repositories.Audits
             if (parent_task_id > 0)
             {
                    string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date,  " +
-                    $" assigned_to_audit, PTW_id, status,parent_task_id,title)  " +
+                    $" assigned_to_audit, PTW_id, status,parent_task_id)  " +
                     $"  select   plan_id, category_id, facility_id, frequency_id, plan_date, '{UtilsRepository.GetUTCTime()}',  " +
-                    $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.EVAL_APPROVED}',{parent_task_id},'{auditPlanList[0].title}'  " +
+                    $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.EVAL_APPROVED}',{parent_task_id}  " +
                     $" from pm_task where id = {task_id};SELECT LAST_INSERT_ID();";
                     DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                     task_id = Convert.ToInt32(dt2.Rows[0][0]);
