@@ -29,6 +29,9 @@ namespace CMMSAPIs.Models.Audit
     public class CMCreateAuditPlan : CMAuditPlan
     {
         public int task_id { get; set; }
+        public int parent_task_id { get; set; }
+        public int plan_id { get; set; }
+        public string title { get; set; }
         public List<CMEvaluationAudit> map_checklist { get; set; }
     }
 

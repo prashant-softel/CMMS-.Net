@@ -2,6 +2,7 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Utils;
 using System;
 using System.Collections.Generic;
+using CMMSAPIs.Models.Masters;
 
 namespace CMMSAPIs.Models.PM
 {
@@ -94,7 +95,7 @@ namespace CMMSAPIs.Models.PM
     {
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
         public List<Materialconsumption> Material_consumption { get; set; }
-
+        public List<CMEvaluationAuditList> map_checklist { get; set; }
         public int plan_id { get; set; }
         public string closedApprovedByName { get; set; }
         public DateTime Schedule_Date { get; set; }

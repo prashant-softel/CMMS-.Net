@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using CMMSAPIs.Models.Users;
+using iTextSharp.tool.xml.html.head;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -527,7 +528,10 @@ namespace CMMSAPIs.Controllers.Audits
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 int task_id = auditPlanList[0].task_id;
-                var data = await _AuditPlanBS.CreateSubTaskForChecklist(task_id, auditPlanList, userID);
+                int parent_task_id = auditPlanList[0].parent_task_id;
+                int plan_id = auditPlanList[0].plan_id;
+                string title = auditPlanList[0].title;
+                var data = await _AuditPlanBS.CreateSubTaskForChecklist(task_id, parent_task_id, plan_id, title, auditPlanList, userID);
                 return Ok(data);
 
             }

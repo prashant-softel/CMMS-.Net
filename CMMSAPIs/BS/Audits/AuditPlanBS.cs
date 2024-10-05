@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Audits;
+using iTextSharp.tool.xml.html.head;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -38,7 +39,7 @@ namespace CMMSAPIs.BS.Audits
         Task<CMDefaultResponse> ApproveClosedAuditPlan(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> AuditLinkToPermit(int audit_id, int ptw_id, int updatedBy, string facilitytimeZone);
         Task<CMDefaultResponse> AssignAuditTask(int task_id, int assign_to, int userID);
-        Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id, List<CMCreateAuditPlan> auditPlanList, int userID);
+        Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id,int parent_task_id, int plan_id, string title, List<CMCreateAuditPlan> auditPlanList, int userID);
     }
     public class AuditPlanBS : IAuditPlanBS
     {
@@ -441,13 +442,13 @@ namespace CMMSAPIs.BS.Audits
                 throw;
             }
         }
-        public async Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id, List<CMCreateAuditPlan> auditPlanList, int userID)
+        public async Task<CMDefaultResponse> CreateSubTaskForChecklist(int task_id, int parent_task_id, int plan_id, string title, List<CMCreateAuditPlan> auditPlanList, int userID)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.CreateSubTaskForChecklist(task_id, auditPlanList, userID);
+                    return await repos.CreateSubTaskForChecklist(task_id, parent_task_id, plan_id, title, auditPlanList, userID);
 
                 }
             }
