@@ -57,6 +57,7 @@ namespace CMMSAPIs.Models.PM
         public long ptw_tbt_done { get; set; }
         public string status_short_ptw { get; set; }
         public string closeRejectedbyName { get; set; }
+        public int max_score { get; set; }
     }
 
     public class CMPMScheduleExecutionDetail
@@ -156,6 +157,8 @@ namespace CMMSAPIs.Models.PM
         public DateTime? skip_approved_at { get; set; }
         public string facility_name { get; set; }
         public Int64 isExpired { get; set; }
+        public string assignedTo { get; set; }
+        public int parent_task_id { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView

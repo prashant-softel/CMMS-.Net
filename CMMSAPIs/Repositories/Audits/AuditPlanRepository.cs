@@ -1151,7 +1151,7 @@ namespace CMMSAPIs.Repositories.Audits
             if (id <= 0)
                 throw new ArgumentException("Invalid Facility ID");
             string planListQry = $"SELECT plan.id as plan_id, plan.title title, plan.status as status_id, statuses.statusName as status_short, plan.Audit_Added_date plan_date,plan.description, plan.checklist_id,Employees, " +
-                " checklist_number as checklist_name,plan.Schedule_Date, " +
+                " checklist_number as checklist_name,plan.Schedule_Date,plan.max_score, " +
                 $" facilities.id as facility_id, facilities.name as facility_name," +
                 $" frequency.id as plan_freq_id, frequency.name as plan_freq_name, createdBy.id as created_by_id, " +
                 $" CONCAT(createdBy.firstName, ' ', createdBy.lastName) as created_by_name, plan.created_at,approvedBy.id as approved_by_id," +
@@ -1382,9 +1382,10 @@ namespace CMMSAPIs.Repositories.Audits
             //string myQuery1 = $"SELECT id, PM_Maintenance_Order_Number as maintenance_order_number, PM_Schedule_date as schedule_date, PM_Schedule_Completed_date as completed_date, Asset_id as equipment_id, Asset_Name as equipment_name, Asset_Category_id as category_id, Asset_Category_name as category_name, PM_Frequecy_id as frequency_id, PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status, {statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
 
-            string myQuery = $"SELECT pm_plan.Schedule_Date, pm_task.id,pm_plan.id as plan_id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.title as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, pm_task.assigned_to_audit  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , " +
+            string myQuery = $"SELECT pm_plan.Schedule_Date,pm_task.parent_task_id, pm_task.id,pm_plan.id as plan_id, CONCAT('AUDITTASK',pm_task.id) as task_code,pm_task.category_id,cat.name as category_name, pm_plan.title as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as done_date, pm_task.assigned_to_audit  as assigned_to_name, CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, pm_task.closed_at , " +
                 $"CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as closedApprovedByName, pm_task.approved_at ," +
-                $"facilities.name as facility_name," +
+                $"facilities.name as facility_name,pm_plan.max_score," +
+                $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assignedTo," +
                 $"CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as closeRejectedbyName,checklist_number as checklist_name, pm_task.rejected_at ," +
                 $"CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelled_by_name, pm_task.cancelled_at , pm_task.rejected_at ," +
                 $"CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, " +

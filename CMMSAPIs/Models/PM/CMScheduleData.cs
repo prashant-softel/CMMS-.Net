@@ -52,6 +52,7 @@ namespace CMMSAPIs.Models.PM
         public string Employees { get; set; }
         public int deleted_by { get; set; }
         public DateTime? deleted_Date { get; set; }
+        public int max_score { get; set; }
 
 
     }
