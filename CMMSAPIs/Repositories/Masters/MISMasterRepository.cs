@@ -2107,7 +2107,6 @@ namespace CMMSAPIs.Repositories.Masters
                       "concat(responsible1.firstName, ' ', responsible1.lastName) as assigned_to_name, Observation_assign_to as assigned_to_id , " +
                       "pm_execution.PM_Schedule_Observation_add_date as closer_date,pm_execution.PM_Schedule_Observation_update_date as closed_date,  " +
                       "concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken,pm_execution.preventive_action as corrective_action,  " +
-                      "concat(responsible1.firstName, ' ', responsible1.lastName) as assigned_to_name, Observation_assign_to as assigned_to_id, " +
                       "DATEDIFF(pm_execution.Observation_target_date,pm_execution.PM_Schedule_Observation_add_date) AS remaining_days,  " +
                       "pm_execution.Observation_target_date as target_date,ckp.requirement as observation_description,ckp.created_at as created_at, " +
                       "concat(createdBy.firstName, ' ', createdBy.lastName) created_by,  pm_task.updated_at, " +
@@ -2121,7 +2120,6 @@ namespace CMMSAPIs.Repositories.Masters
                       "left join ir_risktype ON ckp.risk_type = ir_risktype.id " +
                       " left join users responsible1 on responsible1.id = pm_execution.Observation_assign_to " +
                       "left join mis_m_typeofobservation ON ckp.type_of_observation = mis_m_typeofobservation.id " +
-                      " left join users responsible1 on responsible1.id = pm_execution.Observation_assign_to" +
                       " left join users createdBy on createdBy.id = ckp.created_by left join users updatedBy  on updatedBy.id = pm_task.updated_by " +
                       " left join business on business.id = facilities.operatorId " +
                        "where pm_execution.id = " + observation_id + "; ";
