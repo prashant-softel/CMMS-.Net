@@ -1007,10 +1007,18 @@ namespace CMMSAPIs.Models.Masters
         public string status_short { get; set; }
         public string status_long { get; set; }
         public List<CMEvaluationAudit> audit_list { get; set; }
-
+    }
+    public class SubEvalutionTask
+    {
+        public int subtask_id { get; set; }
+        public string title { get; set; }
+        public int checklist_id { get; set; }
+        public int assign_to { get; set; }
+        public DateTime schedule_date { get; set; }
+        public string assign_name { get; set; }
+        public string checklist_name { get; set; }
 
     }
-
     public class ProjectDetails
     {
 
@@ -1039,6 +1047,14 @@ namespace CMMSAPIs.Models.Masters
 
     }
 
+
+    public class MISSUMMARY
+    {
+        public string year { get; set; }
+        public ProjectDetails projectdetails { get; set; }
+        public List<MapAuditlist> MonthlyData { get; set; }
+
+    }
     public class MapAuditlist
     {
         public dynamic year { get; set; }
@@ -1046,7 +1062,8 @@ namespace CMMSAPIs.Models.Masters
         public dynamic month_id { get; set; }
 
         public List<ManPowerData> manPowerData { get; set; }
-        public List<CMWaterDataReport> waterData { get; set; }
+        public List<CMWaterDataMonthWise> waterData { get; set; }
+        public List<CMWaterDataMonthWise> WasteData { get; set; }
         public List<IncidentAccidentData> incidentAccidentData { get; set; }
         public List<HseTrainingData> hseTrainingData { get; set; }
         public List<HseInspectionAuditData> hseInspectionAuditData { get; set; }
@@ -1056,13 +1073,6 @@ namespace CMMSAPIs.Models.Masters
         public List<VisitsAndNotices> visitsAndNotices { get; set; }
     }
 
-    public class MISSUMMARY
-    {
-        public string year { get; set; }
-        public ProjectDetails projectdetails { get; set; }
-        public List<MapAuditlist> MonthlyData { get; set; }
-
-    }
     public class ManPowerData
     {
         public dynamic year { get; set; }

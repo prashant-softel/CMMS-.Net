@@ -358,12 +358,12 @@ namespace CMMSAPIs.Repositories.Masters
             string myQuery = "";
             if (return_all)
             {
-                myQuery = "SELECT  softwareId as software_id, moduleName, featureName, menuImage, `add` , edit, `delete`, `view`, issue, approve, selfView," +
+                myQuery = "SELECT id as id, softwareId as software_id, moduleName, featureName, menuImage, `add` , edit, `delete`, `view`, issue, approve, selfView," +
                           " escalate, isActive, serialNo FROM features ";
             }
             else
             {
-                myQuery = "SELECT  softwareId as software_id , moduleName, featureName, menuImage, `add`, edit, `delete`," +
+                myQuery = "SELECT  id as id,softwareId as software_id , moduleName, featureName, menuImage, `add`, edit, `delete`," +
                           " `view`, issue, approve, selfView, escalate, isActive, serialNo FROM features where isActive=1; ";
             }
 
@@ -1238,7 +1238,7 @@ namespace CMMSAPIs.Repositories.Masters
             return retValue;
 
         }
-        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, string moduleID, DateTime fromDate, DateTime toDate)
         {
 
             List<CMDashboadModuleWiseList> countResult = new List<CMDashboadModuleWiseList>();
@@ -1248,94 +1248,108 @@ namespace CMMSAPIs.Repositories.Masters
             }
             CMDashboadModuleWiseList modulewiseDetail = new CMDashboadModuleWiseList();
             CMDashboadDetails result = new CMDashboadDetails();
-            switch (moduleID)
+            string input = moduleID;
+            int mid = 0;
+            string[] separatedValues = new string[0];
+            bool condition = moduleID != null;
+            if (condition)
             {
-                case CMMS.CMMS_Modules.JOB:
+                separatedValues = input.Split(',');
+            }
+            foreach (string sid in separatedValues)
+            {
+                mid = Convert.ToInt32(sid);
+                if (mid == (int)CMMS.CMMS_Modules.JOB)
+                {
                     modulewiseDetail.module_name = "Breakdown Maintenance";
                     result = await getJobDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
-                    break;
-                case CMMS.CMMS_Modules.PM_PLAN:
+                }
+                else if (mid == (int)CMMS.CMMS_Modules.PM_PLAN)
+                {
                     modulewiseDetail.module_name = "Preventive Maintenance";
                     result = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
-                    break;
-                case CMMS.CMMS_Modules.MC_PLAN:
+                }
+                else if (mid == (int)CMMS.CMMS_Modules.MC_PLAN)
+                {
                     modulewiseDetail.module_name = "Module Cleaning";
                     result = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
-                    break;
-                case CMMS.CMMS_Modules.INCIDENT_REPORT:
+                }
+                else if (mid == (int)CMMS.CMMS_Modules.INCIDENT_REPORT)
+                {
                     modulewiseDetail.module_name = "Incident Report";
                     result = await getIRDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
-                    break;
-                case CMMS.CMMS_Modules.SM_GO:
+                }
+                else if (mid == (int)CMMS.CMMS_Modules.SM_GO)
+                {
                     modulewiseDetail.module_name = "Stock Management";
                     result = await getSMDashboardDetails(facilityId, fromDate, toDate);
                     modulewiseDetail.CMDashboadDetails = result;
                     countResult.Add(modulewiseDetail);
-                    break;
-                default:
-                    CMDashboadModuleWiseList modulewiseDetail_Job = new CMDashboadModuleWiseList();
-                    CMDashboadDetails result_job = new CMDashboadDetails();
-                    modulewiseDetail_Job.module_name = "Breakdown Maintenance";
-                    result_job = await getJobDashboardDetails(facilityId, fromDate, toDate);
-                    modulewiseDetail_Job.CMDashboadDetails = result_job;
-                    modulewiseDetail_Job.category_total_count = result_job.bm_closed_count + result_job.mc_closed_count + result_job.pm_closed_count;
-                    modulewiseDetail_Job.category_pm_count = result_job.pm_closed_count;
-                    modulewiseDetail_Job.category_mc_count = result_job.mc_closed_count;
-                    modulewiseDetail_Job.category_bm_count = result_job.bm_closed_count;
-                    countResult.Add(modulewiseDetail_Job);
+                }
+            }
+            if (moduleID == null)
+            {
+                CMDashboadModuleWiseList modulewiseDetail_Job = new CMDashboadModuleWiseList();
+                CMDashboadDetails result_job = new CMDashboadDetails();
+                modulewiseDetail_Job.module_name = "Breakdown Maintenance";
+                result_job = await getJobDashboardDetails(facilityId, fromDate, toDate);
+                modulewiseDetail_Job.CMDashboadDetails = result_job;
+                modulewiseDetail_Job.category_total_count = result_job.bm_closed_count + result_job.mc_closed_count + result_job.pm_closed_count;
+                modulewiseDetail_Job.category_pm_count = result_job.pm_closed_count;
+                modulewiseDetail_Job.category_mc_count = result_job.mc_closed_count;
+                modulewiseDetail_Job.category_bm_count = result_job.bm_closed_count;
+                countResult.Add(modulewiseDetail_Job);
 
-                    CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
-                    CMDashboadDetails result_PM = new CMDashboadDetails();
-                    modulewiseDetail_PM.module_name = "Preventive Maintenance";
-                    result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
-                    modulewiseDetail_PM.CMDashboadDetails = result_PM;
-                    modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
-                    modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
-                    modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
-                    countResult.Add(modulewiseDetail_PM);
+                CMDashboadModuleWiseList modulewiseDetail_PM = new CMDashboadModuleWiseList();
+                CMDashboadDetails result_PM = new CMDashboadDetails();
+                modulewiseDetail_PM.module_name = "Preventive Maintenance";
+                result_PM = await getPMPlanDashboardDetails(facilityId, fromDate, toDate);
+                modulewiseDetail_PM.CMDashboadDetails = result_PM;
+                modulewiseDetail_PM.category_total_count = result_PM.bm_closed_count + result_PM.mc_closed_count + result_PM.pm_closed_count;
+                modulewiseDetail_PM.category_pm_count = result_PM.pm_closed_count;
+                modulewiseDetail_PM.category_mc_count = result_PM.mc_closed_count;
+                modulewiseDetail_PM.category_bm_count = result_PM.bm_closed_count;
+                countResult.Add(modulewiseDetail_PM);
 
-                    CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
-                    CMDashboadDetails result_MC = new CMDashboadDetails();
-                    modulewiseDetail_MC.module_name = "Module Cleaning";
-                    result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
-                    modulewiseDetail_MC.CMDashboadDetails = result_MC;
-                    modulewiseDetail_MC.category_total_count = result_MC.bm_closed_count + result_MC.mc_closed_count + result_MC.pm_closed_count;
-                    modulewiseDetail_MC.category_pm_count = result_MC.pm_closed_count;
-                    modulewiseDetail_MC.category_mc_count = result_MC.mc_closed_count;
-                    modulewiseDetail_MC.category_bm_count = result_MC.bm_closed_count;
-                    countResult.Add(modulewiseDetail_MC);
+                CMDashboadModuleWiseList modulewiseDetail_MC = new CMDashboadModuleWiseList();
+                CMDashboadDetails result_MC = new CMDashboadDetails();
+                modulewiseDetail_MC.module_name = "Module Cleaning";
+                result_MC = await getMCPlanDashboardDetails(facilityId, fromDate, toDate);
+                modulewiseDetail_MC.CMDashboadDetails = result_MC;
+                modulewiseDetail_MC.category_total_count = result_MC.bm_closed_count + result_MC.mc_closed_count + result_MC.pm_closed_count;
+                modulewiseDetail_MC.category_pm_count = result_MC.pm_closed_count;
+                modulewiseDetail_MC.category_mc_count = result_MC.mc_closed_count;
+                modulewiseDetail_MC.category_bm_count = result_MC.bm_closed_count;
+                countResult.Add(modulewiseDetail_MC);
 
-                    CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
-                    CMDashboadDetails result_IR = new CMDashboadDetails();
-                    modulewiseDetail_IR.module_name = "Incident Report";
-                    result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
-                    modulewiseDetail_IR.CMDashboadDetails = result_IR;
-                    modulewiseDetail_IR.category_total_count = result_IR.bm_closed_count + result_IR.mc_closed_count + result_IR.pm_closed_count;
-                    modulewiseDetail_IR.category_pm_count = result_IR.pm_closed_count;
-                    modulewiseDetail_IR.category_mc_count = result_IR.mc_closed_count;
-                    modulewiseDetail_IR.category_bm_count = result_IR.bm_closed_count;
-                    countResult.Add(modulewiseDetail_IR);
+                CMDashboadModuleWiseList modulewiseDetail_IR = new CMDashboadModuleWiseList();
+                CMDashboadDetails result_IR = new CMDashboadDetails();
+                modulewiseDetail_IR.module_name = "Incident Report";
+                result_IR = await getIRDashboardDetails(facilityId, fromDate, toDate);
+                modulewiseDetail_IR.CMDashboadDetails = result_IR;
+                modulewiseDetail_IR.category_total_count = result_IR.bm_closed_count + result_IR.mc_closed_count + result_IR.pm_closed_count;
+                modulewiseDetail_IR.category_pm_count = result_IR.pm_closed_count;
+                modulewiseDetail_IR.category_mc_count = result_IR.mc_closed_count;
+                modulewiseDetail_IR.category_bm_count = result_IR.bm_closed_count;
+                countResult.Add(modulewiseDetail_IR);
 
-                    CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
-                    CMDashboadDetails result_SM = new CMDashboadDetails();
-                    modulewiseDetail_SM.module_name = "Stock Management";
-                    result_SM = await getSMDashboardDetails(facilityId, fromDate, toDate);
-                    modulewiseDetail_SM.CMDashboadDetails = result_SM;
-                    countResult.Add(modulewiseDetail_SM);
-                    break;
+                CMDashboadModuleWiseList modulewiseDetail_SM = new CMDashboadModuleWiseList();
+                CMDashboadDetails result_SM = new CMDashboadDetails();
+                modulewiseDetail_SM.module_name = "Stock Management";
+                result_SM = await getSMDashboardDetails(facilityId, fromDate, toDate);
+                modulewiseDetail_SM.CMDashboadDetails = result_SM;
+                countResult.Add(modulewiseDetail_SM);
             }
             return countResult;
         }
-
         public async Task<CMDashboadDetails> getJobDashboardDetails(string facilityId, DateTime fromDate, DateTime toDate)
         {
             CMDashboadDetails result = new CMDashboadDetails();
@@ -1544,12 +1558,12 @@ namespace CMMSAPIs.Repositories.Masters
              int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;
              int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;*/
             int completed_on_time = itemList
-    .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+        .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
                 x.schedule_time.HasValue &&
                 x.end_date.HasValue &&
                 (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8))
-    .ToList()
-    .Count();
+        .ToList()
+        .Count();
 
             int wo_delay = itemList
                 .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
@@ -2084,20 +2098,20 @@ namespace CMMSAPIs.Repositories.Masters
 
             string Plant_Stock_Opening_Details_query = $"select     asset_type, SUM(opening) AS Opening, SUM(inward) AS inward," +
                  $" SUM(outward) AS outward  from (SELECT ifnull(smc.cat_name,'Others') as asset_type, " +
-     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
-     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ({facility_id})" +
-     $" and sm_trans.actorID in ({facility_id}) and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
-     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
-     $" FROM smtransition as sm_trans " +
-     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
-     $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a GROUP BY asset_type;";
+        $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+        $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID  and ST.facilityID in ({facility_id})" +
+        $" and sm_trans.actorID in ({facility_id}) and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+        $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+        $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+        $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+        $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+        $" FROM smtransition as sm_trans " +
+        $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+        $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+        $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+        $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+        $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
+        $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code) a GROUP BY asset_type;";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
@@ -2120,20 +2134,20 @@ namespace CMMSAPIs.Repositories.Masters
 
             string Plant_Stock_Opening_Details_query = $"select     facilityName, SUM(opening) AS Opening, SUM(inward) AS inward," +
                  $" SUM(outward) AS outward  from (SELECT fc.name as facilityName, " +
-     $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
-     $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID " +
-     $" and sm_trans.actorID =  sm_trans.facilityID and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
-     $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
-     $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
-     $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
-     $" FROM smtransition as sm_trans " +
-     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and " +
-     $" sm_trans.actorID = sm_trans.facilityID   group by a_master.asset_code) a GROUP BY facilityName;";
+        $" IFNULL((select sum(ST.creditQty)-sum(ST.debitQty)  FROM smtransition as ST  JOIN smassetmasters as SM ON SM.ID = ST.assetItemID  " +
+        $" LEFT JOIN facilities fcc ON fcc.id = ST.facilityID   where   ST.actorType = {(int)CMMS.SM_Actor_Types.Store} and SM.ID=a_master.ID " +
+        $" and sm_trans.actorID =  sm_trans.facilityID and date_format(ST.lastModifiedDate, '%Y-%m-%d') < '{StartDate.ToString("yyyy-MM-dd")}'  group by SM.asset_code),0) Opening," +
+        $"  IFNULL((select sum(si.creditQty) from smtransition si where si.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+        $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as inward, " +
+        $"   IFNULL((select sum(so.debitQty) from smtransition so where so.id = sm_trans.id and  date_format(sm_trans.lastModifiedDate, '%Y-%m-%d') " +
+        $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' ),0) as outward " +
+        $" FROM smtransition as sm_trans " +
+        $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+        $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+        $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+        $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+        $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and " +
+        $" sm_trans.actorID = sm_trans.facilityID   group by a_master.asset_code) a GROUP BY facilityName;";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();
@@ -2230,15 +2244,15 @@ namespace CMMSAPIs.Repositories.Masters
                 $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}' and  smt.fromActorType = {(int)CMMS.SM_Actor_Types.Vendor}  and smt.assetItemID = sm_trans.assetItemID and smt.toActorType ={(int)CMMS.SM_Actor_Types.Store} and smt.PlantId in ({facility_id}) ),0) as inward, " +
                 $"   IFNULL((select SUM(smt1.qty) from smtransactiondetails smt1  where date_format(smt1.lastInsetedDateTime, '%Y-%m-%d') " +
                 $" BETWEEN '{StartDate.ToString("yyyy-MM-dd")}' AND '{EndDate.ToString("yyyy-MM-dd")}'  and smt1.assetItemID = sm_trans.assetItemID  and smt1.fromActorType IN ({(int)CMMS.SM_Actor_Types.PM_Task},{(int)CMMS.SM_Actor_Types.JobCard},{(int)CMMS.SM_Actor_Types.Engineer}) and smt1.toActorType ={(int)CMMS.SM_Actor_Types.Inventory} and smt1.PlantId in ({facility_id})),0) as outward  " +
-     $" FROM smtransition as sm_trans " +
-     $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
-     $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
-     $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
-     $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
-     $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
-     $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code" +
-     $"" +
-     $") a GROUP BY asset_type;";
+        $" FROM smtransition as sm_trans " +
+        $" JOIN smassetmasters as a_master ON a_master.ID = sm_trans.assetItemID " +
+        $" LEFT JOIN facilities fc ON fc.id = sm_trans.facilityID " +
+        $" Left join smassettypes AST on AST.id = a_master.asset_type_ID " +
+        $"  left join smitemcategory smc on smc.ID = a_master.item_category_ID " +
+        $" where sm_trans.actorType = {(int)CMMS.SM_Actor_Types.Store} and sm_trans.facilityID in ({facility_id}) and " +
+        $" sm_trans.actorID in ({facility_id}) group by a_master.asset_code" +
+        $"" +
+        $") a GROUP BY asset_type;";
 
             List<CMPlantStockOpening> Plant_Stock_Opening_Details_Reader = await Context.GetData<CMPlantStockOpening>(Plant_Stock_Opening_Details_query).ConfigureAwait(false);
             List<CMSMConsumptionByGoods> result = new List<CMSMConsumptionByGoods>();

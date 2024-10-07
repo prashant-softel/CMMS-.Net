@@ -50,7 +50,7 @@ namespace CMMSAPIs.BS.Masters
         Task<List<CMFrequency>> GetFrequencyList();
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID, int userID, string facilitytimeZone);
         Task<string> DownloadFile(int id);
-        Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate);
+        Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, string moduleID, DateTime fromDate, DateTime toDate);
         Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module);
     }
     public class CMMSBS : ICMMSBS
@@ -635,7 +635,7 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
-        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, CMMS.CMMS_Modules moduleID, DateTime fromDate, DateTime toDate)
+        public async Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, string moduleID, DateTime fromDate, DateTime toDate)
         {
             try
             {

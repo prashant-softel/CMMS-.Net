@@ -1863,7 +1863,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"observation_description, created_at, created_by, is_active,status_code,action_taken) VALUES " +
                                      $"({request.facility_id},{request.risk_type_id}, '{request.preventive_action}', {request.assigned_to_id}, '{request.contact_number}', " +
                                      $"{request.cost_type}, '{request.date_of_observation:yyyy-MM-dd HH:mm:ss}', {request.type_of_observation}, '{request.location_of_observation}', " +
-                                     $"{request.source_of_observation}, '{request.target_date:yyyy-MM-dd HH:mm:ss}', '{request.observation_description}', " +
+                                     $"{request.source_of_observation}, '{request.target_date:yyyy-MM-dd HH:mm:ss}', \"{request.observation_description}\", " +
                                      $"'{UtilsRepository.GetUTCTime()}', {UserID}, 1,{(int)CMMS.CMMS_Status.OBSERVATION_CREATED},'{request.action_taken}'); " +
                                      $"SELECT LAST_INSERT_ID();";
 
@@ -1886,7 +1886,7 @@ namespace CMMSAPIs.Repositories.Masters
                 {
                     sb.Append(": " + request.comment);
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, insertedValue, 0, 0, sb.ToString(), CMMS.CMMS_Status.OBSERVATION_CREATED, UserID);
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, insertedValue, 0, 0, request.comment, CMMS.CMMS_Status.OBSERVATION_CREATED, UserID);
                 response = new CMDefaultResponse(insertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Observation data saved successfully.");
             }
             catch (Exception ex)
@@ -2067,7 +2067,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (check_point_type_id == 1)
             {
-                string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status, " +
+                string myQuery = "select observations.id,observations.facility_id,facilities.name facility_name,status_code,observations.short_status,observations.action_taken as action_taken , " +
                     " business.name as operator_name, risk_type_id,ir_risktype.risktype as risk_type, preventive_action, responsible_person, business.contactNumber as contact_number, cost_type ,CASE WHEN cost_type=1 THEN 'Capex' WHEN cost_type=2 THEN 'Opex' ELSE 'Empty' END as Cost_name ,  " +
                     " date_of_observation, type_of_observation, location_of_observation, source_of_observation,mis.name as source_of_observation_name,  " +
                     " monthname(observations.date_of_observation) as month_of_observation,observations.target_date as closer_date, concat(createdBy.firstName, ' ', createdBy.lastName) as action_taken, updated_by as updateid, created_by as createdid ," +
@@ -2748,12 +2748,12 @@ namespace CMMSAPIs.Repositories.Masters
             if (44 == module_id)
             {
                 string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
-                                    $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.moduleQuantity) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
-                                    $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.moduleQuantity) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
+                                    $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.area) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
+                                    $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.area) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
                                      $" AVG(CASE WHEN mc.startDate IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)        ELSE TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)     END) AS TimeTaken " +
                                     $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
                                     $" LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
-                                    $" LEFT JOIN(SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
+                                    $" LEFT JOIN(SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
                                     $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
                                     $" WHERE mc.facilityId IN({facility_id}) AND mc.moduleType = 2 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}'  GROUP BY mc.facilityId;";
 
@@ -2775,7 +2775,9 @@ namespace CMMSAPIs.Repositories.Masters
                 {
 
                     sb.Append(": " + request.comment);
-                    deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}, closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' ,preventive_action = '{request.comment}'  WHERE id = {request.id};";
+                    deleteQry = $"UPDATE observations SET status_code = {(int)CMMS_Status.OBSERVATION_CLOSED}," +
+                        $" closed_by = '{userId}' , closed_at='{UtilsRepository.GetUTCTime()}' ," +
+                        $"preventive_action = '{request.comment}',action_taken = '{request.action_taken}'  WHERE id = {request.id};";
 
                     await Context.ExecuteNonQry<int>(deleteQry).ConfigureAwait(false);
 
@@ -2972,20 +2974,7 @@ namespace CMMSAPIs.Repositories.Masters
            $" where  mis_waterdata.plantId = {facility_id} and DATE_FORMAT(Date,'%Y') = '{year}'" +
            $" group by MONTH(month_id) , mis_waterdata.waterTypeId  " +
            $"  ;";
-
             List<CMWaterDataMonthWise> ListResult = await Context.GetData<CMWaterDataMonthWise>(SelectQ).ConfigureAwait(false);
-
-            /*var groupedWaterDataResult = ListResult.GroupBy(r => new { r.facility_id, r.facility_name })
-          SelectMany(group => group.Select(r => new CMMISMonthWiseResult
-          {
-              month_id = (int)r.month_id,  // Explicit cast to int
-              month_name = r.month_name,
-              year = (int)r.year,  // Explicit cast to int
-              waste_type = r.water_type,
-              procured_qty = r.procured_qty,
-              consumed_qty = r.consumed_qty,
-          }).Distinct()) // Ensuring unique entries
-          .ToList();*/
             // waste data
             string SelectQ_waste_data = $" select distinct waste_data.id, facilityId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +
                $" sum(creditQty) as procured_qty, sum(debitQty) as consumed_qty, mw.name as water_type, show_opening " +
@@ -2995,43 +2984,9 @@ namespace CMMSAPIs.Repositories.Masters
                $" where  waste_data.plantId = {facility_id} and DATE_FORMAT(Date,'%Y') = '{year}' and mw.status=1 " +
                $" group by MONTH(month_id) , waste_data.wasteTypeId  " +
                $"  ;";
-
             List<CMWaterDataMonthWise> ListResult_waste_data = await Context.GetData<CMWaterDataMonthWise>(SelectQ_waste_data).ConfigureAwait(false);
-            /*
-                        var groupedWasteDataResult = ListResult_waste_data.GroupBy(r => new { r.facility_id, r.facility_name })
-                      .SelectMany(group => group.Select(r => new CMMISMonthWiseResult
-                      {
-                          month_id = (int)r.month_id,  // Explicit cast to int
-                          month_name = r.month_name,
-                          year = (int)r.year,  // Explicit cast to int
-                          waste_type = r.water_type,
-                          procured_qty = r.procured_qty,
-                          consumed_qty = r.consumed_qty,
-                      }).Distinct()) // Ensuring unique entries
-                      .ToList();
 
 
-
-                        List<ProjectDetails> projectDetailsList = new List<ProjectDetails>();
-
-                        foreach (var item in data)
-                        {
-                            ProjectDetails projectDetail = new ProjectDetails
-                            {
-
-                                sitename = item.sitename,
-                                State = item.State,
-                                District = item.District,
-                                ContractorName = item.ContractorName,
-                                ContractorSiteInChargeName = item.ContractorSiteInChargeName,
-                                WaterData = groupedWaterDataResult,
-                                WasteData = groupedWasteDataResult,
-                                MonthlyData = hfedata,
-                                healthDatas = occupational_Helath,
-                                visitsAndNotices = Regulatory_visit_notice
-                            };
-                            projectDetailsList.Add(projectDetail);
-                        }*/
             return new List<MISSUMMARY>();
         }
         internal async Task<List<EnviromentalSummary>> GeEnvironmentalSummary(string year, int facility_id)

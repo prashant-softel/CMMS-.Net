@@ -31,6 +31,7 @@ namespace CMMSAPIs.Models.Audit
 
         public int plan_id { get; set; }
         public string title { get; set; }
+        public string plan_number { get; set; }
         public int assign_to { get; set; }
         public List<CMEvaluationAudit> map_checklist { get; set; }
     }

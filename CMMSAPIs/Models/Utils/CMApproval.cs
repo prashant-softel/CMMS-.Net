@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.Utils
     {
         public int id { get; set; }
         public string comment { get; set; }
+        public string action_taken { get; set; }
         public int facility_id { get; set; }
         public int claim_status { get; set; }
         public int status { get; set; }

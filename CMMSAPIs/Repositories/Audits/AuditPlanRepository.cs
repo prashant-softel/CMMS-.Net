@@ -122,7 +122,7 @@ namespace CMMSAPIs.Repositories.Audits
             status = (int)CMMS.CMMS_Status.AUDIT_SCHEDULE;
 
 
-            string SelectQ = "select id from st_audit where title = '" + request.title + "'";
+            string SelectQ = "select id from st_audit where title = '" + request.plan_number + "'";
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
             if (auditPlanList != null && auditPlanList.Count > 0)
@@ -132,7 +132,7 @@ namespace CMMSAPIs.Repositories.Audits
             else
             {
                 string InsertQ = $"insert into st_audit(title, Facility_id, Audit_Added_date, Status, Auditee_Emp_ID, Auditor_Emp_ID, Frequency, Description, Schedule_Date, Checklist_id, created_by, created_at,assignedTo,Employees,is_PTW,module_type_id,max_score) " +
-                                $"values('{request.title}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id},{request.max_score}) ; SELECT LAST_INSERT_ID();";
+                                $"values('{request.plan_number}', {request.Facility_id}, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', {status}, {request.auditee_id}, {request.auditor_id}, {request.ApplyFrequency},'{request.Description}','{request.Schedule_Date.ToString("yyyy-MM-dd HH:mm:ss")}', {request.Checklist_id}, {userID},'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}','{request.assignedTo}','{string.Join(", ", request.Employees)}', {request.is_PTW},{request.Module_Type_id},{request.max_score}) ; SELECT LAST_INSERT_ID();";
                 DataTable dt2 = await Context.FetchData(InsertQ).ConfigureAwait(false);
                 InsertedValue = Convert.ToInt32(dt2.Rows[0][0]);
                 response = new CMDefaultResponse(InsertedValue, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with plan number : " + request.title + " created successfully.");
@@ -147,10 +147,10 @@ namespace CMMSAPIs.Repositories.Audits
 
             if (request.Module_Type_id == (int)CMMS.checklist_type.Evaluation && request.map_checklist.Count > 0)
             {
-                string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id,title, checklist_id, weightage,comments,created_by,created_at) VALUES ";
+                string mapChecklistQry = "INSERT INTO evalution_checklist_map(evalution_plan_id, checklist_id, weightage,comments,created_by,created_at) VALUES ";
                 foreach (var map in request.map_checklist)
                 {
-                    mapChecklistQry += $"({InsertedValue},'{map.title}', {map.checklist_id}, {map.weightage},'{map.comment}',{userID},'{UtilsRepository.GetUTCTime()}'), ";
+                    mapChecklistQry += $"({InsertedValue}, {map.checklist_id}, {map.weightage},'{map.comment}',{userID},'{UtilsRepository.GetUTCTime()}'), ";
                 }
                 if (mapChecklistQry.Length > 0)
                 {
@@ -291,7 +291,7 @@ namespace CMMSAPIs.Repositories.Audits
                 case CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT:
                     retValue = "Audit link with permit";
                     break;
-        
+
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -1438,6 +1438,16 @@ namespace CMMSAPIs.Repositories.Audits
             //                    $"WHERE pm_execution.PM_Schedule_Id = {schedule_id};";
 
             //List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
+            string task1 = "SELECT pme.checkpoint_title AS title,pme.id as subtask_id, ck.id as checklist_id, " +
+                           $"pme.assign_to_evalution as assign_to, pmt.plan_date as  schedule_date, " +
+                           $" CONCAT(usr.firstName,' ',usr.lastName)   as assign_name,ck.checklist_number as checklist_name   " +
+                           $"FROM pm_execution as pme " +
+                          $"LEFT join  pm_task as pmt on pmt.parent_task_id=pme.task_id  " +
+                           $"LEFT join  checkpoint as ckp on pme.Check_Point_id=ckp.id " +
+                           $"LEFT join  checklist_number as ck on ck.id=ckp.check_list_id " +
+                           $"LEFT join  users as usr on usr.id=pme.assign_to_evalution " +
+                           $" WHERE pmt.id = {task_id}; ";
+            List<SubEvalutionTask> Sub_task = await Context.GetData<SubEvalutionTask>(task1).ConfigureAwait(false);
             foreach (var schedule in checklist_collection)
             {
                 string myQuery3 = "SELECT checkpoint.min_range,checkpoint.max_range,is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
@@ -1489,6 +1499,7 @@ namespace CMMSAPIs.Repositories.Audits
             }
             taskViewDetail[0].schedules = checklist_collection;
             taskViewDetail[0].map_checklist = await GetEvaluationChecklistByID(taskViewDetail[0].plan_id, facilitytimeZone);
+            taskViewDetail[0].Sub_PmTask = Sub_task;
 
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
             //if (_Status != CMMS.CMMS_Status.AUDIT_APPROVED)
@@ -1996,14 +2007,14 @@ namespace CMMSAPIs.Repositories.Audits
 
 
 
-            string getParamsQry = $"SELECT plan.id,plan.Audit_Added_date,evalution_checklist_map.checklist_id,  evalution_checklist_map.id as schedule_id "+
-                                  $"FROM evalution_checklist_map "+
-                                  $"left join st_audit as plan on evalution_checklist_map.evalution_plan_id = plan.id "+
+            string getParamsQry = $"SELECT plan.id,plan.Audit_Added_date,evalution_checklist_map.checklist_id,  evalution_checklist_map.id as schedule_id " +
+                                  $"FROM evalution_checklist_map " +
+                                  $"left join st_audit as plan on evalution_checklist_map.evalution_plan_id = plan.id " +
                                   $"where plan.id = {plan_id}";
 
             List<ScheduleIDData> schedule_details = await Context.GetData<ScheduleIDData>(getParamsQry).ConfigureAwait(false);
 
-      
+
             foreach (CMEvaluationAudit schedule in auditPlanList.map_checklist)
             {
                 string checkpointsQuery = "SELECT checkpoint.id, checkpoint.check_point, checkpoint.check_list_id as checklist_id, checkpoint.requirement, checkpoint.is_document_required,checkpoint.status " +
@@ -2023,9 +2034,9 @@ namespace CMMSAPIs.Repositories.Audits
                     foreach (CMCreateCheckPoint checkpoint in checkpointList)
                     {
                         string executeQuery = "INSERT INTO pm_execution(task_id,PM_Schedule_Id, PM_Schedule_Code, Check_Point_id, Check_Point_Name, " +
-                                                "Check_Point_Code, Status, Check_Point_Requirement,checkpoint_title) VALUES " +
+                                                "Check_Point_Code, Status, assign_to_evalution,PM_Schedule_Observation_add_date,Check_Point_Requirement,checkpoint_title) VALUES " +
                                                 $"({task_id}, {schedule_details[0].schedule_id} ,'PMSCH{schedule_details[0].schedule_id}', {checkpoint.id}, " +
-                                                $"'{checkpoint.check_point}', 'CP{checkpoint.id}', 1, '{checkpoint.requirement}','{schedule.title}'); " +
+                                                $"'{checkpoint.check_point}', 'CP{checkpoint.id}', 1,{checkpoint.assign_to},'{checkpoint.schedule_date}','{checkpoint.requirement}','{schedule.title}'); " +
                                                 $"SELECT LAST_INSERT_ID();";
                         DataTable dt2 = await Context.FetchData(executeQuery).ConfigureAwait(false);
                         int id = Convert.ToInt32(dt2.Rows[0][0]);
@@ -2039,15 +2050,17 @@ namespace CMMSAPIs.Repositories.Audits
 
             if (parent_task_id > 0)
             {
-                   string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date, prev_task_done_date,  " +
-                    $" assigned_to_audit, PTW_id, status,parent_task_id,assigned_to)  " +
-                    $"  select   plan_id, category_id, facility_id, frequency_id, plan_date, '{UtilsRepository.GetUTCTime()}',  " +
-                    $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.AUDIT_APPROVED}',{parent_task_id},{auditPlanList.assign_to}  " +
-                    $" from pm_task where id = {task_id};SELECT LAST_INSERT_ID();";
-                    DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
-                    task_id = Convert.ToInt32(dt2.Rows[0][0]);
+                string entryInTask = $" INSERT INTO pm_task (plan_id, category_id, facility_id, frequency_id, plan_date,  " +
+                 $" assigned_to_audit, PTW_id, status,parent_task_id,assigned_to)  " +
+                 $"  select   plan_id, category_id, facility_id, frequency_id, plan_date,  " +
+                 $" assigned_to_audit, PTW_id, '{(int)CMMS.CMMS_Status.AUDIT_APPROVED}',{parent_task_id},{auditPlanList.assign_to}  " +
+                 $" from pm_task where id = {task_id};SELECT LAST_INSERT_ID();";
+                DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
+                task_id = Convert.ToInt32(dt2.Rows[0][0]);
             }
-           
+            string startQry1 = $"UPDATE pm_task SET prev_task_done_date= '{UtilsRepository.GetUTCTime()}' " +
+                              $"WHERE id = {task_id};";
+            await Context.ExecuteNonQry<int>(startQry1).ConfigureAwait(false);
 
             response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, "Evaluation plan with sub task id : " + task_id + " created successfully.");
 
