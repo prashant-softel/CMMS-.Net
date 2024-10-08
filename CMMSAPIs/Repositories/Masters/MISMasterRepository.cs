@@ -1930,7 +1930,7 @@ namespace CMMSAPIs.Repositories.Masters
                                      $"action_taken = '{request.action_taken}', " +
                                      $"source_of_observation = '{request.source_of_observation}', " +
                                      $"comment = '{request.comment}', " +
-                                     $"target_date = '{request.target_date:yyyy-MM-dd HH:mm:ss}', " +
+                                     $"target_date = " + (request.target_date == null ? "NULL" : $"'{request.target_date}'") + "," +
                                      $"observation_description = '{request.observation_description}', " +
                                      $"status_code={(int)CMMS.CMMS_Status.OBSERVATION_CREATED}," +
                                      $"updated_at = '{UtilsRepository.GetUTCTime()}', " +
@@ -1946,12 +1946,13 @@ namespace CMMSAPIs.Repositories.Masters
                         await Context.ExecuteNonQry<int>(uploadfilkr).ConfigureAwait(false);
                     }
                 }
-                System.Text.StringBuilder sb = new System.Text.StringBuilder("Observation Updated");
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
                 if (request.comment != null)
                 {
                     sb.Append(": " + request.comment);
                 }
-                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, sb.ToString(), CMMS.CMMS_Status.UPDATED, UserID);
+
+                await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.UPDATED, UserID);
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Observation data updated successfully.");
             }
             catch (Exception ex)
@@ -2736,26 +2737,27 @@ namespace CMMSAPIs.Repositories.Masters
                 string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
                                     $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.moduleQuantity) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
                                     $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.moduleQuantity) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
-                                    $" AVG(CASE WHEN mc.startDate IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)        ELSE TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)     END) AS TimeTaken " +
+                                      $" CASE WHEN mc.end_approved_at IS NOT NULL  AND mc.startDate IS NOT NULL  AND TIMESTAMPDIFF(MINUTE, mc.startDate, mc.end_approved_at) >= 0  THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.end_approved_at)  ELSE 0   END AS TimeTaken  " +
                                     $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
                                     $" LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
                                     $" LEFT JOIN(SELECT executionId, SUM(moduleQuantity) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
                                     $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                    $" WHERE mc.facilityId IN({facility_id}) AND mc.moduleType = 1 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}'  GROUP BY mc.facilityId;";
+                                    $" WHERE mc.facilityId IN({facility_id})  AND(mc.moduleType = 1 OR mc.executionStartedAt >= '{start_date}' AND mc.executionStartedAt <= '{end_date}') GROUP BY mc.facilityId;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
             if (44 == module_id)
             {
-                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType,  " +
                                     $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.area) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
-                                    $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.area) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
-                                     $" AVG(CASE WHEN mc.startDate IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)        ELSE TIMESTAMPDIFF(MINUTE, mc.abandonApprovedAt, mc.startDate)     END) AS TimeTaken " +
-                                    $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id " +
-                                    $" LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId " +
-                                    $" LEFT JOIN(SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId   " +
-                                    $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId " +
-                                    $" WHERE mc.facilityId IN({facility_id}) AND mc.moduleType = 2 and mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}'  GROUP BY mc.facilityId;";
+                                    $"IFNULL(sub3.no_of_cleaned, 0)  AS Abandoned, mc.reasonForAbandon AS remark, (SUM(css.area) - IFNULL(sub2.no_of_cleaned, 0)) AS deviation, " +
+                                    $" CASE WHEN mc.end_approved_at IS NOT NULL  AND mc.startDate IS NOT NULL  AND TIMESTAMPDIFF(MINUTE, mc.startDate, mc.end_approved_at) >= 0  THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.end_approved_at)  ELSE 0   END AS TimeTaken  " +
+                                    $"FROM cleaning_execution AS mc LEFT JOIN cleaning_plan AS mp ON mp.planId = mc.planId LEFT JOIN cleaning_execution_items AS css ON css.executionId = mc.id  " +
+                                    $"LEFT JOIN(SELECT executionId, SUM(waterUsed) AS TotalWaterUsed FROM cleaning_execution_schedules GROUP BY executionId) sub1 ON mc.id = sub1.executionId  " +
+                                    $"LEFT JOIN(SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items WHERE cleanedById > 0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId  " +
+                                    $"LEFT JOIN(SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items WHERE abandonedById > 0 GROUP BY executionId) sub3 ON mc.id = sub3.executionId  " +
+                                    $"LEFT JOIN Frequency AS freq ON freq.id = mp.frequencyId LEFT JOIN facilities AS f ON f.id = mc.facilityId  " +
+                                    $"WHERE mc.facilityId IN({facility_id}) AND (mc.moduleType = 2  or mc.executionStartedAt BETWEEN '{start_date}' AND '{end_date}')  GROUP BY mc.facilityId;";
 
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
 
@@ -2854,7 +2856,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid Observation Type");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
 
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assigned Observation ");
         }

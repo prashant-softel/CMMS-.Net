@@ -952,6 +952,7 @@ namespace CMMSAPIs.Models.Masters
         public int checklist_id { get; set; }
         public string title { get; set; }
         public int audit_id { get; set; }
+        public DateTime schedule_date { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
         public int ptw_req { get; set; }
@@ -1012,11 +1013,11 @@ namespace CMMSAPIs.Models.Masters
     {
         public int subtask_id { get; set; }
         public string title { get; set; }
-        public int checklist_id { get; set; }
+        public int id { get; set; }
         public int assign_to { get; set; }
         public DateTime schedule_date { get; set; }
         public string assign_name { get; set; }
-        public string checklist_name { get; set; }
+        public string checklist_number { get; set; }
 
     }
     public class ProjectDetails
@@ -1039,11 +1040,11 @@ namespace CMMSAPIs.Models.Masters
         public int RatingOfPSS { get; set; }
         public int NoOfPowerTransformerInPSS { get; set; }
         public int TransformerCapacity { get; set; }
-        public List<CMMISMonthWiseResult> WaterData { get; set; }
-        public List<CMMISMonthWiseResult> WasteData { get; set; }
-        public List<ManPowerData> MonthlyData { get; set; }
-        public List<OccupationalHealthData> healthDatas { get; set; }
-        public List<VisitsAndNotices> visitsAndNotices { get; set; }
+        /* public List<CMMISMonthWiseResult> WaterData { get; set; }
+         public List<CMMISMonthWiseResult> WasteData { get; set; }
+         public List<ManPowerData> MonthlyData { get; set; }
+         public List<OccupationalHealthData> healthDatas { get; set; }
+         public List<VisitsAndNotices> visitsAndNotices { get; set; }*/
 
     }
 

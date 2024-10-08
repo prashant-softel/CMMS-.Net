@@ -35,7 +35,6 @@ namespace CMMSAPIs.Models.Audit
         public int assign_to { get; set; }
         public List<CMEvaluationAudit> map_checklist { get; set; }
     }
-
     public class CMAuditPlanList
     {
         public int id { get; set; }
@@ -62,7 +61,7 @@ namespace CMMSAPIs.Models.Audit
         public string Module_Type { get; set; }
         public string assignedTo { get; set; }
         public string Employees { get; set; }
-        public string is_PTW { get; set; }
+        public dynamic is_PTW { get; set; }
         public List<CMEvaluationAuditList> map_checklist { get; set; }
     }
 }
