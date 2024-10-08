@@ -435,23 +435,33 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         internal async Task<List<CMMCTaskList>> GetTaskList(string facilityId, string facilitytimeZone, string startDate, string endDate, bool selfView, int userId)         //Pending : add date range and status filter
         {
             string statusOut = "CASE ";
+            string value = null;
             //Scheduled Qnty	Actual Qnty	Deviation	Machine type	Time taken	Remarks
             //SUM(css.moduleQuantity) as  Scheduled_Qnty,sub2.no_of_cleaned as Actual_Qnty,( SUM(css.moduleQuantity) - sub2.no_of_cleaned)  as Deviation
             //CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.startDate, mc.abandonedAt)  ELSE TIMESTAMPDIFF(MINUTE, mc.startDate, mc.endedAt)
             //END as Time_taken , mc.reasonForAbandon as Remark
+
+            if (moduleType == cleaningType.ModuleCleaning)
+            {
+                 value = "moduleQuantity";
+            }
+            else if (moduleType == cleaningType.Vegetation)
+            {
+                 value = "area";
+            }
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
                 statusOut += $"WHEN mc.status = {status.Key} THEN '{status.Value}' ";
             }
             statusOut += $"ELSE 'Invalid Status' END";
 
-            string myQuery1 = $"select f.name as sitename,mp.cleaningType as cleaningType,CASE mp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName ,  cls.waterUsed as waterUsed,mc.id as executionId,mp.title,mc.planId,mc.status,mc.abandonedAt as Abondond_done_date," +
+            string myQuery1 = $"select f.name as sitename,mp.cleaningType as cleaningType,CASE mp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName ,  cls.waterUsed as waterUsed,mc.id as executionId,mp.title,mc.planId,mc.status,mc.abandonedAt as abandoned_done_date," +
                               $" CONCAT(assignedToUser.firstName, assignedToUser.lastName) as responsibility , mc.startDate as scheduledDate, mc.endedAt as doneDate, " +
-                              $" SUM(css.area) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.area) - sub2.no_of_cleaned)  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as Abondend , " +
+                              $" SUM(css.{value}) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.{value} - sub2.no_of_cleaned))  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as abandoned , " +
                               $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonedAt, mc.startDate)  ELSE TIMESTAMPDIFF(MINUTE,mc.endedAt, mc.startDate) END as Time_taken ,  mc.reasonForAbandon as Remark,  " +
                               $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short" +
                               $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
-                              $" LEFT JOIN (SELECT executionId, SUM(area) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
+                              $" LEFT JOIN (SELECT executionId, SUM({value}) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
                               $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
                               $"left join cleaning_execution_schedules as cls on cls.executionId=css.executionId  " +
                               $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
@@ -483,8 +493,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     ViewMCTaskList.scheduledDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.scheduledDate);
                 if (ViewMCTaskList != null && ViewMCTaskList.lastDoneDate != null)
                     ViewMCTaskList.lastDoneDate = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.lastDoneDate);
-                if (ViewMCTaskList != null && ViewMCTaskList.Abondond_done_date != null)
-                    ViewMCTaskList.Abondond_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.Abondond_done_date);
+                if (ViewMCTaskList != null && ViewMCTaskList.abandoned_done_date != null)
+                    ViewMCTaskList.abandoned_done_date = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, ViewMCTaskList.abandoned_done_date);
             }
             return _ViewMCTaskList;
         }

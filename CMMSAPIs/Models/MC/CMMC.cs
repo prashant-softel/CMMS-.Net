@@ -346,11 +346,10 @@ namespace CMMSAPIs.Models.MC
         public DateTime scheduledDate { get; set; }
         public DateTime doneDate { get; set; }
         public DateTime lastDoneDate { get; set; }
-        public DateTime Abondond_done_date { get; set; }
+        public DateTime abandoned_done_date { get; set; }
         public int status { get; set; }
 
         public string status_short { get; set; }
-        public int water_used { get; set; }
         public string permit_code { get; set; }
         public int permit_id { get; set; }
         public int ptw_status { get; set; }
@@ -359,10 +358,10 @@ namespace CMMSAPIs.Models.MC
         public int ptw_id { get; set; }
         public string title { get; set; }
         public int cleaningType { get; set; }
-        public dynamic waterused { get; set; }
+        public dynamic waterUsed { get; set; }
         public dynamic Scheduled_Qnty { get; set; }
         public dynamic Actual_Qnty { get; set; }
-        public dynamic Abondend { get; set; }
+        public dynamic abandoned { get; set; }
         public string Remark { get; set; }
         public dynamic Deviation { get; set; }
         public dynamic Time_taken { get; set; }
