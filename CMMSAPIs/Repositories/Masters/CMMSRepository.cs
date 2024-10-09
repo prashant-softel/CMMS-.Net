@@ -1479,7 +1479,7 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             if (result.total != result.pending + result.completed + result.created + result.rejected + result.assigned)
@@ -1712,7 +1712,7 @@ namespace CMMSAPIs.Repositories.Masters
 
 
             result.total = itemList.Count;
-            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED).ToList().Count;
+            result.completed = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_COMPLETED).ToList().Count;
             //result.pending = result.total - itemList.Where(x => x.latestJCPTWStatus != (int)CMMS.CMMS_Status.PTW_APPROVED).ToList().Count;
             result.pending = result.total - result.completed;
             result.item_list = itemList;
