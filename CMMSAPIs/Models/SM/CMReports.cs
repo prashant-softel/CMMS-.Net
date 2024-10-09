@@ -318,6 +318,7 @@ namespace CMMSAPIs.Models.SM
         public decimal inward { get; set; }
         public decimal outward { get; set; }
         public int min_available_qty { get; set; }
+        public dynamic devation { get; set; }
         public decimal act_available_qty { get; set; }
     }
 }

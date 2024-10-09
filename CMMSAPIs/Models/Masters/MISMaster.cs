@@ -1094,13 +1094,14 @@ namespace CMMSAPIs.Models.Masters
         public dynamic month { get; set; }
         public dynamic month_id { get; set; }
 
-        public int FatalIncidents { get; set; }
-        public int LostTimeInjuries { get; set; }
-        public int MedicalTreatmentInjuries { get; set; }
-        public int FirstAidIncidents { get; set; }
-        public int FireIncidents { get; set; }
-        public int NearMisses { get; set; }
-        public int ManDaysLost { get; set; }
+        public dynamic FatalIncidents { get; set; }
+        public dynamic LostTimeInjuries { get; set; }
+        public dynamic MedicalTreatmentInjuries { get; set; }
+        public dynamic FirstAidIncidents { get; set; }
+        public dynamic FireIncidents { get; set; }
+        public dynamic NearMisses { get; set; }
+        public dynamic ManDaysLost { get; set; }
+        public dynamic ManDaysLost_After_incident { get; set; }
         public decimal CostOfAccidents { get; set; }
     }
 
