@@ -443,11 +443,11 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             if (moduleType == cleaningType.ModuleCleaning)
             {
-                 value = "moduleQuantity";
+                value = "moduleQuantity";
             }
             else if (moduleType == cleaningType.Vegetation)
             {
-                 value = "area";
+                value = "area";
             }
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
@@ -456,9 +456,9 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             statusOut += $"ELSE 'Invalid Status' END";
 
             string myQuery1 = $"select f.name as sitename,mp.cleaningType as cleaningType,CASE mp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic' else 'Wet 'end as cleaningTypeName ,  cls.waterUsed as waterUsed,mc.id as executionId,mp.title,mc.planId,mc.status,mc.abandonedAt as abandoned_done_date," +
-                              $" CONCAT(assignedToUser.firstName, assignedToUser.lastName) as responsibility , mc.startDate as scheduledDate, mc.endedAt as doneDate, " +
-                              $" SUM(css.{value}) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, ( SUM(css.{value} - sub2.no_of_cleaned))  as Deviation , Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as abandoned , " +
-                              $" CASE  WHEN mc.abandonedAt IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, mc.abandonedAt, mc.startDate)  ELSE TIMESTAMPDIFF(MINUTE,mc.endedAt, mc.startDate) END as Time_taken ,  mc.reasonForAbandon as Remark,  " +
+                              $" CONCAT(assignedToUser.firstName, assignedToUser.lastName) as responsibility , mc.startDate as scheduledDate, mc.abandonApprovedAt as doneDate, " +
+                              $" SUM(css.{value}) as  Scheduled_Qnty ,sub2.no_of_cleaned as Actual_Qnty, Case When mc.abandonedById >0 THEN 'yes' ELSE 'no' END as abandoned , " +
+                              $"  mc.reasonForAbandon as Remark ,  " +
                               $" mc.prevTaskDoneDate as lastDoneDate,freq.name as frequency,mc.noOfDays, {statusOut} as status_short" +
                               $" from cleaning_execution as mc left join cleaning_plan as mp on mp.planId = mc.planId " +
                               $" LEFT JOIN (SELECT executionId, SUM({value}) AS no_of_cleaned FROM cleaning_execution_items where cleanedById>0 GROUP BY executionId) sub2 ON mc.id = sub2.executionId " +
@@ -469,8 +469,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                               $"LEFT JOIN users as assignedToUser ON assignedToUser.id = mc.assignedTo " +
                               $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
                               $" where mc.moduleType = {(int)moduleType} ";
-
-
             if (facilityId != null)
             {
 
@@ -485,6 +483,16 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
 
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
+            Parallel.ForEach(_ViewMCTaskList, report =>
+            {
+                if (report.doneDate != null && report.doneDate != DateTime.MinValue)
+                {
+                    TimeSpan timeDifference = report.doneDate - report.scheduledDate;
+                    report.Time_taken = timeDifference.TotalHours;
+                }
+
+                report.Deviation = report.Actual_Qnty - report.Scheduled_Qnty;
+            });
             foreach (var ViewMCTaskList in _ViewMCTaskList)
             {
                 if (ViewMCTaskList != null && ViewMCTaskList.doneDate != null)
