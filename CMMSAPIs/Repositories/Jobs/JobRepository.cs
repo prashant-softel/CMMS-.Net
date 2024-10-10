@@ -7,7 +7,6 @@ using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
@@ -339,11 +338,11 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             ////get equipmentCat list
-            /*string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
+            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
                 "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id " +
                 "WHERE job.id =" + job_id;
             List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
-*/
+
             //get workingArea_name list 
             string myQuery2 = "SELECT asset.id as id, asset.name as name FROM assets as asset " +
              "JOIN jobmappingassets as mapAssets ON mapAssets.assetId  =  asset.id  JOIN jobs as job ON mapAssets.jobId = job.id WHERE job.id =" + job_id;
@@ -418,11 +417,11 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             //get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
+            /*string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
                 "FROM assetcategories as asset_cat" +
                 " where asset_cat.id in ( select distinct equipmentCategoryId from " +
                 "jobworktypes where id in (" + String.Join(",", _WorkType.Select(x => x.id).ToList()) + "));";
-            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);*/
 
             _ViewJobList[0].equipment_cat_list = _equipmentCatList;
             _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;

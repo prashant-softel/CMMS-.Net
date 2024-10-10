@@ -293,16 +293,19 @@ namespace CMMSAPIs.Repositories.Masters
         */
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
-            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status, course_name, ScheduleDate, case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End  as TrainingCompany , Trainer, Mode as mode,  Venue , " +
-                $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, c.Duration_in_Minutes ,cc.name as course_Category ,tg.name as targeted_group from  mis_training_schedule " +
-                $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
-                $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
-                $" LEFT JOIN mis_targeted_group as tg on tg.id = c.Targated_group_id " +
-                $" where mis_training_schedule.facility_id={facility_id} ";
+            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status_code, course_name, " +
+                            $"ScheduleDate, case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End  as TrainingCompany , " +
+                            $"Trainer, Mode as mode,  Venue , " +
+                            $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, " +
+                            $"c.Duration_in_Minutes ,cc.name as course_Category ,tg.name as targeted_group from  mis_training_schedule " +
+                            $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
+                            $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
+                            $" LEFT JOIN mis_targeted_group as tg on tg.id = c.Targated_group_id " +
+                            $" where mis_training_schedule.facility_id={facility_id} ";
             List<GETSCHEDULE> Schedules = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
             foreach (var item in Schedules)
             {
-                string shortstatus = getshortstatus(item.status);
+                string shortstatus = getshortstatus(item.status_code);
                 item.short_status = shortstatus;
             }
             return Schedules;

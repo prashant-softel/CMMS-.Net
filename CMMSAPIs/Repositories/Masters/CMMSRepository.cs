@@ -1557,6 +1557,9 @@ namespace CMMSAPIs.Repositories.Masters
             /* int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8)).ToList().Count;
              int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;
              int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;*/
+            dynamic value = itemList[0].schedule_time - itemList[0].end_date;
+            double totalHours = ((TimeSpan)value).TotalHours;
+
             int completed_on_time = itemList
         .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
                 x.schedule_time.HasValue &&

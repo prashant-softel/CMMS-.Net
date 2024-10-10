@@ -16,6 +16,7 @@ namespace CMMSAPIs.Models.Permits
         public string PermitTypeName { get; set; }
         public string title { get; set; }
         public dynamic extendByMinutes { get; set; }
+        public int extend_request_status_id { get; set; }
         public string description { get; set; }
         public int facility_id { get; set; }
         public int blockId { get; set; }

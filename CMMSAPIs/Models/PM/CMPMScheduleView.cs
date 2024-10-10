@@ -113,6 +113,7 @@ namespace CMMSAPIs.Models.PM
         public int approved_by_id { get; set; }
         public string approved_by_name { get; set; }
         public DateTime approved_at { get; set; }
+        public int extend_request_status_id { get; set; }
         public int rejected_by_id { get; set; }
         public string closeRejectedbyName { get; set; }
         public DateTime rejected_at { get; set; }
@@ -154,6 +155,7 @@ namespace CMMSAPIs.Models.PM
         public DateTime? skip_date { get; set; }
         public string skip_rejected_by_name { get; set; }
         public DateTime? Skip_rejected_Date { get; set; }
+        public DateTime? permit_end_date { get; set; }
         public string skip_approved_by_name { get; set; }
         public DateTime? skip_approved_at { get; set; }
         public string facility_name { get; set; }

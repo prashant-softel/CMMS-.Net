@@ -265,8 +265,6 @@ namespace CMMSAPIs.Repositories.PM
             return scheduleViewList;
         }
 
-
-
         internal async Task<CMDefaultResponse> CancelPMTask(CMApproval request, int userID, string facilitytimeZone)
         {
             /*
@@ -344,7 +342,7 @@ namespace CMMSAPIs.Repositories.PM
 
             string myQuery = $"SELECT pm_task.id, CONCAT('PMTASK',pm_task.id) as task_code, pm_plan.id as plan_id,facilities.name as site_name, pm_task.category_id,cat.name as category_name, pm_plan.plan_name as plan_title, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name,  pm_task.closed_at , CONCAT(approvedBy.firstName,' ',approvedBy.lastName)  as approved_by_name, pm_task.approved_at ,CONCAT(rejectedBy.firstName,' ',rejectedBy.lastName)  as rejected_by_name, pm_task.rejected_at ,CONCAT(cancelledBy.firstName,' ',cancelledBy.lastName)  as cancelledbyName, pm_task.cancelled_at , pm_task.rejected_at ,CONCAT(startedBy.firstName,' ',startedBy.lastName)  as started_by_name, pm_task.started_at , pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, {statusQry} as status_short, " +
                                "  CONCAT(tbtDone.firstName,' ',tbtDone.lastName)  as tbt_by_name, Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1 end ptw_tbt_done,CASE when permit.startDate <  now() then 1 else 0 END as tbt_start, " +
-                               "  permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company ,timediff(permit.endDate,permit.startDate) as extendByMinutes ," +
+                               "  permittypelists.title as permit_type,ptwu.id as Employee_ID,CONCAT(ptwu.firstName,ptwu.lastName) as Employee_name,bus.name as Company ,permit.endDate as permit_end_date ," +
                                " passt.name as Isolated_equipments,CONCAT(tbtDone.firstName,' ',tbtDone.lastName) as TBT_conducted_by_name,permit.TBT_Done_At as TBT_done_time,permit.startDate Start_time,permit.description as workdescription ,pm_task.close_remarks as new_remark   ," +
                                " permit.status as status_PTW, CONCAT(isotak.firstName, ' ',isotak.lastName) as Isolation_taken, " +
                                " CONCAT(cancelledrejectedBy.firstName,' ',cancelledrejectedBy.lastName)  as cancelledrejectedbyName, " +
@@ -353,7 +351,7 @@ namespace CMMSAPIs.Repositories.PM
                                " CONCAT(closedBy.firstName,' ',closedBy.lastName)  as closed_by_name, " +
                                " CONCAT(statusBy.firstName,' ',statusBy.lastName)  as status_updated_by_name, " +
                                " CONCAT(deletedBy.firstName,' ',deletedBy.lastName)  as deletedbyName,  title.plan_name AS title, category.name AS categoryName, " +
-                               "facility.name AS facilityidbyName, CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName, " +
+                               "facility.name AS facilityidbyName, CONCAT(closeRejected.firstName,' ', closeRejected.lastName) AS closeRejectedbyName,permit.extend_request_status_id as extend_request_status_id , " +
                                "CONCAT(updatedBy.firstName,' ',updatedBy.lastName)  as updated_by_name, CONCAT(closeapprovedBy.firstName,' ',closeapprovedBy.lastName)  as closedApprovedByName,  CONCAT(statusBy.firstName,' ', statusBy.lastName) AS status_updated_by_name, " +
                                $"CASE WHEN permit.endDate < '{UtilsRepository.GetUTCTime()}' AND permit.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} THEN 1 ELSE 0 END as isExpired " +
                                " FROM pm_task " +
@@ -482,12 +480,20 @@ namespace CMMSAPIs.Repositories.PM
                     string startQry2 = $"UPDATE pm_task SET  status = {(int)CMMS.CMMS_Status.PM_CLOSE_APPROVED} WHERE id = {taskViewDetail[0].id};";
                     await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
                 }*/
+                bool check = (taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED ||
+              taskViewDetail[0].ptw_status == (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
+                if (taskViewDetail[0].permit_end_date < DateTime.Now && taskViewDetail[0].extend_request_status_id == 0 && check)
+                {
+                    taskViewDetail[0].status_short_ptw = "Permit Expired";
+                }
+                else
+                {
+                    taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
+                    taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
 
-                taskViewDetail[0].status_short = "Permit - " + PermitRepository.getShortStatus(taskViewDetail[0].ptw_status);
-                taskViewDetail[0].status_long = PermitRepository.LongStatus(taskViewDetail[0].ptw_status, await _permitRepo.GetPermitDetails(taskViewDetail[0].permit_id, facilitytimeZone));
-
-                string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
-                taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
+                    string _shortStatus_PTW = Status_PTW(taskViewDetail[0].ptw_status);
+                    taskViewDetail[0].status_short_ptw = _shortStatus_PTW;
+                }
             }
             else
             {

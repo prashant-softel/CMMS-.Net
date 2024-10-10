@@ -171,13 +171,14 @@ namespace CMMSAPIs.Models.MC
         public decimal Scheduled { get; set; }
         public decimal cleaned { get; set; }
         public decimal abandoned { get; set; }
-        public TimeSpan extendByMinutes { get; set; }
+        public DateTime extenddate { get; set; }
         public decimal pending { get; set; }
         public string remark_of_schedule { get; set; }
         public int waterUsed { get; set; }
         public DateTime start_date { get; set; }
         public DateTime end_date { get; set; }
         public dynamic tbt_start { get; set; }
+        public int extend_request_status_id { get; set; }
         public DateTime startDate { get; set; }
         public int permit_id { get; set; }
         public string permit_code { get; set; }
@@ -207,7 +208,7 @@ namespace CMMSAPIs.Models.MC
         public Int64 isExpired { get; set; }
         public int extendedById { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
-        
+
     }
     public class CMMCGetScheduleExecution
     {

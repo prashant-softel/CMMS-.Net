@@ -49,13 +49,13 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             { (int)CMMS.CMMS_Status.MC_PLAN_DELETED, "Deleted" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED, "Scheduled" },
             { (int)CMMS.CMMS_Status.MC_TASK_STARTED, "In Progress" },
-            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Completed" },
+            { (int)CMMS.CMMS_Status.MC_TASK_COMPLETED, "Closed" },
             { (int)CMMS.CMMS_Status.MC_TASK_ABANDONED, "Abandoned" },
             { (int)CMMS.CMMS_Status.MC_TASK_APPROVED, "Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_REJECTED, "Rejected" },
             { (int)CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW,"PTW_Linked" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Approved" },
-            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Reject" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_APPROVED,"Closed Approved" },
+            { (int)CMMS.CMMS_Status.MC_TASK_END_REJECTED,"Closed Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED,"Approved" },
             { (int)CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT,"Reject" },
             { (int)CMMS.CMMS_Status.MC_TASK_RESCHEDULED,"Reschedule" },
@@ -468,19 +468,17 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                               $"LEFT JOIN users as assignedToUser ON assignedToUser.id = mc.assignedTo " +
                               $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID" +
                               $" where mc.moduleType = {(int)moduleType} ";
-            if (facilityId != null)
-            {
-
-                myQuery1 += $" and mc.facilityId IN ({facilityId}) group by mc.id";
-            }
 
             if (selfView)
             {
 
                 myQuery1 += $" AND mc.assignedTo = {userId}";
             }
+            if (facilityId != null)
+            {
 
-
+                myQuery1 += $" and mc.facilityId IN ({facilityId}) group by mc.id order by mc.startDate;";
+            }
             List<CMMCTaskList> _ViewMCTaskList = await Context.GetData<CMMCTaskList>(myQuery1).ConfigureAwait(false);
             Parallel.ForEach(_ViewMCTaskList, report =>
             {
@@ -739,7 +737,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                       $"schedule.actualDay AS cleaningDay, " +
                       $"schedule.startedAt AS start_date, " +
                       $"schedule.endedAt AS end_date, " +
-                      $"permit.startDate AS startDate, timediff(permit.endDate,permit.startDate) as extendByMinutes , " +
+                      $"permit.startDate AS startDate, permit.endDate  as extenddate ,permit.extend_request_status_id as  extend_request_status_id ," +
                       $"CASE WHEN permit.startDate < NOW() THEN 1 ELSE 0 END AS tbt_start, " +
                       $"cp.cleaningType, " +
                       $"CASE WHEN cp.cleaningType = 1 THEN 'Wet' " +
@@ -794,8 +792,9 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             foreach (var item in _ViewSchedule)
             {
-                // check if permit expired
-                if (item.isExpired > 0 && item.extendedById == 0 && item.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
+                bool check = (item.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED ||
+              item.ptw_status == (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
+                if (item.extenddate < DateTime.Now && item.extend_request_status_id == 0 && check)
                 {
                     item.status_short_ptw = "Permit Expired";
                 }

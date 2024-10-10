@@ -1801,7 +1801,8 @@ namespace CMMSAPIs.Repositories.Audits
                  $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED}' , closed_by = {userId}, closed_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_remarks = '{request.comment}'" +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
-                response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit task with id : " + auditPlanList[0].id + " closed successfully.");
+                int task_id = auditPlanList[0].id;
+                response = new CMDefaultResponse(request.id, task_id, CMMS.RETRUNSTATUS.SUCCESS, "Audit task with id : " + auditPlanList[0].id + " closed successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED);
 
                 CMPMTaskView _AuditList = await GetTaskDetail(request.id, facilitytimeZone);
@@ -1874,6 +1875,7 @@ namespace CMMSAPIs.Repositories.Audits
                  $"set Status = '{(int)CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED}' , approved_by = {userId}, approved_at = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}', close_comment = '{request.comment}'" +
                  $"where ID = {request.id}";
                 var result = await Context.ExecuteNonQry<int>(UpdateQ);
+
                 response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Audit plan with task id : " + auditPlanList[0].id + " close approved successfully.");
                 await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.AUDIT_PLAN, request.id, 0, 0, request.comment, CMMS.CMMS_Status.AUDIT_CLOSED_APPROVED);
 
