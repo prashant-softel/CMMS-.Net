@@ -205,7 +205,9 @@ namespace CMMSAPIs.Models.MC
         public DateTime? updatedAt { get; set; }
         public string facilityidbyName { get; set; }
         public Int64 isExpired { get; set; }
+        public int extendedById { get; set; }
         public List<CMMCExecutionEquipment> equipments { get; set; }
+        
     }
     public class CMMCGetScheduleExecution
     {

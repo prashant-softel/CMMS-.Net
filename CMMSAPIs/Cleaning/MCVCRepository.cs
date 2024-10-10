@@ -277,11 +277,10 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
         }
 
-        public static string Status_PTW(int statusID)
+        public static string Status_PTW(CMMS.CMMS_Status statusID)
         {
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)statusID;
             string statusName = "";
-            switch (status)
+            switch (statusID)
             {
                 case CMMS.CMMS_Status.PTW_CREATED:
                     statusName = "Waiting for Approval";
@@ -682,25 +681,14 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         {
 
             string statusEx = "CASE ";
-            foreach (KeyValuePair<int, string> status in StatusDictionary)
-            {
-                statusEx += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
-            }
-            statusEx += $"ELSE 'Invalid Status' END";
-
             string statusSc = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
+                statusEx += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
                 statusSc += $"WHEN schedule.status = {status.Key} THEN '{status.Value}' ";
             }
+            statusEx += $"ELSE 'Invalid Status' END";
             statusSc += $"ELSE 'Invalid Status' END";
-
-            string statusEquip = "CASE ";
-            foreach (KeyValuePair<int, string> status in StatusDictionary)
-            {
-                statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
-            }
-            statusEquip += $"ELSE 'Invalid Status' END";
 
             string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate as scheduledDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
                $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
@@ -784,48 +772,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                       $"schedule.remark_of_schedule AS remark_of_schedule, " +
                       $"schedule.waterUsed, " +
                       $"schedule.remark, " +
-                      $"CASE " +
-                      $"WHEN schedule.status = 350 THEN 'Draft' " +
-                      $"WHEN schedule.status = 351 THEN 'Waiting for Approval' " +
-                      $"WHEN schedule.status = 353 THEN 'Approved' " +
-                      $"WHEN schedule.status = 352 THEN 'Rejected' " +
-                      $"WHEN schedule.status = 354 THEN 'Deleted' " +
-                      $"WHEN schedule.status = 360 THEN 'Scheduled' " +
-                      $"WHEN schedule.status = 361 THEN 'In Progress' " +
-                      $"WHEN schedule.status = 363 THEN 'Completed' " +
-                      $"WHEN schedule.status = 364 THEN 'Abandoned' " +
-                      $"WHEN schedule.status = 365 THEN 'Approved' " +
-                      $"WHEN schedule.status = 366 THEN 'Rejected' " +
-                      $"WHEN schedule.status = 370 THEN 'PTW_Linked' " +
-                      $"WHEN schedule.status = 381 THEN 'Approved' " +
-                      $"WHEN schedule.status = 382 THEN 'Reject' " +
-                      $"WHEN schedule.status = 383 THEN 'Approved' " +
-                      $"WHEN schedule.status = 384 THEN 'Reject' " +
-                      $"WHEN schedule.status = 385 THEN 'Reschedule' " +
-                      $"WHEN schedule.status = 369 THEN 'Abandoned Approved' " +
-                      $"WHEN schedule.status = 368 THEN 'Abandoned Rejected' " +
-                      $"WHEN schedule.status = 701 THEN 'Draft' " +
-                      $"WHEN schedule.status = 702 THEN 'Waiting for Approval' " +
-                      $"WHEN schedule.status = 704 THEN 'Approved' " +
-                      $"WHEN schedule.status = 703 THEN 'Rejected' " +
-                      $"WHEN schedule.status = 705 THEN 'Deleted' " +
-                      $"WHEN schedule.status = 721 THEN 'Scheduled' " +
-                      $"WHEN schedule.status = 722 THEN 'Started' " +
-                      $"WHEN schedule.status = 724 THEN 'Close - Waiting for Approval' " +
-                      $"WHEN schedule.status = 725 THEN 'Abandon - Waiting for Approval' " +
-                      $"WHEN schedule.status = 728 THEN 'Approved' " +
-                      $"WHEN schedule.status = 729 THEN 'Rejected' " +
-                      $"WHEN schedule.status = 730 THEN 'PTW Linked' " +
-                      $"WHEN schedule.status = 731 THEN 'Schedule - Approved' " +
-                      $"WHEN schedule.status = 732 THEN 'Schedule - Reject' " +
-                      $"WHEN schedule.status = 733 THEN 'Updated' " +
-                      $"WHEN schedule.status = 734 THEN 'Reassigned' " +
-                      $"WHEN schedule.status = 408 THEN 'Cleaned' " +
-                      $"WHEN schedule.status = 409 THEN 'Abandoned' " +
-                      $"WHEN schedule.status = 407 THEN 'Scheduled' " +
-                      $"WHEN schedule.status = 726 THEN 'Abandoned Rejected' " +
-                      $"WHEN schedule.status = 727 THEN 'Abandoned Approved' " +
-                      $"ELSE 'Invalid Status' END AS status_short " +
+                      $"{statusSc} AS status_short, " +
+                      $"permit.extendRequestById AS extendedById " +
                       $"FROM cleaning_execution_schedules AS schedule " +
                       $"LEFT JOIN cleaning_execution_items AS item ON schedule.scheduleId = item.scheduleId " +
                       $"LEFT JOIN permits AS permit ON permit.id = schedule.ptw_id " +
@@ -843,20 +791,18 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             CMMS.CMMS_Status _Status_long = (CMMS.CMMS_Status)(_ViewExecution[0].status);
             string _longStatus = getLongStatus(CMMS.CMMS_Modules.MC_TASK, _Status_long, _ViewExecution[0]);
             _ViewExecution[0].status_long = _longStatus;
+
             foreach (var item in _ViewSchedule)
             {
-                TimeSpan permitDuration = TimeSpan.Parse("08:00:00");
-
-                if (item.extendByMinutes == permitDuration)
+                // check if permit expired
+                if (item.isExpired > 0 && item.extendedById == 0 && item.ptw_status == (int)CMMS.CMMS_Status.PTW_APPROVED)
                 {
-                    item.status_short_ptw = "Permit Expire";
+                    item.status_short_ptw = "Permit Expired";
                 }
                 else
                 {
-                    CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
-                    item.status_short_ptw = Status_PTW((int)ptw_status1);
+                    item.status_short_ptw = Status_PTW((CMMS.CMMS_Status)item.ptw_status);
                 }
-
             }
             foreach (var view in _ViewExecution)
             {
@@ -874,28 +820,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
         }
         internal async Task<CMMCExecutionSchedule> GetScheduleDetails(int scheduleId, string facilitytimeZone)
         {
-
-            string statusEx = "CASE ";
-            foreach (KeyValuePair<int, string> status in StatusDictionary)
-            {
-                statusEx += $"WHEN ex.status = {status.Key} THEN '{status.Value}' ";
-            }
-            statusEx += $"ELSE 'Invalid Status' END";
-
             string statusSc = "CASE ";
             foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
                 statusSc += $"WHEN schedule.status = {status.Key} THEN '{status.Value}' ";
             }
             statusSc += $"ELSE 'Invalid Status' END";
-
-            string statusEquip = "CASE ";
-            foreach (KeyValuePair<int, string> status in StatusDictionary)
-            {
-                statusEquip += $"WHEN item.status = {status.Key} THEN '{status.Value}' ";
-            }
-            statusEquip += $"ELSE 'Invalid Status' END";
-
 
             string scheduleQuery = $"select schedule.scheduleId as scheduleId ,schedule.status ,schedule.executionId, schedule.moduleType, schedule.actualDay as cleaningDay ,schedule.startedAt as start_date,schedule.endedAt as end_date  , " +
                                               $" cp.cleaningType ,CASE cp.cleaningType WHEN 1 then 'Wet' When 2 then 'Dry' when 3 then 'Robotic'  else 'Wet '  end as cleaningTypeName, SUM({measure}) as scheduled , " +
@@ -941,8 +871,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
 
             foreach (var item in _ViewSchedule)
             {
-                CMMS.CMMS_Status ptw_status1 = (CMMS.CMMS_Status)(item.ptw_status);
-                item.status_short_ptw = Status_PTW((int)ptw_status1);
+                item.status_short_ptw = Status_PTW((CMMS.CMMS_Status)item.ptw_status);
             }
 
             return _ViewSchedule[0];
