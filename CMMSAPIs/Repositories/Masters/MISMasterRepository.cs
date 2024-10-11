@@ -2856,7 +2856,7 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 throw new ArgumentException("Invalid Observation Type");
             }
-            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.observation_description, CMMS.CMMS_Status.ASSIGNED, request.user_id);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.OBSERVATION, request.id, 0, 0, request.comment, CMMS.CMMS_Status.ASSIGNED, request.user_id);
 
             return new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "Assigned Observation ");
         }

@@ -6218,23 +6218,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\lenovo\\.nuget\\packages\\": {},
+    "C:\\Users\\hp\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\CMMS-.Net\\CMMS_API_Test\\CMMS_API_Test.csproj",
+      "projectUniqueName": "C:\\3 Octo test api\\CMMS-.Net\\CMMS_API_Test\\CMMS_API_Test.csproj",
       "projectName": "CMMS_API_Test",
-      "projectPath": "D:\\CMMS-.Net\\CMMS_API_Test\\CMMS_API_Test.csproj",
-      "packagesPath": "C:\\Users\\lenovo\\.nuget\\packages\\",
-      "outputPath": "D:\\CMMS-.Net\\CMMS_API_Test\\obj\\",
+      "projectPath": "C:\\3 Octo test api\\CMMS-.Net\\CMMS_API_Test\\CMMS_API_Test.csproj",
+      "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
+      "outputPath": "C:\\3 Octo test api\\CMMS-.Net\\CMMS_API_Test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\lenovo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -6249,8 +6249,8 @@
         "netcoreapp3.1": {
           "targetAlias": "netcoreapp3.1",
           "projectReferences": {
-            "D:\\CMMS-.Net\\CMMS_Services\\CMMS_Services.csproj": {
-              "projectPath": "D:\\CMMS-.Net\\CMMS_Services\\CMMS_Services.csproj"
+            "C:\\3 Octo test api\\CMMS-.Net\\CMMS_Services\\CMMS_Services.csproj": {
+              "projectPath": "C:\\3 Octo test api\\CMMS-.Net\\CMMS_Services\\CMMS_Services.csproj"
             }
           }
         }
@@ -6297,7 +6297,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.202\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "c:\\Program Files\\dotnet\\sdk\\5.0.416\\RuntimeIdentifierGraph.json"
       }
     }
   }

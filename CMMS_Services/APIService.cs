@@ -218,6 +218,19 @@ namespace CMMS_Services
             content.Add(apiHelper.GetContent(response));
             return content;
         }
+
+        public List<T> DeleteService(string endPoint, dynamic payload)
+        {
+            //SetToken();
+            var apiHelper = new APIHelper<T>(token);
+            var url = apiHelper.SetUrl(endPoint);
+            var request = apiHelper.CreateDeleteRequest(payload);
+            var response = apiHelper.GetResponse(url, request);
+            List<T> content = new List<T>();
+            content.Add(apiHelper.GetContent(response));
+            return content;
+        }
+
         public List<T> PatchServiceList(string endPoint, dynamic payload)
         {
             //SetToken();

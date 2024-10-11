@@ -519,10 +519,10 @@ namespace CMMSAPIs.Repositories.PM
                                $"SELECT LAST_INSERT_ID(); ";
 
             DataTable dt3 = await Context.FetchData(mainQuery).ConfigureAwait(false);
-            int id = Convert.ToInt32(dt3.Rows[0][0]);
+            int task_id = Convert.ToInt32(dt3.Rows[0][0]);
 
             string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                $"select distinct {id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
+                                $"select distinct {task_id} as task_id,planId as plan_id, assetId as Asset_id, checklistId as checklist_id,PP.plan_date as PM_Schedule_date,{(int)CMMS.CMMS_Status.PM_SCHEDULED} as status from pmplanassetchecklist  P inner join pm_plan PP on PP.Id = P.planId where planId = {request.id}";
             await Context.ExecuteNonQry<int>(scheduleQry);
 
             string setCodeNameQuery = "UPDATE pm_schedule " +
@@ -547,7 +547,7 @@ namespace CMMSAPIs.Repositories.PM
                 Console.WriteLine($"Failed to send PM Notification: {e.Message}");
             }
             //await CMMSNotification.sendNotification(CMMS.CMMS_Modules.WARRANTY_CLAIM, CMMS.CMMS_Status.APPROVED, new[] { _WCList[0].created_by }, _WCList[0]);
-            CMDefaultResponse response = new CMDefaultResponse(request.id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
+            CMDefaultResponse response = new CMDefaultResponse(request.id, task_id, CMMS.RETRUNSTATUS.SUCCESS, "PM Plan Approved Successfully");
             return response;
         }
 

@@ -6,6 +6,7 @@ using System.Text;
 using CMMSAPIs.Models;
 using CMMSAPIs.BS.Facility;
 using CMMSAPIs.Helper;
+using Newtonsoft.Json;
 
 namespace CMMS_API_Test
 {
@@ -34,13 +35,14 @@ namespace CMMS_API_Test
 
 
         //MRS
-        string EP_requestMRS = "/api/MRS/requestMRS";
+        string EP_requestMRS = "/api/MRS/CreateMRS";
         string EP_getMRSList = "/api/MRS/getMRSList";
         string EP_getMRSItems = "/api/MRS/getMRSItems";
         string EP_getMRSItemsBeforeIssue = "/api/MRS/getMRSItemsBeforeIssue";
         string EP_getMRSItemsWithCode = "/api/MRS/getMRSItemsWithCode";
         string EP_getMRSDetails = "/api/MRS/getMRSDetails";
         string EP_mrsApproval = "/api/MRS/mrsApproval";
+        string EP_mrsReject = "/api/MRS/mrsReject";
         string EP_getReturnDataByID = "/api/MRS/getReturnDataByID";
         string EP_getAssetTypeByItemID = "/api/MRS/getAssetTypeByItemID";
         string EP_mrsReturn = "/api/MRS/mrsReturn";
@@ -49,9 +51,15 @@ namespace CMMS_API_Test
         // GO
         string EP_getGOList = "/api/GO/GetGOList";
         string EP_getGOItemByID = "/api/GO/GetGOItemByID";
+        string EP_GetGODetailsByID = "/api/GO/GetGODetailsByID";
         string EP_createGO = "/api/GO/CreateGO";
         string EP_updateGO = "/api/GO/UpdateGO";
-        string EP_GOApproval = "/api/GO/GOApproval";
+        string EP_GOApproval = "/api/GO/ApproveGO";
+        string EP_RejectGO = "/api/GO/RejectGO";
+        string EP_UpdateGOReceive = "/api/GO/UpdateGOReceive";
+        string EP_ApproveGOReceive = "/api/GO/ApproveGOReceive";
+        string EP_RejectGOReceive = "/api/GO/RejectGOReceive";
+        string EP_CloseGO = "/api/GO/CloseGO";
         string EP_withdrawGO = "/api/GO/WithdrawGO";
         string EP_GetPurchaseData = "/api/GO/GetPurchaseData";
         string EP_getPurchaseDetailsByID = "/api/GO/getPurchaseDetailsByID";
@@ -258,51 +266,65 @@ namespace CMMS_API_Test
         public void VerifyrequestMRS()
         {
             string payload = @"{
-                             ""isEditMode"":0,
-                             ""plant_ID"":1,
-                             ""requested_by_emp_ID"":1,
-                             ""requestd_date"":""2023-03-03"",
-                             ""flag"":1,
-                             ""setAsTemplate"":3,
-                             ""equipments"":[{
-                                 ""equipmentID"":12,
-                                 ""approval_required"":1,
-                                 ""asset_type_ID"":10,
-                                 ""asset_code"":""M0001""
-                             }]
-                        }";
+                                  ""ID"": 0,
+                                  ""to_actor_id"": 205,
+                                  ""to_actor_type_id"": 3,
+                                  ""from_actor_id"": 1,
+                                  ""from_actor_type_id"": 2,
+                                  ""activity"": ""Switchgear Quarterly Check"",
+                                  ""facility_ID"": 1,
+                                  ""isEditMode"": 0,
+                                  ""remarks"": ""rererere"",
+                                  ""setAsTemplate"": """",
+                                  ""whereUsedType"": 27,
+                                  ""whereUsedRefID"": 205,
+                                  ""cmmrsItems"": [
+                                      {
+                                          ""issued_qty"": 0,
+                                          ""requested_qty"": 3,
+                                          ""asset_code"": ""S423741003"",
+                                          ""asset_type_ID"": 1,
+                                          ""asset_item_ID"": 83,
+                                          ""id"": 83,
+                                          ""available_qty"": 5,
+                                          ""serial_number"": null
+                                      }
+                                  ]
+                              }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = ptwService.CreateItem(EP_requestMRS, payload);
             string responseMessage = response.message;
             Assert.AreEqual("Request has been submitted.", responseMessage);
+
         }
 
         [TestMethod]
         public void VerifygetMRSList()
         {
-            int plant_ID = 1;
-            int emp_id = 1;
-            DateTime toDate = Convert.ToDateTime("2023-04-01");
-            DateTime fromDate = Convert.ToDateTime("2022-01-01");
+            var facilityID = 1; 
+            var emp_id = 1;  
+            var fromDate = "2024-09-09";
+            var toDate = "2024-09-16";
+            
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
-            var response = ptwService.GetItemList(EP_getMRSList + "?plant_ID=" + plant_ID + "&emp_id=" + emp_id + "&toDate=" + toDate + "&fromDate=" + fromDate);
+            var response = ptwService.GetItemList(EP_getMRSList + "?facility_ID=" + facilityID + "&emp_id=" + emp_id + "&toDate=" + toDate + "&fromDate=" + fromDate);
             int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);
+            Assert.AreEqual(ListCount, 6);
         }
 
         [TestMethod]
         public void VerifygetMRSItems()
         {
-            int ID = 1;
+            int ID = 100;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
             var response = ptwService.GetItemList(EP_getMRSItems + "?ID=" + ID);
             int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);
+            Assert.AreEqual(ListCount, 10);
         }
         [TestMethod]
         public void VerifygetMRSItemsBeforeIssue()
         {
-            int ID = 1;
+            int ID = 100;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
             var response = ptwService.GetItemList(EP_getMRSItemsBeforeIssue + "?ID=" + ID);
             int ListCount = response.Count;
@@ -320,47 +342,49 @@ namespace CMMS_API_Test
         [TestMethod]
         public void VerifygetMRSDetails()
         {
-            int ID = 1;
+            var id = 189;
+            var facilityID = 1;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
-            var response = ptwService.GetItemList(EP_getMRSDetails + "?ID=" + ID);
-            int ListCount = response.Count;
-            Assert.AreEqual(ListCount, 1);
+            var response = ptwService.GetItem(EP_getMRSDetails + "?ID=" + id + "&facility_id=" + facilityID);
+            Assert.IsNotNull(response);
+            Assert.AreEqual(response.ID, id);
+            Assert.AreEqual(response.whereUsedTypeName, "PMTASK");
+            Assert.AreEqual(response.approver_name, "Admin HFE");
         }
 
         [TestMethod]
         public void VerifymrsApproval()
         {
             string payload = @"{
-                                ""ID"":10,
-                                ""isEditMode"":0,
-                                ""plant_ID"":1,
-                                ""requested_by_emp_ID"":1,
-                                ""requestd_date"":""2023-03-03"",
-                                ""flag"":1,
-                                ""setAsTemplate"":3,
-                                ""asset_item_ID"":4,
-                                ""approval_status"":2,
-                                ""return_remarks"":""Testing"",
-                                ""equipments"":[{
-                                    ""id"":4,
-                                    ""equipmentID"":12,
-                                    ""approval_required"":1,
-                                    ""asset_type_ID"":10,
-                                    ""asset_code"":""M0001"",
-                                    ""qty"":10,
-                                    ""issued_qty"":15 
-                                }]
+                                ""ID"":131,
+                                ""comment"": ""MRS approval for MRS 131""
+                                
+                               
+                               
                         }";
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
             var response = ptwService.CreateItem(EP_mrsApproval, payload);
             string responseMessage = response.message;
-            Assert.AreEqual("MRS Request Approved", responseMessage);
+            Assert.AreEqual("Status updated.", responseMessage);
+        }
+
+        [TestMethod]
+        public void VerifymrsReject()
+        {
+            string payload = @"{
+                                ""ID"":180,
+                                ""comment"": ""MRS reject for MRS 131""
+                        }";
+            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.Utils.CMDefaultResponse>();
+            var response = ptwService.CreateItem(EP_mrsReject, payload);
+            string responseMessage = response.message;
+            Assert.AreEqual("Status updated.", responseMessage);
         }
 
         [TestMethod]
         public void VerifygetReturnDataByID()
         {
-            int ID = 1;
+            int ID = 100;
             var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.SM.CMMRS>();
             var response = ptwService.GetItemList(EP_getReturnDataByID + "?ID=" + ID);
             int ListCount = response.Count;
@@ -428,26 +452,10 @@ namespace CMMS_API_Test
             Assert.AreEqual("MRS Request Approved", responseMessage);
         }
 
-        // GOODS ORDER API'S
+        
 
         [TestMethod]
-        public void VerifygetGOList()
-        {
-            int plantID = 45;
-            string fromDate = "2001-01-01";
-            string toDate = "2023-05-14";
-            var ptwService = new CMMS_Services.APIService<CMMSAPIs.Models.GO.CMGO>();
-            var response = ptwService.GetItemList(EP_getGOList + "?plantID=" + plantID + "&fromDate=" + fromDate + "&toDate=" + toDate);
-            int vendorID = response[0].vendorID;
-            int status = response[0].status;
-            //string generatedBy = response[0].generatedBy;
-            Assert.AreEqual(vendorID, 177);
-            Assert.AreEqual(status, 2);
-            //Assert.AreEqual(generatedBy, "Jagatpal Singh");
-        }
-
-        [TestMethod]
-        public void VerifycreateGO()
+        public void createGO()
         {
             string payload = @"{
                                ""purchaseID"":7,
@@ -471,7 +479,7 @@ namespace CMMS_API_Test
             Assert.AreEqual(myNewItemId, responseForItem[0].id);
         }
         [TestMethod]
-        public void VerifyupdateGO()
+        public void updateGO()
         {
 
             string payload = @"{
@@ -494,7 +502,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void VerifyGOApproval()
+        public void GOApproval()
         {
 
             string payload = @"{
@@ -512,7 +520,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void VerifyWithdrawGO()
+        public void withdrawGO()
         {
 
             string payload = @"{
@@ -530,7 +538,7 @@ namespace CMMS_API_Test
         }
 
         [TestMethod]
-        public void VerifyGetAssetBySerialNo()
+        public void GetAssetBySerialNo()
         {
 
             string serial_number = "3000009";

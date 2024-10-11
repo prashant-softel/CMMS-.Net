@@ -11,3 +11,16 @@ D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CoreComp
 D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CopyComplete
 D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.dll
 D:\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.pdb
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.deps.json
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.dll
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMS_Services.pdb
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.dll
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.AssemblyReference.cache
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfoInputs.cache
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.AssemblyInfo.cs
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CoreCompileInputs.cache
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.csproj.CopyComplete
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.dll
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\obj\Debug\netcoreapp3.1\CMMS_Services.pdb
+C:\3 Octo test api\CMMS-.Net\CMMS_Services\bin\Debug\netcoreapp3.1\CMMSAPIs.pdb
