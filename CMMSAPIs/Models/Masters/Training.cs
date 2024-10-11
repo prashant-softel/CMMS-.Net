@@ -92,6 +92,7 @@ namespace CMMSAPIs.Models.Masters
         public string Venue { get; set; }
         public string Training_Agency { get; set; }
         public string HFE_Epmloyee { get; set; }
+        public int status_code { get; set; }
         public List<INTERNALEMPLOYEES> internal_employee { get; set; }
         public List<ExternalEmployee> external_employee { get; set; }
         public List<CMTRAININGFILE> uploadfile_ids { get; set; }

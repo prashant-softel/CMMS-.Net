@@ -1436,8 +1436,6 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             return response;
 
         }
-
-
         internal async Task<CMDefaultResponse> EndExecution(int executionId, int userId, string facilitytimeZone)
         {
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
@@ -1445,16 +1443,12 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             CMMS.CMMS_Modules module = CMMS.CMMS_Modules.MC_TASK;
             int status = (int)CMMS.CMMS_Status.MC_TASK_COMPLETED;
 
-
             // Determine status and module based on moduleType
             if (moduleType == cleaningType.Vegetation)
             {
                 module = CMMS.CMMS_Modules.VEGETATION_TASK;
                 status = (int)CMMS.CMMS_Status.VEG_TASK_COMPLETED; ;
             }
-
-
-
             string Query = $"Update cleaning_execution set status = {status},endedById={userId},endedAt='{UtilsRepository.GetUTCTime()}', status_updated_at = '{UtilsRepository.GetUTCTime()}'  where id = {executionId}; ";
             //$"Update cleaning_execution_schedules set status = {status} where scheduleId = {scheduleId}";
 

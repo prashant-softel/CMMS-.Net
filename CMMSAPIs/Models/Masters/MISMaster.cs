@@ -952,6 +952,7 @@ namespace CMMSAPIs.Models.Masters
         public int checklist_id { get; set; }
         public string title { get; set; }
         public int audit_id { get; set; }
+        public int assign_to { get; set; }
         public DateTime schedule_date { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
@@ -1015,9 +1016,12 @@ namespace CMMSAPIs.Models.Masters
         public string title { get; set; }
         public int id { get; set; }
         public int assign_to { get; set; }
+        public dynamic is_ptw { get; set; }
         public DateTime schedule_date { get; set; }
         public string assign_name { get; set; }
         public string checklist_number { get; set; }
+        public string status_short { get; set; }
+        public dynamic ptw_tbt_done { get; set; }
 
     }
     public class ProjectDetails
