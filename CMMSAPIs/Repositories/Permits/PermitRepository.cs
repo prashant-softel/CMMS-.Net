@@ -617,12 +617,13 @@ namespace CMMSAPIs.Repositories.Permits
 
             myQuery += "GROUP BY ptw.id ORDER BY ptw.id DESC;";
             //$" WHERE ptw.facilityId = { facility_id } and user.id = { userID } ";
+
             List<CMPermitList> _PermitList = await Context.GetData<CMPermitList>(myQuery).ConfigureAwait(false);
-            bool check = (_PermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED ||
-                          _PermitList[0].ptwStatus == (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
 
             foreach (var permit in _PermitList)
             {
+                bool check = (permit.ptwStatus == (int)CMMS.CMMS_Status.PTW_APPROVED ||
+                          permit.ptwStatus == (int)CMMS.CMMS_Status.PTW_EXTEND_REQUEST_APPROVE);
 
 
                 if (permit.endDatetime < DateTime.Now && permit.extend_request_status_id == 0 && check)

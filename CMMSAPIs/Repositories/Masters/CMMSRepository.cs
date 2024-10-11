@@ -459,7 +459,8 @@ namespace CMMSAPIs.Repositories.Masters
 
         internal async Task<List<CMFacility>> GetBlockList(int facility_id)
         {
-            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin FROM Facilities WHERE isBlock = 1 AND status = 1 AND parentId = " + facility_id;
+            string myQuery = "SELECT id, name, address, city, state, country, zipcode as pin " +
+                             "FROM Facilities WHERE isBlock = 1 AND status = 1 AND parentId = " + facility_id;
             List<CMFacility> _Facility = await Context.GetData<CMFacility>(myQuery).ConfigureAwait(false);
             return _Facility;
         }
@@ -1488,12 +1489,12 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
 
+            /*  int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.time_condition == 1).ToList().Count;
+              int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.time_condition == 0).ToList().Count;
+              int wo_backlog = itemList.Where(x => x.on_time_status == 2).ToList().Count;*/
 
-            /*int completed_on_time = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.on_time_status == 1).ToList().Count;
-            int wo_delay = itemList.Where(x => x.latestJCStatus == (int)CMMS.CMMS_Status.JC_CLOSE_APPROVED && x.on_time_status == 2).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.on_time_status == 0).ToList().Count;*/
-            int completed_on_time = itemList.Where(x => x.time_condition == 0).ToList().Count;
-            int wo_delay = itemList.Where(x => x.time_condition == 1).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.time_condition == 1).ToList().Count;
+            int wo_delay = itemList.Where(x => x.time_condition == 0).ToList().Count;
             int wo_backlog = itemList.Where(x => x.time_condition == 2).ToList().Count;
             if (result.total > 0)
             {
@@ -1520,6 +1521,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date,pm_task.closed_at as end_date, " +
                 $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
                 $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
+                $"CASE WHEN ABS(TIMESTAMPDIFF(HOUR, PM_task.schedule_time, pm_task.closed_at)) < 8 THEN 1    WHEN ABS(TIMESTAMPDIFF(HOUR, PM_task.schedule_time, pm_task.closed_at)) > 8 THEN 0   ELSE 2 END AS time_condition  ," +
                 $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status, IFNULL( PM_task.schedule_time, CAST('1900-01-01 00:00:00' AS DATETIME)) as schedule_time  " +
                    "FROM pm_task " +
                    $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
@@ -1557,32 +1559,29 @@ namespace CMMSAPIs.Repositories.Masters
             /* int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8)).ToList().Count;
              int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;
              int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;*/
-            dynamic value = itemList[0].schedule_time - itemList[0].end_date;
-            double totalHours = ((TimeSpan)value).TotalHours;
 
-            int completed_on_time = itemList
-        .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
-                x.schedule_time.HasValue &&
-                x.end_date.HasValue &&
-                (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8))
-        .ToList()
-        .Count();
+            int completed_on_time = itemList.Where(x => x.time_condition == 1).ToList().Count;
+            int wo_delay = itemList.Where(x => x.time_condition == 0).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.time_condition == 2).ToList().Count;
+            /* int completed_on_time = itemList
+         .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                 (totalHours <= 8))
+         .ToList()
+         .Count();
 
-            int wo_delay = itemList
-                .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
-                            x.schedule_time.HasValue &&
-                            x.end_date.HasValue &&
-                            (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8))
-                .ToList()
-                .Count();
+             int wo_delay = itemList
+                 .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                             (totalHours >= 8))
+                 .ToList()
+                 .Count();
 
-            int wo_backlog = itemList
-                .Where(x => x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
-                            x.schedule_time.HasValue &&
-                            x.end_date.HasValue &&
-                            (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8))
-                .ToList()
-                .Count();
+             int wo_backlog = itemList
+                 .Where(x => x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
+                             x.schedule_time.HasValue &&
+                             x.end_date.HasValue &&
+                             (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8))
+                 .ToList()
+                 .Count();*/
             if (result.total > 0)
             {
                 result.wo_on_time = completed_on_time;

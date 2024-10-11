@@ -186,11 +186,11 @@ namespace CMMSAPIs.Controllers.Inventory
         //[Authorize]
         [Route("GetInventoryCategoryList")]
         [HttpGet]
-        public async Task<IActionResult> GetInventoryCategoryList()
+        public async Task<IActionResult> GetInventoryCategoryList(int block_id)
         {
             try
             {
-                var data = await _InventoryBS.GetInventoryCategoryList();
+                var data = await _InventoryBS.GetInventoryCategoryList(block_id);
                 return Ok(data);
             }
             catch (Exception ex)

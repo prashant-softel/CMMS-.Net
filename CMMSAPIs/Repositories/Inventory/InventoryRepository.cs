@@ -2450,10 +2450,24 @@ namespace CMMSAPIs.Repositories.Inventory
             return new CMDefaultResponse(id, CMMS.RETRUNSTATUS.SUCCESS, "Asset Status Deleted");
         }
 
-        internal async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
+        internal async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList(int block_id)
         {
-            string myQuery = "SELECT id, name, description, calibrationStatus as calibration_required FROM assetcategories where status = 1";
-            List<CMInventoryCategoryList> _AssetCategory = await Context.GetData<CMInventoryCategoryList>(myQuery).ConfigureAwait(false);
+            List<CMInventoryCategoryList> _AssetCategory = new List<CMInventoryCategoryList>();
+
+            if (block_id > 0)
+            {
+                string myQuery2 = "SELECT asa.id as id, asa.name as name , a.description as description  FROM assetcategories as asa  " +
+                                  "LEFT join assets as a on a.categoryId=asa.id  " +
+                                  "LEFT join facilities as fa on a.blockId=fa.id  " +
+                                  $"where a.status = 1 and fa.id={block_id} group by asa.id ;";
+                _AssetCategory = await Context.GetData<CMInventoryCategoryList>(myQuery2).ConfigureAwait(false);
+            }
+            else
+            {
+                string myQuery = "SELECT id, name, description, calibrationStatus as calibration_required " +
+                               "FROM assetcategories where status = 1";
+                _AssetCategory = await Context.GetData<CMInventoryCategoryList>(myQuery).ConfigureAwait(false);
+            }
             return _AssetCategory;
         }
 
