@@ -125,7 +125,7 @@ namespace CMMSAPIs.Controllers.Grievance
             }
 
         [Route("CloseGrievance")]
-            [HttpDelete]
+            [HttpPut]
             public async Task<IActionResult> CloseGrievannce(CMGrievance request, string facilityId)
             {
                 try
