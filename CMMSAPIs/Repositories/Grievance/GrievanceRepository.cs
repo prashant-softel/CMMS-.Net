@@ -336,32 +336,22 @@ namespace CMMSAPIs.Repositories.Grievance
             List<int> idList = new List<int>();
 
 
-            string myQuery = "UPDATE jobs SET ";
-            myQuery += $"closedAt = '{UtilsRepository.GetUTCTime()}', closedBy = {userID}, status = {statusId}, WHERE id = {request.id};";
+            string myQuery = "UPDATE mis_grievance SET ";
+            myQuery += $"closedDate = '{UtilsRepository.GetUTCTime()}', actionTaken = '{request.actionTaken}', resolutionLevel = {request.resolutionLevel},  closedBy = {userID}, status_id = {statusId} WHERE id = {request.id};";
             await Context.ExecuteNonQry<int>(myQuery).ConfigureAwait(false);
 
 
-            idList.Add(retID);
+            /*idList.Add(retID);
             CMGrievance _GrievanceAdded = await GetGrievanceDetails(retID);
 
-            /*string _shortStatus = getShortStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.Grievance_ADDED);
-            _GrievanceAdded.statusShort = _shortStatus;*/
-            // String _shortStatus = getShortStatus(CMMS.CMMS_Modules.INVENTORY, CMMS.CMMS_Status.INVENTORY_ADDED);
-            // _inventoryAdded.status_short = _shortStatus;
+            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, new int[] { userID }, _GrievanceAdded);*/
 
-            //_GrievanceAdded.status_short = Convert.ToInt32(_shortStatus);
-
-            /* string _longStatus = getLongStatus(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, _GrievanceAdded);
-             _GrievanceAdded.statusLong = _longStatus;*/
-
-
-
-            await CMMSNotification.sendNotification(CMMS.CMMS_Modules.GRIEVANCE, CMMS.CMMS_Status.GRIEVANCE_CLOSED, new int[] { userID }, _GrievanceAdded);
+            await _utilsRepo.AddHistoryLog(CMMS.CMMS_Modules.GRIEVANCE, request.id, 0, 0, "Grievance Closed.", CMMS.CMMS_Status.GRIEVANCE_CLOSED, userID);
             //add to history
 
 
 
-            return new CMDefaultResponse(idList, retCode, strRetMessage);
+            return new CMDefaultResponse(request.id, retCode, "Grievance Closed");
         }
 
 
