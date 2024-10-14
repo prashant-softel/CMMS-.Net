@@ -26,7 +26,7 @@ namespace CMMSAPIs.BS.Inventory
         Task<CMDefaultResponse> AddInventoryStatus(CMInventoryStatusList request, int userID);
         Task<CMDefaultResponse> UpdateInventoryStatus(CMInventoryStatusList request, int userID);
         Task<CMDefaultResponse> DeleteInventoryStatus(int id);
-        Task<List<CMInventoryCategoryList>> GetInventoryCategoryList();
+        Task<List<CMInventoryCategoryList>> GetInventoryCategoryList(int block_id);
         Task<CMDefaultResponse> AddInventoryCategory(CMInventoryCategoryList request, int userID);
         Task<CMDefaultResponse> UpdateInventoryCategory(CMInventoryCategoryList request, int userID);
         Task<CMDefaultResponse> DeleteInventoryCategory(int id);
@@ -233,13 +233,13 @@ namespace CMMSAPIs.BS.Inventory
             }
         }
 
-        public async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList()
+        public async Task<List<CMInventoryCategoryList>> GetInventoryCategoryList(int block_id)
         {
             try
             {
                 using (var repos = new InventoryRepository(getDB, _environment))
                 {
-                    return await repos.GetInventoryCategoryList();
+                    return await repos.GetInventoryCategoryList(block_id);
 
                 }
             }

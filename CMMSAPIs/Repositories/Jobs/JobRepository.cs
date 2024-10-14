@@ -7,6 +7,7 @@ using CMMSAPIs.Repositories.Utils;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.Jobs
@@ -338,10 +339,10 @@ namespace CMMSAPIs.Repositories.Jobs
             _ViewJobList[0].breakdown_type = $"{(CMMS.CMMS_JobType)_ViewJobList[0].job_type}";
 
             ////get equipmentCat list
-            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
+            string myQuery12 = "SELECT asset_cat.id as id, asset_cat.name as name  FROM assetcategories as asset_cat " +
                 "JOIN jobmappingassets as mapAssets ON mapAssets.categoryId = asset_cat.id JOIN jobs as job ON mapAssets.jobId = job.id " +
                 "WHERE job.id =" + job_id;
-            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            List<CMequipmentCatList> _equipmentCatList1 = await Context.GetData<CMequipmentCatList>(myQuery12).ConfigureAwait(false);
 
             //get workingArea_name list 
             string myQuery2 = "SELECT asset.id as id, asset.name as name FROM assets as asset " +
@@ -417,13 +418,14 @@ namespace CMMSAPIs.Repositories.Jobs
                 }
             }
             //get equipmentCat list
-            /*string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
+            string myQuery1 = "SELECT asset_cat.id as id, asset_cat.name as name  " +
                 "FROM assetcategories as asset_cat" +
                 " where asset_cat.id in ( select distinct equipmentCategoryId from " +
                 "jobworktypes where id in (" + String.Join(",", _WorkType.Select(x => x.id).ToList()) + "));";
-            List<CMequipmentCatList> _equipmentCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);*/
-
-            _ViewJobList[0].equipment_cat_list = _equipmentCatList;
+            List<CMequipmentCatList> _WorktypeCatList = await Context.GetData<CMequipmentCatList>(myQuery1).ConfigureAwait(false);
+            _equipmentCatList1.AddRange(_WorktypeCatList);
+            _equipmentCatList1 = _equipmentCatList1.GroupBy(x => x.id).Select(g => g.First()).ToList();
+            _ViewJobList[0].equipment_cat_list = _equipmentCatList1;
             _ViewJobList[0].working_area_name_list = _WorkingAreaNameList;
             _ViewJobList[0].associated_permit_list = _AssociatedpermitList;
             _ViewJobList[0].work_type_list = _WorkType;
@@ -484,7 +486,8 @@ namespace CMMSAPIs.Repositories.Jobs
                 string qryAssetsIds = $"insert into jobmappingassets(jobId, assetId ) values ({newJobID}, {data});";
                 await Context.ExecuteNonQry<int>(qryAssetsIds).ConfigureAwait(false);
             }
-            string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE jobmappingassets.assetId = assets.id;";
+            string setCat = $"UPDATE jobmappingassets, assets SET jobmappingassets.categoryId = assets.categoryId WHERE " +
+                            $"jobmappingassets.assetId = assets.id;";
             await Context.ExecuteNonQry<int>(setCat).ConfigureAwait(false);
             if (request.WorkType_Ids == null)
                 request.WorkType_Ids = new List<int>();
