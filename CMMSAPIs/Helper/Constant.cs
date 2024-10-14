@@ -664,7 +664,7 @@ namespace CMMSAPIs.Helper
             EVAL_ASSIGNED,
             EVAL_REJECTED,
             EVAL_APPROVED,
-            //EVAL_LINKED_TO_PTW,
+            EVAL_LINKED_TO_PTW,
             EVAL_START,
             EVAL_CLOSED,
             EVAL_CLOSE_REJECTED,

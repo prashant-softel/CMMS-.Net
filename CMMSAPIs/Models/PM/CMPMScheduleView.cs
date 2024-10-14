@@ -95,6 +95,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMTaskView : CMPMTaskList
     {
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
+        public List<CMPMScheduleExecutionDetail> Sub_schedules { get; set; }
         public List<Materialconsumption> Material_consumption { get; set; }
         public List<CMEvaluationAuditList> map_checklist { get; set; }
         public List<SubEvalutionTask> Sub_PmTask { get; set; }

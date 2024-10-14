@@ -221,7 +221,13 @@ namespace CMMSAPIs.Repositories.PM
                 planListQry += $" AND category.id IN ( {category_id} )";
             if (frequency_id != null && category_id != "")
                 planListQry += $" AND frequency.id IN ( {frequency_id} )";
+            if (start_date != null && end_date != null)
 
+                if (start_date != null && end_date != null)
+                {
+                    planListQry += $"AND DATE_FORMAT(plan_date, '%Y-%m-%d') BETWEEN '{start_date.Value.ToString("yyyy-MM-dd")}' AND '{end_date.Value.ToString("yyyy-MM-dd")}' ";
+                }
+            //    planListQry += $" AND plan.plan_date >= '{start_date} and plan.plan_date =<'{end_date}' '";
             //planListQry += " ORDER BY plan.plan_date ASC";
 
             List<CMPMPlanList> plan_list = new List<CMPMPlanList>();

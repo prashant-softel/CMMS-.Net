@@ -1022,7 +1022,14 @@ namespace CMMSAPIs.Models.Masters
         public string checklist_number { get; set; }
         public string status_short { get; set; }
         public dynamic ptw_tbt_done { get; set; }
-
+        public string status_short_ptw { get; set; }
+        public int evalution_plan_id { get; set; }
+        public dynamic tbt_start { get; set; }
+        public int status_of { get; set; }
+        public int permit_id { get; set; }
+        public string permit_code { get; set; }
+        public int ptw_status { get; set; }
+        public int isolation { get; set; }
     }
     public class ProjectDetails
     {
