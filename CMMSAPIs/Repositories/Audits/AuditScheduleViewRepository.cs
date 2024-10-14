@@ -2,7 +2,6 @@
 using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.Jobs;
 using CMMSAPIs.Models.PM;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Jobs;
 using CMMSAPIs.Repositories.Utils;
@@ -61,14 +60,13 @@ namespace CMMSAPIs.Repositories.Audits
             CMPMScheduleObservation schedule = new CMPMScheduleObservation();
             schedule = request.schedules[0];
 
+            /* string executeQuery1 = $"SELECT id FROM pm_schedule WHERE id = {schedule.schedule_id} and task_id = {request.task_id};";
 
-            string executeQuery1 = $"SELECT id FROM pm_schedule WHERE id = {schedule.schedule_id} and task_id = {request.task_id};";
+             DataTable dtSch = await Context.FetchData(executeQuery1).ConfigureAwait(false);
 
-            DataTable dtSch = await Context.FetchData(executeQuery1).ConfigureAwait(false);
-
-            if (dtSch.Rows.Count == 0)
-                throw new MissingMemberException($"PM Schedule PMSCH{schedule.schedule_id} associated with PM Task PMTASK{request.task_id} not found");
-
+             if (dtSch.Rows.Count == 0)
+                 throw new MissingMemberException($"PM Schedule PMSCH{schedule.schedule_id} associated with PM Task PMTASK{request.task_id} not found");
+ */
             string executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id} and task_id = {request.task_id};";
 
             DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
@@ -114,6 +112,10 @@ namespace CMMSAPIs.Repositories.Audits
                         else if (typeValue == 1 || typeValue == 2)
                         {
                             CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                        }
+                        else if (typeValue == 4)
+                        {
+                            CPtypeValue = $" ,`range`={schedule_detail.input_range}";
                         }
                     }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";

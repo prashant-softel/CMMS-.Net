@@ -47,9 +47,9 @@ namespace CMMSAPIs.Repositories.NewFolder
             List<IncidentAccidentData> incidentAccidentData = await Context.GetData<IncidentAccidentData>(incident).ConfigureAwait(false);
 
             // Fetch HSE Training Data
-            /*string trainingdata = "";// $"SELECT totalTrainings, trainingManHours, mockDrillsConducted, specialTrainingsConducted FROM mis_trainingdata WHERE facility_id={facility_id};";
+            string trainingdata = $"SELECT totalTrainings, trainingManHours, mockDrillsConducted, specialTrainingsConducted FROM mis_trainingdata WHERE facility_id={facility_id};";
             List<HseTrainingData> hseTrainingData = await Context.GetData<HseTrainingData>(trainingdata).ConfigureAwait(false);
-
+            /*
             // Fetch HSE Inspection and Audit Data
             string auditdata = ""; //$"SELECT observationsRaised, observationsClosed, majorObservationsRaised, majorObservationsClosed FROM mis_audit WHERE facility_id={facility_id};";
             List<HseInspectionAuditData> hseInspectionAuditData = await Context.GetData<HseInspectionAuditData>(auditdata).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace CMMSAPIs.Repositories.NewFolder
             // Fetch Grievance Data
             string grievancedata = "";// $"SELECT totalGrievancesRaised, grievancesResolved, workforceGrievancesPending, localCommunityGrievancesResolved FROM mis_grievances WHERE facility_id={facility_id};";
             List<GrievanceData> grievanceData = await Context.GetData<GrievanceData>(grievancedata).ConfigureAwait(false);
-*/
+            */
 
 
             string SelectQ = $" select distinct mis_waterdata.id,plantId as facility_id,fc.name facility_name,MONTHNAME(date) as month_name,Month(date) as month_id,YEAR(date) as year, " +

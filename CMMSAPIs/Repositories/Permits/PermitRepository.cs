@@ -2,6 +2,7 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
+using CMMSAPIs.Repositories.Audits;
 using CMMSAPIs.Repositories.PM;
 using CMMSAPIs.Repositories.Utils;
 using System;
@@ -1043,7 +1044,7 @@ namespace CMMSAPIs.Repositories.Permits
                 $"left join assets on assets.id = pmassets.Asset_id " +
                 $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
                 $"left join users as user on user.id = pm.assigned_to " +
-                $"where pm.ptw_id = {permit_id} group by pm.id; ";
+                $"where pm.ptw_id = {permit_id} and pm.category_id!=0 group by pm.id; ";
 
             List<CMAssociatedPMList> _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
 
@@ -1053,6 +1054,25 @@ namespace CMMSAPIs.Repositories.Permits
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
                 string _shortStatus = PMScheduleViewRepository.getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 task.status_short = _shortStatus;
+            }
+            string pmlistsub = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, " +
+                $"plan.title  as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, " +
+                $"pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+                $"from pm_task as pm " +
+                $"left join st_audit as plan on pm.plan_id = plan.id " +
+                $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
+                $"left join assets on assets.id = pmassets.Asset_id " +
+                $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
+                $"left join users as user on user.id = pm.assigned_to " +
+                $"where pm.ptw_id = {permit_id} and category_id=0 group by pm.id; ";
+
+            List<CMAssociatedPMList> _AssociatedPMListForAudit = await Context.GetData<CMAssociatedPMList>(pmlistsub).ConfigureAwait(false);
+            foreach (var task in _AssociatedPMListForAudit)
+            {
+
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
+                string _shortStatus = AuditPlanRepository.getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
+                task.status_short_Audit = _shortStatus;
             }
 
             string closeQry = $"select `1`,`2`,`3`,`4`,closeOther from permits where id = {permit_id}  ";
@@ -1238,7 +1258,7 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstAssociatedPM = _AssociatedPMList;
             _PermitDetailsList[0].ListAssociatedMC = filteredMCList;
             _PermitDetailsList[0].ListAssociatedvc = filteredMCList1;
-
+            _PermitDetailsList[0]._AssociatedPMListForAudit = _AssociatedPMListForAudit;
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;

@@ -1020,9 +1020,9 @@ namespace CMMSAPIs.Models.Masters
         public DateTime schedule_date { get; set; }
         public string assign_name { get; set; }
         public string checklist_number { get; set; }
-        public string status_short { get; set; }
+        public string status_short_sub { get; set; }
         public dynamic ptw_tbt_done { get; set; }
-        public string status_short_ptw { get; set; }
+        public string status_short_ptw_sub { get; set; }
         public int evalution_plan_id { get; set; }
         public dynamic tbt_start { get; set; }
         public int status_of { get; set; }

@@ -278,6 +278,9 @@ namespace CMMSAPIs.Models.PM
         public int execution_id { get; set; }
         public string observation { get; set; }
         public int range { get; set; }
+        public int input_range { get; set; }
+        public int min { get; set; }
+        public int max { get; set; }
         public int cp_ok { get; set; }
         public int is_ok { get; set; }
         public int boolean { get; set; }
