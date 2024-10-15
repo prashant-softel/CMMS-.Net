@@ -15,7 +15,7 @@ namespace CMMSAPIs.BS.Grievance
 {
     public interface IGrievanceBS
     {
-        Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTimeZone);
+        Task<List<CMGrievance>> GetGrievanceList(string facilityId, string startDate, string endDate, int selfView, string facilityTimeZone);
         Task<CMGrievance> GetGrievanceDetails(int id, int facilityId, string facilityTimeZone);
         Task<CMDefaultResponse> CreateGrievance(CMCreateGrievance request, int userID, string facilityId, string facilityTimeZone, int status);
         Task<CMDefaultResponse> UpdateGrievance(CMUpdateGrievance request, int userID, string facilityId, string facilityTimeZone);
@@ -35,13 +35,13 @@ namespace CMMSAPIs.BS.Grievance
             _environment = environment;
         }
 
-        public async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilityTime)
+        public async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string startDate, string endDate, int selfView, string facilityTime)
         {
             try
             {
                 using (var repos = new GrievanceRepository(getDB, _environment))
                 {
-                    return await repos.GetGrievanceList(facilityId, status, startDate, endDate, selfView, facilityTime);
+                    return await repos.GetGrievanceList(facilityId, startDate, endDate, selfView, facilityTime);
                 }
             }
             catch (Exception ex)

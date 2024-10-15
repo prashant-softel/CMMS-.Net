@@ -26,6 +26,41 @@ namespace CMMSAPIs.Repositories.Grievance
             m_errorLog = new ErrorLog(iwebhostobj);
         }
 
+        private Dictionary<int, string> StatusDictionary = new Dictionary<int, string>()
+        {
+            { (int)CMMS.CMMS_Status.Grievance_ADDED, "Created" },
+            { (int)CMMS.CMMS_Status.GRIEVANCE_ONGOING, "Ongoing" },
+            { (int)CMMS.CMMS_Status.GRIEVANCE_CLOSED, "Closed" },
+            { (int)CMMS.CMMS_Status.Grievance_DELETED, "Deleted" }
+        };
+
+        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMGrievance InvObj)
+        {
+            string retValue = "Grievance";
+
+            switch (notificationID)
+            {
+                case CMMS.CMMS_Status.Grievance_ADDED:
+                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.grievanceType, InvObj.createdByName, InvObj.createdAt);
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
+                    retValue += String.Format("Asset {0} Closed by {1} at {2}</p>", InvObj.grievanceType, InvObj.closedByName, InvObj.closedAt);
+                    break;
+                case CMMS.CMMS_Status.Grievance_UPDATED:
+                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", InvObj.grievanceType, InvObj.updatedBy, InvObj.updatedAt);
+                    break;
+                case CMMS.CMMS_Status.Grievance_DELETED:
+                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
+                    break;
+                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
+                    retValue += String.Format("Asset {0} Ongoing by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
+                    break;
+                default:
+                    break;
+            }
+            return retValue;
+        }
+
         internal static string getShortStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
             string retValue;
@@ -54,34 +89,14 @@ namespace CMMSAPIs.Repositories.Grievance
             return retValue;
 
         }
-        internal string getLongStatus(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMGrievance InvObj)
+        internal async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string startDate, string endDate, int selfView, string facilitytimezone)
         {
-            string retValue = "Grievance";
-
-            switch (notificationID)
+            string statusOut = "CASE ";
+            foreach (KeyValuePair<int, string> status in StatusDictionary)
             {
-                case CMMS.CMMS_Status.Grievance_ADDED:
-                    retValue += String.Format("Asset {0} Added by {1} at {2}</p>", InvObj.grievanceType, InvObj.createdByName, InvObj.createdAt);
-                    break;
-                case CMMS.CMMS_Status.GRIEVANCE_CLOSED:
-                    retValue += String.Format("Asset {0} Closed by {1} at {2}</p>", InvObj.grievanceType, InvObj.closedByName, InvObj.closedAt);
-                    break;
-                case CMMS.CMMS_Status.Grievance_UPDATED:
-                    retValue += String.Format("Asset {0} Updated by {1} at {2}</p>", InvObj.grievanceType, InvObj.updatedBy, InvObj.updatedAt);
-                    break;
-                case CMMS.CMMS_Status.Grievance_DELETED:
-                    retValue += String.Format("Asset {0} Deleted by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
-                    break;
-                case CMMS.CMMS_Status.GRIEVANCE_ONGOING:
-                    retValue += String.Format("Asset {0} Ongoing by {1} at {2}</p>", InvObj.grievanceType, InvObj.deletedBy, InvObj.deletedAt);
-                    break;
-                default:
-                    break;
+                statusOut += $"WHEN g.status_id = {status.Key} THEN '{status.Value}' ";
             }
-            return retValue;
-        }
-        internal async Task<List<CMGrievance>> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView, string facilitytimezone)
-        {
+            statusOut += $"ELSE 'Invalid Status' END";
             // validate facilityid is not empty
             if (facilityId?.Length <= 0)
             {
@@ -89,19 +104,13 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             string myQuery =
-                "SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
-                ", g.createdAt, g.createdBy, g.updatedBy, g.description, t.status, t.addedBy, t.addedAt " +
-                ", t.updatedBy, t.updatedAt " +
-                " FROM mis_grievance g " +
-                " LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
-                " WHERE  g.facilityId IN (" + facilityId + ") and g.status = 1";
+                $"SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
+                $", g.createdAt, g.createdBy, g.updatedBy, g.description, {statusOut} as statusShort, t.status, t.addedBy, t.addedAt " +
+                $", t.updatedBy, t.updatedAt " +
+                $" FROM mis_grievance g " +
+                $" LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
+                $" WHERE  g.facilityId IN (" + facilityId + ") and g.status = 1";
 
-
-
-            if (status?.Length > 0)
-            {
-                myQuery += " AND g.status_id IN (" + (int)CMMS.CMMS_Status.Grievance_ADDED + ", " + (int)CMMS.CMMS_Status.GRIEVANCE_ONGOING + ")";
-            }
 
 
 
@@ -116,6 +125,8 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             List<CMGrievance> Grievance = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
+
+
             foreach (var detail in Grievance)
             {
                 detail.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.updatedAt);
@@ -197,7 +208,7 @@ namespace CMMSAPIs.Repositories.Grievance
 
                 //concern = request.concern;
 
-                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + request.resolutionLevel + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + status +"'); ";
+                qry += "('" + request.facilityId + "','" + request.grievanceType + "','" + request.concern + "','" + request.description + "','" + request.resolutionLevel + "','" + statusId + "','" + UtilsRepository.GetUTCTime() + "','" + userID + "','" + status + "'); ";
 
                 qry += "select LAST_INSERT_ID(); ";
 

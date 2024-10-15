@@ -32,12 +32,12 @@ namespace CMMSAPIs.Controllers.Grievance
         //[Authorize]
         [Route("GetGrievanceList")]
             [HttpGet]
-            public async Task<IActionResult> GetGrievanceList(string facilityId, string status, string startDate, string endDate, int selfView)
+            public async Task<IActionResult> GetGrievanceList(string facilityId, string startDate, string endDate, int selfView)
             {
              try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => facilityId == facilityId)?.timezone;
-                var data = await _Grievance.GetGrievanceList(facilityId, status, startDate, endDate, selfView, facilitytimeZone);
+                var data = await _Grievance.GetGrievanceList(facilityId, startDate, endDate, selfView, facilitytimeZone);
                 return Ok(data);
             }
                  catch (Exception ex)
