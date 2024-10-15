@@ -33,7 +33,15 @@ namespace CMMSAPIs.Repositories.Masters
              * Code goes here
             */
             string myQuery = "SELECT " +
-                                "checklist_number.id , checklist_number.checklist_number , checklist_number.checklist_type as type, checklist_number.status, checklist_number.created_by as createdById, CONCAT(created_user.firstName, ' ', created_user.lastName) as createdByName, checklist_number.created_at as createdAt, checklist_number.updated_by as updatedById, CONCAT(updated_user.firstName, ' ', updated_user.lastName) as updatedByName, checklist_number.updated_at as updatedAt, checklist_number.asset_category_id as category_id, asset_cat.name as category_name, checklist_number.frequency_id, frequency.name as frequency_name, checklist_number.manpower as manPower, checklist_number.duration, checklist_number.facility_id as facility_id, facilities.name as facility_name " +
+                                "checklist_number.id , checklist_number.checklist_number , checklist_number.checklist_type as type, " +
+                                "checklist_number.status, checklist_number.created_by as createdById,checklist_number.Sop_number as Sop_number , " +
+                                "CONCAT(created_user.firstName, ' ', created_user.lastName) as createdByName, " +
+                                "checklist_number.created_at as createdAt, checklist_number.updated_by as updatedById, " +
+                                "CONCAT(updated_user.firstName, ' ', updated_user.lastName) as updatedByName, " +
+                                "checklist_number.updated_at as updatedAt, checklist_number.asset_category_id as category_id, " +
+                                "asset_cat.name as category_name, checklist_number.frequency_id, frequency.name as frequency_name, " +
+                                "checklist_number.manpower as manPower, checklist_number.duration, checklist_number.facility_id as facility_id, " +
+                                "facilities.name as facility_name " +
                              "FROM " +
                                 "checklist_number " +
                              "LEFT JOIN " +
@@ -95,7 +103,7 @@ namespace CMMSAPIs.Repositories.Masters
                 string query = "INSERT INTO checklist_number(checklist_number, checklist_type, facility_id, status ,created_by ," +
                     " created_at , asset_category_id ,frequency_id ,manpower , duration,Sop_number)VALUES" +
                             $"('{request.checklist_number}', {request.type}, {request.facility_id}, 1, {userID}," +
-                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'a'); select LAST_INSERT_ID();";
+                            $"'{UtilsRepository.GetUTCTime()}',{request.category_id},{request.frequency_id}, {request.manPower},{request.duration},'{request.Sop_number}'); select LAST_INSERT_ID();";
 
                 DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
 
@@ -507,7 +515,7 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Category", new Tuple<string, Type>("category_name", typeof(string)) },
                 { "Man Power", new Tuple<string, Type>("manPower", typeof(int)) },
                 { "Duration", new Tuple<string, Type>("duration", typeof(int)) },
-                //{ "Sop_number", new Tuple<string, Type>("Sop_number", typeof(int)) },
+                { "Sop_number", new Tuple<string, Type>("Sop_number", typeof(string)) },
             };
 
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
@@ -674,14 +682,14 @@ namespace CMMSAPIs.Repositories.Masters
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
                             else if (Convert.ToDouble(newR["duration"]) == 0)
                                 m_errorLog.SetError($"[Checklist: Row {rN}] Duration cannot be empty or 0.");
-                            /* if (newR["Sop_number"].ToString() == "" && newR["Sop_number"] == DBNull.Value)
-                             {
-                                 m_errorLog.SetError($"[Sop_number: Row {rN}]  value cannot be empty.");
-                             }
-                             else
-                             {
-                                 newR["Sop_number"] = newR["Sop_number"].ToString();
-                             }*/
+                            if (newR["Sop_number"].ToString() != "" && newR["Sop_number"] != DBNull.Value)
+                            {
+                                newR["Sop_number"] = newR["Sop_number"].ToString();
+                            }
+                            else
+                            {
+                                newR["Sop_number"] = "0";
+                            }
                             dt2.Rows.Add(newR);
                             /*
                              { "Facility_Name", new Tuple<string, Type>("facility_name", typeof(string)) },
@@ -775,9 +783,9 @@ namespace CMMSAPIs.Repositories.Masters
                 { "Checkpoint Type", new Tuple<string, Type>("checkpoint_type", typeof(string)) },
                 { "Range Min", new Tuple<string, Type>("range_min", typeof(string)) },
                 { "Range Max", new Tuple<string, Type>("range_max", typeof(string)) },
-                /*{ "Risk Type", new Tuple<string, Type>("risk_type_id", typeof(string)) },
+                { "Risk Type", new Tuple<string, Type>("risk_type_id", typeof(string)) },
                 { "Type Observation", new Tuple<string, Type>("observation_type_id", typeof(string)) },
-                { "Cost Type", new Tuple<string, Type>("cost_typ_id", typeof(string)) },*/
+                { "Cost Type", new Tuple<string, Type>("cost_typ_id", typeof(string)) },
             };
             string query1 = $"SELECT file_path FROM uploadedfiles WHERE id = {file_id};";
             DataTable dt1 = await Context.FetchData(query1).ConfigureAwait(false);
@@ -897,13 +905,30 @@ namespace CMMSAPIs.Repositories.Masters
                             {
                                 m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid checkpoint type.");
                             }
-                            try
+                            if (Convert.ToString(newR["cost_typ_id"]) != null && Convert.ToString(newR["cost_typ_id"]) != "")
                             {
                                 newR["cost_typ_id"] = cost_type[Convert.ToString(newR["Cost Type"]).ToUpper()];
                             }
-                            catch
+                            else
                             {
-                                m_errorLog.SetError($"[Checkpoint: Row {rN}] Invalid Cost type.");
+                                newR["cost_typ_id"] = 0;
+                            }
+                            if (Convert.ToString(newR["observation_type_id"]) != null && Convert.ToString(newR["observation_type_id"]) != "")
+                            {
+                                newR["observation_type_id"] = cost_type[Convert.ToString(newR["Type Observation"]).ToUpper()];
+                            }
+                            else
+                            {
+                                newR["observation_type_id"] = 0;
+                            }
+
+                            if (Convert.ToString(newR["risk_type_id"]) != null && Convert.ToString(newR["risk_type_id"]) != "")
+                            {
+                                newR["risk_type_id"] = cost_type[Convert.ToString(newR["Risk Type"]).ToUpper()];
+                            }
+                            else
+                            {
+                                newR["risk_type_id"] = 0;
                             }
 
                             if (Convert.ToInt32(newR["failure_weightage"]) > 100)

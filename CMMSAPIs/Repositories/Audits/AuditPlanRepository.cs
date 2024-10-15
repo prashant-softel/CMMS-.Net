@@ -1329,8 +1329,13 @@ namespace CMMSAPIs.Repositories.Audits
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
             //statusQry += "ELSE 'Unknown Status' END";
 
-            string myQuery = $"SELECT pm_task.id,pm_task.category_id,'' as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code,st_audit.title as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, st_audit.status as status_plan, pm_task.Status status  " +
-                               "FROM pm_task " +
+            string myQuery = $"SELECT pm_task.id,pm_task.category_id,'' as category_name,  CONCAT('AuditTASK',pm_task.id) as task_code, " +
+                              $"st_audit.title as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, " +
+                              $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, " +
+                              $"closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, " +
+                              $"pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code, st_audit.status as status_plan, " +
+                              $"pm_task.Status status  " +
+                              "FROM pm_task " +
                                $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
                                $"left join st_audit  on pm_task.plan_id = st_audit.id " +
                                $"left join frequency as freq on pm_task.frequency_id = freq.id Where  module_type_id = " + module_type_id + "";
@@ -1478,25 +1483,27 @@ namespace CMMSAPIs.Repositories.Audits
             List<SubEvalutionTask> Sub_task = new List<SubEvalutionTask>();
 
             string task1 = "SELECT pme.checkpoint_title AS title,pm_task.id as subtask_id, ck.id as  id ,e.evalution_plan_id, " +
-                           "Case when permit.TBT_Done_By is null  then 0 else  permit.TBT_Done_By end ptw_tbt_done, " +
+                           "Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1  end ptw_tbt_done,  " +
                            $" pm_task.assigned_to as assign_to, pm_task.plan_date as  schedule_date, " +
-                           $" Case when permit.TBT_Done_By is null  then 0 else  permit.TBT_Done_By end   tbt_start, " +
+                           $" CASE when permit.startDate <  now() then 1 else 0 END as  tbt_start, " +
                            $"pm_task.PTW_id as permit_id,   " +
                            $"CONCAT('PTW',pm_task.PTW_id) as permit_code ,permit.status as ptw_status,  " +
                            $" permit.physicalIsolation as isolation ," +
                            $" pm_task.Status as status_of,{statusQry} as status_short , " +
                            $" CONCAT(usr.firstName,' ',usr.lastName)   as assign_name,ck.checklist_number as checklist_number, " +
-                           $" e.ptw_req as ptw_required ,  " +
-                           $"CASE WHEN  e.ptw_req=1 THEN 'YES'  else 'NO' END as is_ptw  " +
+                           $" ef.ptw_req as ptw_required ,  " +
+                           $"CASE WHEN  ef.ptw_req=1 THEN 'YES'  else 'NO' END as is_ptw  " +
                            $"FROM  pm_task as pm_task " +
                            $"LEFT join  pm_execution as pme on pm_task.id=pme.task_id  " +
                            $"LEFT join  checkpoint as ckp on pme.Check_Point_id=ckp.id " +
                            $"Left join evalution_checklist_map as e on e.evalution_plan_id = pm_task.plan_id  " +
                            $"left join permits as permit on pm_task.PTW_id = permit.id " +
                            $"LEFT join  checklist_number as ck on ck.id=ckp.check_list_id " +
+                           $"LEFT JOIN evalution_checklist_map AS ef ON ef.evalution_plan_id = pm_task.plan_id AND ck.id = ef.checklist_id " +
                            $"LEFT join  users as usr on usr.id=pm_task.assigned_to " +
                            $" WHERE pm_task.parent_task_id= {task_id} group by pm_task.id;";
             Sub_task = await Context.GetData<SubEvalutionTask>(task1).ConfigureAwait(false);
+
             if (Sub_task.Count > 0)
             {
                 foreach (var data in Sub_task)

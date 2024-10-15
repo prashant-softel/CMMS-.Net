@@ -1021,6 +1021,7 @@ namespace CMMSAPIs.Models.Masters
         public string assign_name { get; set; }
         public string checklist_number { get; set; }
         public string status_short_sub { get; set; }
+        public int ptw_required { get; set; }
         public dynamic ptw_tbt_done { get; set; }
         public string status_short_ptw_sub { get; set; }
         public int evalution_plan_id { get; set; }

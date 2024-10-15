@@ -92,7 +92,7 @@ namespace CMMSAPIs.Models.Permits
         public DateTime? extend_at { get; set; }
         public int extendRequestApprovedby_id { get; set; }
         public string extendRequestApprovedByName { get; set; }
-
+        public int pm_category { get; set; }
         public double latitude { get; set; }
         public double longitude { get; set; }
         public List<int> category_ids { get; set; }
@@ -116,7 +116,7 @@ namespace CMMSAPIs.Models.Permits
         public List<CMIsolationList> LstIsolation { get; set; }
         public List<CMAssociatedList> LstAssociatedJobs { get; set; }
         public List<CMAssociatedPMList> LstAssociatedPM { get; set; }
-        public List<CMAssociatedPMList> _AssociatedPMListForAudit { get; set; }
+
         public List<CMAssociatedListMC> ListAssociatedMC { get; set; }
         public List<CMAssociatedPMListVC> ListAssociatedvc { get; set; }
 
@@ -196,7 +196,7 @@ namespace CMMSAPIs.Models.Permits
         public string assignedTo { get; set; }
         public int status { get; set; }
         public string status_short { get; set; }
-        public string status_short_Audit { get; set; }
+
     }
     public class CMLoto
     {

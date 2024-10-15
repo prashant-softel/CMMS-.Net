@@ -96,7 +96,7 @@ namespace CMMSAPIs.Repositories.Jobs
 
             /*Your code goes here*/
             string myQuery = "SELECT " +
-                                 //                                 "job.id, job.facilityId, user.id, facilities.name as plantName, job.status as status, job.createdAt as jobDate, DATE_FORMAT(job.breakdownTime, '%Y-%m-%d') as breakdown_time, job.id as id, asset_cat.name as equipmentCat, asset.name as workingArea, job.title as jobDetails, workType.workTypeName as workType, permit.code as permitId, job.createdBy as raisedBy, CONCAT(user.firstName , ' ' , user.lastName) as assignedToName, user.id as assignedToId, IF(job.breakdownTime = '', 'Non Breakdown Maintenance', 'Breakdown Maintenance') as breakdownType , job.description as description" +
+
                                  "job.id, job.facilityId as facilityId, facilities.name as facilityName,mapAssets.categoryId, " +
                                  "group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentCat, " +
                                  "group_concat(distinct asset.name order by asset.id separator ', ') as workingArea, job.title as jobDetails, " +
@@ -143,7 +143,7 @@ namespace CMMSAPIs.Repositories.Jobs
                     DateTime start = DateTime.Parse(startDate);
                     DateTime end = DateTime.Parse(endDate);
                     if (DateTime.Compare(start, end) < 0)
-                        myQuery += " AND DATE_FORMAT(job.createdAt,'%Y-%m-%d') BETWEEN \'" + startDate + "\' AND \'" + endDate + "\'";
+                        myQuery += " AND DATE_FORMAT(job.createdAt,'%Y-%m-%d') BETWEEN \'" + start.ToString("yyyy-MM-dd") + "\' AND \'" + end.ToString("yyyy-MM-dd") + "\'";
                 }
 
                 if (selfView)

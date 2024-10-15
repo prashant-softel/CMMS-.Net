@@ -1518,7 +1518,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
 
             string myQuery = $"SELECT facilities.name as facility_name,pm_task.id as wo_number,pm_plan.plan_name as wo_decription, a.name as assetsname ,pm_plan.plan_name,pm_task.category_id,cat.name as asset_category, " +
-                $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_plan.plan_date as start_date,pm_task.closed_at as end_date, " +
+                $" CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, pm_task.plan_date as start_date,pm_task.closed_at as end_date, " +
                 $"freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, " +
                 $"CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
                 $"CASE WHEN ABS(TIMESTAMPDIFF(HOUR, PM_task.schedule_time, pm_task.closed_at)) < 8 THEN 1    WHEN ABS(TIMESTAMPDIFF(HOUR, PM_task.schedule_time, pm_task.closed_at)) > 8 THEN 0   ELSE 2 END AS time_condition  ," +

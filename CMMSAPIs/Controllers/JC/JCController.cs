@@ -27,7 +27,7 @@ namespace CMMSAPIs.Controllers.JC
         //[Authorize]
         [Route("GetJCList")]
         [HttpGet]
-        public async Task<IActionResult> GetJCList(string facility_id, bool self_view)
+        public async Task<IActionResult> GetJCList(string facility_id, bool self_view, string start_date, string end_date)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace CMMSAPIs.Controllers.JC
                     .FirstOrDefault(x => x.facility_id == firstFacilityId)?.timezone;
 
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _JCBS.GetJCList(facility_id, userID, self_view, facilitytimeZone);
+                var data = await _JCBS.GetJCList(facility_id, userID, self_view, start_date, end_date, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -2,7 +2,6 @@ using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Notifications;
 using CMMSAPIs.Models.Permits;
 using CMMSAPIs.Models.Utils;
-using CMMSAPIs.Repositories.Audits;
 using CMMSAPIs.Repositories.PM;
 using CMMSAPIs.Repositories.Utils;
 using System;
@@ -925,8 +924,10 @@ namespace CMMSAPIs.Repositories.Permits
                 throw new ArgumentException("Invalid Permit ID");
 
             string myQuery = $"SELECT ptw.id as insertedId,CONCAT(userTBT.firstName,' ',userTBT.lastName) as TBT_Done_By,ptw.extend_request_status_id as extend_request_status_id, TBT_Done_By as TBT_Done_By_id ,CONCAT('PTW ',ptw.id) as sitePermitNo,case when TBT_Done_At = '0000-00-00 00:00:00' then null else TBT_Done_At end as TBT_Done_At,CASE when ptw.endDate < '{UtilsRepository.GetUTCTime()}' and ptw.status = {(int)CMMS.CMMS_Status.PTW_APPROVED} then 1 else 0 END as isExpired, ptw.status as ptwStatus, {statusSubQuery} as current_status_short, ptw.startDate as start_datetime, ptw.endDate as end_datetime, facilities.id as facility_id, facilities.name as siteName, ptw.id as permitNo, ptw.permitNumber as sitePermitNo, permitType.id as permitTypeid, permitType.title as PermitTypeName, blocks.id as blockId, blocks.name as BlockName, ptw.permittedArea as permitArea, ptw.workingTime as workingTime, ptw.title as title, ptw.description as description, ptw.jobTypeId as job_type_id, jobType.title as job_type_name, ptw.TBTId as sop_type_id, sop.title as sop_type_name, user1.id as issuer_id, CONCAT(user1.firstName,' ',user1.lastName) as issuedByName,ud1.name as issuerDesignation,co1.name as issuerCompany,ptw.acceptedDate as request_datetime, ptw.issuedDate as issue_at, user6.id as issueRejectedby_id, CONCAT(user6.firstName,' ',user6.lastName) as issueRejectedByName,co6.name as issueRejecterCompany,ud6.name as issueRejecterDesignation, ptw.rejectedDate as issueRejected_at, user2.id as approver_id, CONCAT(user2.firstName,' ',user2.lastName) as approvedByName,ud2.name as approverDesignation,co2.name as approverCompany, ptw.approvedDate as approve_at,user7.id as rejecter_id, CONCAT(user7.firstName,' ',user7.lastName) as rejectedByName,ud7.name as rejecterDesignation,co7.name as rejecterCompany, ptw.rejectedDate as rejected_at, user3.id as requester_id, CONCAT(user3.firstName,' ',user3.lastName) as requestedByName,ud3.name as requesterDesignation,co3.name as requesterCompany, ptw.completedDate as close_at, user4.id as cancelRequestby_id, CONCAT(user4.firstName,' ',user4.lastName) as cancelRequestByName,ud4.name as cancelRequestByDesignation,co4.name as cancelRequestByCompany,user8.id as cancelRequestApprovedby_id, CONCAT(user8.firstName,' ',user8.lastName) as cancelRequestApprovedByName,ud8.name as cancelRequestApprovedByDesignation,co8.name as cancelRequestApprovedByCompany, user9.id as cancelRequestRejectedby_id, CONCAT(user9.firstName,' ',user9.lastName) as cancelRequestRejectedByName, ud9.name as cancelRequestRejectedByDesignation,co9.name as cancelRequestRejectedByCompany,user5.id as closedby_id, CONCAT(user5.firstName,' ',user5.lastName) as closedByName, ud5.name as closedByDesignation,co5.name as closedByCompany,ptw.cancelRequestDate as cancel_at,ptw.gridIsolation as is_grid_isolation_required,gridStartDate as grid_start_datetime,gridStopDate  as grid_stop_datetime, gridRemark as grid_remark,physicalIsolation as is_physical_iso_required , physicalIsoRemark as physical_iso_remark,lotoRequired as is_loto_required,ptw.TBT_Done_Check as TBT_Done_Check, lotoRemark as loto_remark,ptw.extendRequestby_id ,ptw.extendRequestApprovedby_id ," +
-              "CONCAT(userT1.firstName,' ',userT1.lastName) as extendRequestByName, TIMESTAMPDIFF(MINUTE, ptw.startDate, ptw.endDate) AS  extendByMinutes, ptw.startDate as startDate, CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start, CONCAT(user2.firstName,' ',user2.lastName) as extendRequestApprovedByName " +
+              "CONCAT(userT1.firstName,' ',userT1.lastName) as extendRequestByName, TIMESTAMPDIFF(MINUTE, ptw.startDate, ptw.endDate) AS  extendByMinutes,pmtask.category_id as pm_category , ptw.startDate as startDate, CASE when ptw.startDate <  now() then 1 else 0 END as tbt_start, CONCAT(user2.firstName,' ',user2.lastName) as extendRequestApprovedByName " +
               " FROM permits as ptw " +
+
+              "LEFT JOIN pm_task as pmtask ON ptw.id = pmtask.ptw_id " +
               "LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
               "LEFT JOIN permitjobtypelist as jobType ON ptw.jobTypeId = jobType.id " +
               "LEFT JOIN permittbtjoblist as sop ON ptw.TBTId = sop.id " +
@@ -1037,17 +1038,34 @@ namespace CMMSAPIs.Repositories.Permits
                 list.breakdownTime = await _utilsRepo.ConvertToUTCDTC(facilitytimeZone, list.breakdownTime);
 
             }
-            string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.plan_name as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+
+            List<CMAssociatedPMList> _AssociatedPMList = new List<CMAssociatedPMList>();
+            if (_PermitDetailsList[0].pm_category > 0)
+            {
+                string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.plan_name as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
                 $"from pm_task as pm " +
                 $"left join pm_plan as plan on pm.plan_id = plan.id " +
                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
                 $"left join assets on assets.id = pmassets.Asset_id " +
                 $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
                 $"left join users as user on user.id = pm.assigned_to " +
-                $"where pm.ptw_id = {permit_id} and pm.category_id!=0 group by pm.id; ";
+                $"where pm.ptw_id = {permit_id} and   pm.category_id!=0 group by pm.id; ";
 
-            List<CMAssociatedPMList> _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
+                _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
+            }
+            else
+            {
+                string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.title as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+                $"from pm_task as pm " +
+                $"left join st_audit as plan on pm.plan_id = plan.id " +
+                $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
+                $"left join assets on assets.id = pmassets.Asset_id " +
+                $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
+                $"left join users as user on user.id = pm.assigned_to " +
+                $"where pm.ptw_id = {permit_id} and   pm.category_id=0 group by pm.id; ";
 
+                _AssociatedPMList = await Context.GetData<CMAssociatedPMList>(pmlist).ConfigureAwait(false);
+            }
             foreach (var task in _AssociatedPMList)
             {
 
@@ -1055,25 +1073,25 @@ namespace CMMSAPIs.Repositories.Permits
                 string _shortStatus = PMScheduleViewRepository.getShortStatus(CMMS.CMMS_Modules.PM_PLAN, _Status);
                 task.status_short = _shortStatus;
             }
-            string pmlistsub = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, " +
-                $"plan.title  as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, " +
-                $"pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
-                $"from pm_task as pm " +
-                $"left join st_audit as plan on pm.plan_id = plan.id " +
-                $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
-                $"left join assets on assets.id = pmassets.Asset_id " +
-                $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
-                $"left join users as user on user.id = pm.assigned_to " +
-                $"where pm.ptw_id = {permit_id} and category_id=0 group by pm.id; ";
+            /* string pmlistsub = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, " +
+                 $"plan.title  as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, " +
+                 $"pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+                 $"from pm_task as pm " +
+                 $"left join st_audit as plan on pm.plan_id = plan.id " +
+                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +
+                 $"left join assets on assets.id = pmassets.Asset_id " +
+                 $"left join assetcategories as asset_cat on asset_cat.id = assets.categoryid " +
+                 $"left join users as user on user.id = pm.assigned_to " +
+                 $"where pm.ptw_id = {permit_id} and category_id=0 group by pm.id; ";
 
-            List<CMAssociatedPMList> _AssociatedPMListForAudit = await Context.GetData<CMAssociatedPMList>(pmlistsub).ConfigureAwait(false);
-            foreach (var task in _AssociatedPMListForAudit)
-            {
+             List<CMAssociatedPMList> _AssociatedPMListForAudit = await Context.GetData<CMAssociatedPMList>(pmlistsub).ConfigureAwait(false);
+             foreach (var task in _AssociatedPMListForAudit)
+             {
 
-                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
-                string _shortStatus = AuditPlanRepository.getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
-                task.status_short_Audit = _shortStatus;
-            }
+                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(task.status);
+                 string _shortStatus = AuditPlanRepository.getShortStatus(CMMS.CMMS_Modules.AUDIT_PLAN, _Status);
+                 task.status_short_Audit = _shortStatus;
+             }*/
 
             string closeQry = $"select `1`,`2`,`3`,`4`,closeOther from permits where id = {permit_id}  ";
             DataTable dt1 = await Context.FetchData(closeQry).ConfigureAwait(false);
@@ -1258,7 +1276,7 @@ namespace CMMSAPIs.Repositories.Permits
             _PermitDetailsList[0].LstAssociatedPM = _AssociatedPMList;
             _PermitDetailsList[0].ListAssociatedMC = filteredMCList;
             _PermitDetailsList[0].ListAssociatedvc = filteredMCList1;
-            _PermitDetailsList[0]._AssociatedPMListForAudit = _AssociatedPMListForAudit;
+
             _PermitDetailsList[0].LstCategory = _CategoryList;
             _PermitDetailsList[0].category_ids = _CategoryIDList;
             _PermitDetailsList[0].physical_iso_equips = _physical_iso_equips;

@@ -34,5 +34,6 @@
         public int updatedById { get; set; }
         public string updatedByName { get; set; }
         public dynamic updatedAt { get; set; }
+        public string Sop_number { get; set; }
     }
 }

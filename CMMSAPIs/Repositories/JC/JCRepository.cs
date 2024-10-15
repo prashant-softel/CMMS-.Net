@@ -107,7 +107,7 @@ namespace CMMSAPIs.Repositories.JC
 
         }
 
-        internal async Task<List<CMJCList>> GetJCList(string facility_id, int userID, bool self_view, string facilitytimeZone)
+        internal async Task<List<CMJCList>> GetJCList(string facility_id, int userID, bool self_view, string start_date, string end_date, string facilitytimeZone)
         {
             /* Return all field mentioned in JCListModel model
             *  tables are JobCards, Jobs, Permit, Users
@@ -130,13 +130,21 @@ namespace CMMSAPIs.Repositories.JC
             if (!string.IsNullOrEmpty(facility_id))
             {
                 myQuery1 += $"WHERE job.facilityId IN ({facility_id}) ";
-
-                if (self_view)
-                    myQuery1 += $"AND ( jc.JC_Added_by = {userID} OR job.assignedId = {userID}  ) ";
             }
             else
             {
                 throw new ArgumentException("Invalid Facility ID");
+            }
+            if (self_view)
+            {
+                myQuery1 += $"AND ( jc.JC_Added_by = {userID} OR job.assignedId = {userID}  ) ";
+            }
+            if (start_date != null && end_date != null)
+            {
+                DateTime start = DateTime.Parse(start_date);
+                DateTime end = DateTime.Parse(end_date);
+                if (DateTime.Compare(start, end) < 0)
+                    myQuery1 += " AND DATE_FORMAT(jc.JC_Date_Start,'%Y-%m-%d') BETWEEN \'" + start.ToString("yyyy-MM-dd") + "\' AND \'" + end.ToString("yyyy-MM-dd") + "\'";
             }
 
 
