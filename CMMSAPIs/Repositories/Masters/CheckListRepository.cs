@@ -290,9 +290,18 @@ namespace CMMSAPIs.Repositories.Masters
                                 "requirement, is_document_required, action_to_be_done, checkpoint.created_by as created_by_id," +
                                 " CONCAT(created_user.firstName,' ',created_user.lastName) as created_by_name, checkpoint.created_at, " +
                                 "checkpoint.updated_by as updated_by_id, CONCAT(updated_user.firstName,' ',updated_user.lastName) as updated_by_name, " +
-                                "CASE WHEN checkpoint.type_id=1 THEN 'PM' WHEN  checkpoint.type_id=2 THEN 'HOTO'  WHEN  checkpoint.type_id=3 THEN 'AUDIT' WHEN  checkpoint.type_id=4 THEN 'MIS' ELSE 'Unknown Type' END as type_name , " +
+                                "CASE WHEN checkpoint.type_id=1 THEN 'PM' " +
+                                "WHEN  checkpoint.type_id=2 THEN 'HOTO'  " +
+                                "WHEN  checkpoint.type_id=3 THEN 'AUDIT' " +
+                                "WHEN  checkpoint.type_id=4 THEN 'MIS' " +
+                                "ELSE 'Unknown Type' END as type_name , " +
                                 "checkpoint.updated_at, checkpoint.status ,checkpoint.failure_weightage,checkpoint.type_id as type, m.name AS type_of_observation, r.risktype AS risk_type, " +
-                                "CASE WHEN checkpoint.type = 1 then 'Bool'  WHEN checkpoint.type = 0 then 'Text' WHEN checkpoint.type = 2 then 'Range' ELSE 'Unknown Type' END as checkpoint_type , " +
+                                "CASE WHEN checkpoint.type = 1 then 'Bool'  " +
+                                "WHEN checkpoint.type = 0 then 'Text' " +
+                                "WHEN checkpoint.type = 2 then 'Range' " +
+                                "WHEN checkpoint.type = 3 then 'Input Range' " +
+                                "WHEN checkpoint.type = 4 then 'Three State Boolean' " +
+                                "ELSE 'Unknown Type' END as checkpoint_type , " +
                                 "CASE WHEN checkpoint.cost_type = 1 then 'capex'  WHEN checkpoint.cost_type = 2  then 'opex'  ELSE 'Empty' END as Cost_type_name ,checkpoint.cost_type as Cost_Type,  " +
                                 "checkpoint.min_range as min ,checkpoint.max_range as max " +
                              "FROM " +
@@ -357,7 +366,8 @@ namespace CMMSAPIs.Repositories.Masters
             foreach (CMCreateCheckPoint request in requestList)
             {
 
-                if (request.checkpoint_type.id != 2)
+
+                /*if (request.checkpoint_type.id != 2)
                 {
                     request.checkpoint_type.min = 0;
                     request.checkpoint_type.max = 0;
@@ -365,7 +375,22 @@ namespace CMMSAPIs.Repositories.Masters
                 if (request.checkpoint_type.id != 1)
                 {
                     request.checkpoint_type.id = 0;
+                }*/
+
+
+                if (request.checkpoint_type.id == 2 || request.checkpoint_type.id == 3)
+                {
+                    // If id == 2 or 3, keep min and max as provided
+                    // request.checkpoint_type.min and request.checkpoint_type.max will stay the same
                 }
+                else
+                {
+                    // For any other checkpoint type, set min and max to 0
+                    request.checkpoint_type.min = 0;
+                    request.checkpoint_type.max = 0;
+                }
+
+                
                 string query = "INSERT INTO checkpoint " +
                "(check_point, check_list_id, requirement, is_document_required, action_to_be_done, " +
                "failure_weightage, type, min_range, max_range,type_id ,created_by, created_at, status, " +
