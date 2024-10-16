@@ -92,8 +92,7 @@ namespace CMMS_API_Test
             Assert.AreEqual(payload.group_id, getItemResponse[0].group_id, "group_id should be match");
             Assert.AreEqual(payload.number_of_days, getItemResponse[0].number_of_days, "number_of_days should be match");
             Assert.AreEqual(payload.duration, getItemResponse[0].duration, "duration should be match");
-            Assert.AreEqual(payload.facility_id, getItemResponse[0].facility_id, "facility_id should be match");
-            
+            Assert.AreEqual(payload.facility_id, getItemResponse[0].facility_id, "facility_id should be match"); 
         }
 
 
@@ -103,7 +102,7 @@ namespace CMMS_API_Test
         {
             var payload = new CMMSAPIs.Models.Masters.CMTrainingCourse
             {
-                Id = 0,
+                Id = 2,
                 name = "FSD",
                 category_id = 2,
                 group_id = 1,
@@ -125,7 +124,7 @@ namespace CMMS_API_Test
             var getItem = new CMMS_Services.APIService<List<CMMSAPIs.Models.Masters.CMTrainingCourse>>();
             var getItemResponse = getItem.GetItem(EP_GetCourseDetailById + "?id=" + id);
 
-            Assert.AreEqual((int)CMMS.CMMS_Status.COURSE_CREATED, getItemResponse[0].status);
+            Assert.AreEqual((int)CMMS.CMMS_Status.COURSE_UPDATED, getItemResponse[0].status);
 
             Assert.AreEqual(payload.name, getItemResponse[0].name, "name should be match");
             Assert.AreEqual(payload.category_id, getItemResponse[0].category_id, "category_id should be match");
@@ -188,8 +187,6 @@ namespace CMMS_API_Test
             Assert.IsNotNull(response, "The API response should not be null.");
             Assert.AreEqual(schedule_id, response[0].ScheduleID, "The training ID should match.");
         }
-
-
 
 
 
