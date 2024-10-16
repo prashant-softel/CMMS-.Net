@@ -111,7 +111,7 @@ namespace CMMSAPIs.Repositories.Grievance
                 $" LEFT JOIN mis_m_grievancetype t ON g.grievanceType = t.id" +
                 $" WHERE  g.facilityId IN (" + facilityId + ") and g.status = 1";
 
-
+          
 
 
             if (!string.IsNullOrEmpty(startDate) && !string.IsNullOrEmpty(endDate))
@@ -125,6 +125,8 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             List<CMGrievance> Grievance = await Context.GetData<CMGrievance>(myQuery).ConfigureAwait(false);
+
+       
 
 
             foreach (var detail in Grievance)
@@ -216,6 +218,8 @@ namespace CMMSAPIs.Repositories.Grievance
                 DataTable dt = await Context.FetchData(qry).ConfigureAwait(false);
                 retID = Convert.ToInt32(dt.Rows[0][0]);
 
+                
+               
 
                 //idList.Add(retID);
                 try
@@ -464,7 +468,7 @@ namespace CMMSAPIs.Repositories.Grievance
                         local_community = true;
                     }
 
-                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && work_force)
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 1 && work_force)
                     {
                         forMonth.workforce_case_resolved++;
                         forMonth.total_number_of_grievances_resolved++;
@@ -479,7 +483,7 @@ namespace CMMSAPIs.Repositories.Grievance
                         forMonth.worforce_inspection_ongoing++;
                     }
 
-                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && local_community)
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 1 && local_community)
                     {
                         forMonth.local_cases_resolved++;
                         forMonth.total_number_of_grievances_resolved++;
@@ -494,15 +498,15 @@ namespace CMMSAPIs.Repositories.Grievance
                         forMonth.local_cases_inspection_ongoing++;
                     }
 
-                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 1)
+                    if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 1 && item.resolutionLevel == 1)
                     {
                         forMonth.resolved_at_l1++;
                     }
-                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 2)
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 1 && item.resolutionLevel == 2)
                     {
                         forMonth.resolved_at_l2++;
                     }
-                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 0 && item.resolutionLevel == 3)
+                    else if (item.statusId == (int)CMMS_Status.GRIEVANCE_CLOSED && item.status == 1 && item.resolutionLevel == 3)
                     {
                         forMonth.resolved_at_l3++;
                     }
