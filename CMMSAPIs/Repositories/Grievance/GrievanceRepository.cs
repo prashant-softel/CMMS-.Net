@@ -133,6 +133,7 @@ namespace CMMSAPIs.Repositories.Grievance
             {
                 detail.updatedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.updatedAt);
                 detail.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.createdAt);
+                detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
                 detail.deletedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.deletedAt);
                 //    detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
             }

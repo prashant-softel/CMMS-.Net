@@ -16,7 +16,6 @@ namespace CMMSAPIs.Models.Grievance
         public string type_description { get; set; }
         public string actionTaken { get; set; }
         public int resolutionLevel { get; set; }
-        public DateTime? closedDate { get; set; }
         public string closedBy { get; set; }
         public string closedByName { get; set; }
         public int createdBy { get; set; }
