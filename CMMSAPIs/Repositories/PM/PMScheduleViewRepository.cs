@@ -174,18 +174,21 @@ namespace CMMSAPIs.Repositories.PM
             //    statusQry += $"WHEN pm_schedule.status = {(int)status.Key} THEN '{status.Value}' ";
             //statusQry += "ELSE 'Unknown Status' END";
             //  
-            string myQuery = $"SELECT pm_task.id,pm_plan.id as plan_id, pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
-                               ",f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type " +
-                               " ,Isolation FROM pm_task " +
-                               $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
-                               $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
-                               $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
-                               $"left join permits as permit on pm_task.PTW_id = permit.id " +
-                               "left join facilities as f on f.id=pm_task.facility_id " +
-                               "LEFT JOIN permittypelists as permitType ON permitType.id = permit.typeId  " +
-                               "LEFT JOIN users as isotak ON isotak.id = permit.physicalIsolation " +
-                               $"left join frequency as freq on pm_task.frequency_id = freq.id " +
-                               $"where 1 ";
+            string myQuery = $"SELECT pm_task.id,pm_plan.id as plan_id, pm_task.category_id,cat.name as category_name,  CONCAT('PMTASK',pm_task.id) as task_code,   " +
+                             $"pm_plan.plan_name as plan_title,pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,   " +
+                             $"prev_task_done_date as last_done_date, closed_at as done_date, CONCAT(assignedTo.firstName,' ',assignedTo.lastName)  as assigned_to_name, pm_task.PTW_id as permit_id, " +
+                             $"CONCAT('PTW',pm_task.PTW_id) as permit_code,permit.status as ptw_status, PM_task.status " +
+                            ",f.name as Site_name,pm_task.started_at as start_date,pm_task.closed_at as close_time,CONCAT(isotak.firstName,isotak.lastName) as Isolation_taken,permitType.title as permit_type " +
+                            " ,Isolation FROM pm_task " +
+                            $"left join users as assignedTo on pm_task.assigned_to = assignedTo.id " +
+                            $"left join pm_plan  on pm_task.plan_id = pm_plan.id " +
+                            $"left join assetcategories as cat  on pm_task.category_id = cat.id " +
+                            $"left join permits as permit on pm_task.PTW_id = permit.id " +
+                            "left join facilities as f on f.id=pm_task.facility_id " +
+                            "LEFT JOIN permittypelists as permitType ON permitType.id = permit.typeId  " +
+                            "LEFT JOIN users as isotak ON isotak.id = permit.physicalIsolation " +
+                            $"left join frequency as freq on pm_task.frequency_id = freq.id " +
+                            $"where 1 ";
 
             // myQuery += (frequencyIds.Length > 0 ? " AND freq.id IN ( '" + string.Join("' , '", frequencyIds) + "' )" : string.Empty);
 

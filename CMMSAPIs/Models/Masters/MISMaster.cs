@@ -1,3 +1,4 @@
+using CMMSAPIs.Models.PM;
 using System;
 using System.Collections.Generic;
 
@@ -956,6 +957,8 @@ namespace CMMSAPIs.Models.Masters
         public DateTime schedule_date { get; set; }
         public decimal weightage { get; set; }
         public string comment { get; set; }
+        public int subtask_id { get; set; }
+
         public int ptw_req { get; set; }
         public DateTime created_at { get; set; }
         public int updated_by { get; set; }
@@ -1031,6 +1034,7 @@ namespace CMMSAPIs.Models.Masters
         public string permit_code { get; set; }
         public int ptw_status { get; set; }
         public int isolation { get; set; }
+        public List<CMPMScheduleExecutionDetail> Sub_schedules { get; set; }
     }
     public class ProjectDetails
     {

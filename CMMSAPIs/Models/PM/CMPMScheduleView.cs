@@ -63,6 +63,7 @@ namespace CMMSAPIs.Models.PM
     public class CMPMScheduleExecutionDetail
     {
         public int schedule_id { get; set; }
+        public int subtask_id { get; set; }
         public int clone_of_asset { get; set; }
         public string clone_of_name { get; set; }
         public int assetsID { get; set; }
@@ -95,7 +96,6 @@ namespace CMMSAPIs.Models.PM
     public class CMPMTaskView : CMPMTaskList
     {
         public List<CMPMScheduleExecutionDetail> schedules { get; set; }
-        public List<CMPMScheduleExecutionDetail> Sub_schedules { get; set; }
         public List<Materialconsumption> Material_consumption { get; set; }
         public List<CMEvaluationAuditList> map_checklist { get; set; }
         public List<SubEvalutionTask> Sub_PmTask { get; set; }
@@ -162,7 +162,7 @@ namespace CMMSAPIs.Models.PM
         public string facility_name { get; set; }
         public Int64 isExpired { get; set; }
         public string assignedTo { get; set; }
-        public int parent_task_id { get; set; }
+        public dynamic parent_task_id { get; set; }
 
     }
     public class CMPMScheduleViewDetail : CMPMScheduleView

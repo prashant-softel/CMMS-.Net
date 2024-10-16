@@ -1,18 +1,15 @@
 using CMMSAPIs.BS.Audits;
 using CMMSAPIs.Models.Audit;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using System;
-using CMMSAPIs.Models.SM;
-using Microsoft.AspNetCore.Http;
-using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Models.PM;
+using CMMSAPIs.Models.SM;
+using CMMSAPIs.Models.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using CMMSAPIs.Models.Users;
-using iTextSharp.tool.xml.html.head;
+using System.Threading.Tasks;
 
 namespace CMMSAPIs.Controllers.Audits
 {
@@ -31,7 +28,7 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("GetAuditPlanList")]
         [HttpGet]
-        public async Task<IActionResult> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,int module_type_id)
+        public async Task<IActionResult> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate, int module_type_id)
         {
             try
             {
@@ -49,7 +46,7 @@ namespace CMMSAPIs.Controllers.Audits
         //[Authorize]
         [Route("GetAuditPlanByID")]
         [HttpGet]
-        public async Task<IActionResult> GetAuditPlanByID(int id,int facility_id)
+        public async Task<IActionResult> GetAuditPlanByID(int id, int facility_id)
         {
             try
             {
@@ -161,7 +158,7 @@ namespace CMMSAPIs.Controllers.Audits
                 return Ok(item);
             }
         }
-                [Route("CreatePlan")]
+        [Route("CreatePlan")]
         [HttpPost]
         public async Task<IActionResult> CreatePlan(CMPMPlanDetail request)
         {
@@ -279,7 +276,7 @@ namespace CMMSAPIs.Controllers.Audits
         }
         [Route("GetPlanDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetPlanDetail(int planId,int facility_id)
+        public async Task<IActionResult> GetPlanDetail(int planId, int facility_id)
         {
             try
             {
@@ -321,7 +318,7 @@ namespace CMMSAPIs.Controllers.Audits
 
         [Route("GetTaskDetail")]
         [HttpGet]
-        public async Task<IActionResult> GetTaskDetail(int task_id,int facility_id)
+        public async Task<IActionResult> GetTaskDetail(int task_id, int facility_id)
         {
             try
             {
@@ -435,10 +432,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
             catch (Exception ex)
             {
-                ExceptionResponse item = new ExceptionResponse();
-                item.Status = 400;
-                item.Message = "Invalid data sent.";
-                return Ok(item);
+                throw ex;
             }
         }
 
@@ -518,7 +512,7 @@ namespace CMMSAPIs.Controllers.Audits
             }
 
         }
-        
+
         [Route("CreateSubTaskForChecklist")]
         [HttpPost]
         public async Task<IActionResult> CreateSubTaskForChecklist(CMCreateAuditPlan auditPlanList)
@@ -526,7 +520,7 @@ namespace CMMSAPIs.Controllers.Audits
 
             try
             {
-                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));     
+                int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var data = await _AuditPlanBS.CreateSubTaskForChecklist(auditPlanList, userID);
                 return Ok(data);
 

@@ -1,10 +1,7 @@
 ﻿using CMMSAPIs.Helper;
 using CMMSAPIs.Models.Grievance;
-using CMMSAPIs.Models.Masters;
-using CMMSAPIs.Models.Users;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Grievance;
-using CMMSAPIs.Repositories.Masters;
 using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
