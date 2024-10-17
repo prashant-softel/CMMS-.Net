@@ -253,7 +253,6 @@ namespace CMMSAPIs.Repositories.Masters
                     retValue = "Updated With TBT";
                     retCurrentStatus = "Inprogress";
                     break;
-
                 default:
                     retValue = "Unknown <" + m_notificationID + ">";
                     break;
@@ -1533,14 +1532,15 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join assets as a on a.id = ps.Asset_id " +
                    //  $"left join assets as a on a.id=(select Asset_id  from pm_schedule where id=pm_task.id) " +
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
-                   $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter};";
+                   $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter} and pm_task.category_id != 0;";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
 
             foreach (var plan in itemList)
             {
                 CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status);
-                string _shortStatus = getShortStatus_PM_Plan(CMMS.CMMS_Modules.PM_PLAN, _Status);
-                plan.status_long = _shortStatus;
+                CMDashboardStatus dashboardStatus = getShortStatus_PM_Plan(CMMS.CMMS_Modules.PM_PLAN, _Status);
+                plan.short_status = dashboardStatus.shortStatus;
+                plan.current_status = dashboardStatus.currentStatus;
             }
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_ASSIGNED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_CLOSE_REJECTED || x.status == (int)CMMS.CMMS_Status.PM_PLAN_REJECTED).ToList().Count;
@@ -1594,43 +1594,74 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return result;
         }
-        internal static string getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        internal static CMDashboardStatus getShortStatus_PM_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
         {
+            string retCurrentStatus = "";
             string retValue;
             retValue = "";
-
+            
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
-                    retValue = "Scheduled"; break;
+                    retValue = "Scheduled";
+                    retCurrentStatus = "Open";
+                    break;
                 case CMMS.CMMS_Status.PM_ASSIGNED:
-                    retValue = "Assigned"; break;
+                    retValue = "Assigned";
+                    retCurrentStatus = "Open";
+                    break;
                 case CMMS.CMMS_Status.PM_LINKED_TO_PTW:
-                    retValue = "Linked To PTW"; break;
+                    retValue = "Linked To PTW";
+                    retCurrentStatus = "Open";
+                    break;
                 case CMMS.CMMS_Status.PM_START:
-                    retValue = "Started"; break;
+                    retValue = "Started";
+                    retCurrentStatus = "Inprogress";
+                    break;
                 case CMMS.CMMS_Status.PM_CLOSED:
-                    retValue = "Close - Waiting for Approval"; break;
+                    retValue = "Close - Waiting for Approval";
+                    retCurrentStatus = "Closed";
+                    break;
                 case CMMS.CMMS_Status.PM_CLOSE_REJECTED:
-                    retValue = "Close - Rejected"; break;
+                    retValue = "Close - Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
                 case CMMS.CMMS_Status.PM_CLOSE_APPROVED:
-                    retValue = "Close - Approved"; break;
+                    retValue = "Close - Approved";
+                    retCurrentStatus = "Closed";
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED:
-                    retValue = "Cancelled"; break;
+                    retValue = "Cancelled";
+                    retCurrentStatus = "Closed";
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_REJECTED:
-                    retValue = "Cancelled - Rejected"; break;
+                    retValue = "Cancelled - Rejected";
+                    retCurrentStatus = "Open";
+                    break;
                 case CMMS.CMMS_Status.PM_CANCELLED_APPROVED:
-                    retValue = "Cancelled - Approved"; break;
+                    retValue = "Cancelled - Approved";
+                    retCurrentStatus = "Closed";
+                    break;
                 case CMMS.CMMS_Status.PM_DELETED:
-                    retValue = "Deleted"; break;
+                    retValue = "Deleted";
+                    retCurrentStatus = "Deleted";
+                    break;
                 case CMMS.CMMS_Status.PM_UPDATED:
-                    retValue = "Updated"; break;
+                    retValue = "Updated";
+                    retCurrentStatus = "Inprogress";
+                    break;
                 case CMMS.CMMS_Status.PM_TASK_DELETED:
-                    retValue = "Deleted"; break;
+                    retValue = "Deleted";
+                    retCurrentStatus = "Deleted";
+                    break;
                 default:
+                    retValue = "Unknown <" + m_notificationID + ">";
                     break;
             }
-            return retValue;
+            CMDashboardStatus retDashboardValue = new CMDashboardStatus();
+            retDashboardValue.currentStatus = retCurrentStatus;
+            retDashboardValue.shortStatus = retValue;
+            return retDashboardValue;
 
         }
 
@@ -1689,7 +1720,12 @@ namespace CMMSAPIs.Repositories.Masters
 
             string myQuery12 = $"select mc.facilityId as facility_id,F.name as facility_name,mc.planId as plan_id, mc.id as wo_number ,mp.title as wo_decription,mc.planId,mc.status, CONCAT(createdBy.firstName, createdBy.lastName) as responsibility ," +
                 $" mc.startDate as start_date, mc.endedAt as doneDate,mc.prevTaskDoneDate as end_date,freq.name as frequency,mc.noOfDays, {statusOut} as " +
-                $"status_long , CASE WHEN mc.moduleType=1 THEN 'Wet' WHEN mc.moduleType=2 THEN 'Dry' ELSE 'Robotic' END as MC_Type,  " +
+                $"status_long , " +
+                $"CASE WHEN mc.moduleType=1 THEN 'Wet' " +
+                $"WHEN mc.moduleType=2 THEN 'Dry' " +
+                $"ELSE 'Robotic' END as MC_Type,  " +
+                $"CASE WHEN mc.moduleType=1 THEN  SUM(css.moduleQuantity) " +
+                $"ELSE SUM(css.area) end as Scheduled, " +
                 $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
                 $"from cleaning_execution as mc " +
                 $"LEFT join cleaning_plan as mp on mp.planId = mc.planId " +
@@ -1699,11 +1735,20 @@ namespace CMMSAPIs.Repositories.Masters
                 $"LEFT JOIN Frequency as freq on freq.id = mp.frequencyId " +
                 $"LEFT JOIN users as createdBy ON createdBy.id = mc.assignedTo " +
                 $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
-                $" left join facilities as F on F.id = mc.facilityId  " +
-                $"where (mc.moduleType=1 and rescheduled = 0)";
+                $"left join facilities as F on F.id = mc.facilityId  " +
+                $"where (mc.moduleType in (1,2) and rescheduled = 0)";
             myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
+
+            foreach (var plan in itemList)
+            {
+                CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(plan.status);
+                CMDashboardStatus dashboardStatus = getShortStatus_MC_Plan(CMMS.CMMS_Modules.MC_PLAN, _Status);
+                plan.short_status = dashboardStatus.shortStatus;
+                plan.current_status = dashboardStatus.currentStatus;
+            }
+
             result.WaterUsedTotal = await WaterUsedTotal(facilityId);
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_SCHEDULED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_REJECTED).ToList().Count;
@@ -1735,6 +1780,232 @@ namespace CMMSAPIs.Repositories.Masters
             }
             return result;
         }
+
+
+        internal static CMDashboardStatus getShortStatus_MC_Plan(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status m_notificationID)
+        {
+            string retCurrentStatus = "";
+            string retValue = "";
+
+            switch (m_notificationID)
+            {
+                case CMMS.CMMS_Status.MC_PLAN_DRAFT:
+                    retValue = "Draft";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_SUBMITTED:
+                    retValue = "Waiting for Approval";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_APPROVED:
+                    retValue = "Approved";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_REJECTED:
+                    retValue = "Rejected";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_DELETED:
+                    retValue = "Deleted";
+                    retCurrentStatus = "Deleted";
+                    break;
+                case CMMS.CMMS_Status.MC_PLAN_UPDATED:
+                    retValue = "Updated";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULED:
+                    retValue = "Scheduled";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_STARTED:
+                    retValue = "Started";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ENDED:
+                    retValue = "Ended";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_COMPLETED:
+                    retValue = "Completed";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED:
+                    retValue = "Abandoned";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_APPROVED:
+                    retValue = "Approved";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_REJECTED:
+                    retValue = "Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_UPDATED:
+                    retValue = " Task Updated";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.SCHEDULED_LINKED_TO_PTW:
+                    retValue = "Linked To PTW";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_END_APPROVED:
+                    retValue = "End Approved";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_END_REJECTED:
+                    retValue = "End Reject";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_APPROVED:
+                    retValue = "Schedule Approved";
+                    retCurrentStatus = "Empty";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_SCHEDULE_REJECT:
+                    retValue = "Schedule Rejected";
+                    retCurrentStatus = "Empty";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_RESCHEDULED:
+                    retValue = "Reschedule";
+                    retCurrentStatus = "Empty";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ASSIGNED:
+                    retValue = "Assigned";
+                    retCurrentStatus = "Empty";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED_REJECTED:
+                    retValue = "Reject";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED:
+                    retValue = "Approved";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_DRAFT:
+                    retValue = "Draft";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_SUBMITTED:
+                    retValue = "Submitted";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_REJECTED:
+                    retValue = "Rejected";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_APPROVED:
+                    retValue = "Approved";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_DELETED:
+                    retValue = "Deleted";
+                    retCurrentStatus = "Deleted";
+                    break;
+                case CMMS.CMMS_Status.VEG_PLAN_UPDATED:
+                    retValue = "Updated";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_SCHEDULED:
+                    retValue = "Scheduled";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_STARTED:
+                    retValue = "Started";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ENDED:
+                    retValue = "Ended";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_COMPLETED:
+                    retValue = "Completed";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ABANDONED:
+                    retValue = "Abanddoned";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ABANDONED_REJECTED:
+                    retValue = "Abandoned Rejected";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ABANDONED_APPROVED:
+                    retValue = "Abandoned Approved";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_APPROVED:
+                    retValue = "Approved";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_REJECTED:
+                    retValue = "Rejected";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEGETATION_LINKED_TO_PTW:
+                    retValue = "Linked To PTW";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_END_APPROVED:
+                    retValue = "End Approved";
+                    retCurrentStatus = "Closed";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_END_REJECTED:
+                    retValue = "End Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_UPDATED:
+                    retValue = "Task Updated";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_ASSIGNED:
+                    retValue = "Assinged";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_TASK_RESCHEDULED:
+                    retValue = "Rescheduled";
+                    retCurrentStatus = "Open";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_STARTED:
+                    retValue = "Execution Started";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_APPROVED:
+                    retValue = "Execution Approved";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_UPDATED:
+                    retValue = "Execution Updated";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_END_REJECTED:
+                    retValue = "End Rejected";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_ABANDONED:
+                    retValue = "Abandoned";
+                    retCurrentStatus = "Inprogress";
+                    break;
+                case CMMS.CMMS_Status.VEG_EXECUTION_COMPLETED:
+                    retValue = "Completed";
+                    retCurrentStatus = "Closed";
+                    break;
+                default:
+                    retValue = "Unknown <" + m_notificationID + ">";
+                    retCurrentStatus = "Unknown";
+                    break;
+            }
+
+            CMDashboardStatus retDashboardValue = new CMDashboardStatus
+            {
+                currentStatus = retCurrentStatus,
+                shortStatus = retValue
+            };
+
+            return retDashboardValue;
+        }
+
+
+
         private async Task<List<CMWATERUESD>> WaterUsedTotal(string facility_id)
         {
 
@@ -1862,7 +2133,6 @@ namespace CMMSAPIs.Repositories.Masters
                 case CMMS.CMMS_Status.GO_DELETED:
                     retValue = "GO - Deleted";
                     break;
-
 
                 case CMMS.CMMS_Status.GO_REJECTED:
                     retValue = "GO Raised - Rejected";
