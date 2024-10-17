@@ -3,6 +3,7 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -472,8 +473,13 @@ namespace CMMSAPIs.Repositories.Masters
             $" LEFT JOIN mis_targeted_group tg ON tg.id = c.Targated_group_id " +
             $" LEFT JOIN mis_training_course status ON status.id = ts.CourseId " +
             $" WHERE ts.facility_id = {facility_id} " +
-            $" AND status.Status = 1 " +
-            $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
+            $" AND status.Status = 1 ";
+
+            if(fromDate!= DateTime.MinValue && toDate != DateTime.MinValue)
+            {
+                 getsch += $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
+            }
+            
 
 
 
@@ -515,7 +521,7 @@ namespace CMMSAPIs.Repositories.Masters
                     }
 
                     forMonth.created++;
-                    int num = Int32.Parse(item.short_status);
+                    int num = item.status_code;
                     if (num == (int)CMMS.CMMS_Status.COURSE_SCHEDULE)
                     {
                         forMonth.scheduled++;

@@ -104,7 +104,7 @@ namespace CMMSAPIs.Repositories.Grievance
             }
 
             string myQuery =
-                $"SELECT g.id, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
+                $"SELECT g.id, MONTHNAME(g.createdAt) AS month_name, g.facilityId, g.grievanceType AS grievanceTypeId, t.name AS grievanceType, g.concern, g.actionTaken, g.resolutionLevel, g.closedDate as closedAt, g.status_id as statusId " +
                 $", g.createdAt, g.createdBy, g.updatedBy, g.description, {statusOut} as statusShort, t.status, t.addedBy, t.addedAt " +
                 $", t.updatedBy, t.updatedAt " +
                 $" FROM mis_grievance g " +
@@ -135,7 +135,6 @@ namespace CMMSAPIs.Repositories.Grievance
                 detail.createdAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.createdAt);
                 detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
                 detail.deletedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.deletedAt);
-                //    detail.closedAt = await _utilsRepo.ConvertToUTCDTC(facilitytimezone, detail.closedAt);
             }
             return Grievance;
         }
