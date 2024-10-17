@@ -47,9 +47,11 @@ namespace CMMSAPIs.Repositories.Audits
         internal async Task<List<CMDefaultResponse>> ExecuteAuditSchedule(CMPMExecutionDetail request, int userID)
         {
             List<CMDefaultResponse> responseList = new List<CMDefaultResponse>();
-            string statusQry = $"SELECT status FROM pm_task WHERE id = {request.task_id};";
+            string statusQry = $"SELECT category_id,status FROM pm_task WHERE id = {request.task_id};";
             DataTable dt1 = await Context.FetchData(statusQry).ConfigureAwait(false);
-            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][0]);
+            int category_id = Convert.ToInt32(dt1.Rows[0][0]);
+            CMMS.CMMS_Status status = (CMMS.CMMS_Status)Convert.ToInt32(dt1.Rows[0][1]);
+
             if (status != CMMS.CMMS_Status.AUDIT_START)
             {
                 responseList.Add(new CMDefaultResponse(request.task_id, CMMS.RETRUNSTATUS.FAILURE,
@@ -67,14 +69,33 @@ namespace CMMSAPIs.Repositories.Audits
              if (dtSch.Rows.Count == 0)
                  throw new MissingMemberException($"PM Schedule PMSCH{schedule.schedule_id} associated with PM Task PMTASK{request.task_id} not found");
  */
-            string executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id} and task_id = {request.task_id};";
+
+            string executeQuery = "";
+            if (category_id == 0)
+            {
+                String query = $"select id from pm_task where pm_task.parent_task_id={request.task_id};";
+                DataTable ct = await Context.FetchData(query).ConfigureAwait(false);
+                List<int> pm_id = ct.GetColumn<int>("id");
+
+                if (pm_id.Count > 0)
+                {
+                    string pmIdList = string.Join(",", pm_id);
+                    executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id} and task_id in ({pmIdList});";
+                }
+
+            }
+            else
+            {
+                executeQuery = $"SELECT id FROM pm_execution WHERE PM_Schedule_Id = {schedule.schedule_id} and task_id = {request.task_id};";
+            }
+
 
             DataTable dt = await Context.FetchData(executeQuery).ConfigureAwait(false);
-
             List<int> executeIds = dt.GetColumn<int>("id");
 
             foreach (var schedule_detail in schedule.add_observations)
             {
+
                 CMDefaultResponse response;
                 if (executeIds.Contains(schedule_detail.execution_id))
                 {

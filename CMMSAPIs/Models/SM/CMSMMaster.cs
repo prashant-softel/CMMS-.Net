@@ -433,6 +433,7 @@ namespace CMMSAPIs.Models.SM
     public class CMASSETMASTERLIST
     {
         public int ID { get; set; }
+        public int plant_ID { get; set; }
         public int asset_type_ID { get; set; }
         public string asset_type { get; set; }
         public string asset_code { get; set; }

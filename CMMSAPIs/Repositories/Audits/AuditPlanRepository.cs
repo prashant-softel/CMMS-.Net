@@ -1402,7 +1402,7 @@ namespace CMMSAPIs.Repositories.Audits
             //PM_Frequecy_Name as frequency_name, PM_Schedule_Emp_name as assigned_to_name, PTW_id as permit_id, status,
             //{statusQry} as status_name, Facility_id as facility_id, Facility_Name as facility_name " +
             //                    $"FROM pm_schedule WHERE id = {schedule_id};";
-
+            //  COALESCE(pm_task.title, st_audit.title) AS plan_title1,
             string myQuery = $"SELECT pm_plan.Schedule_Date,pm_task.parent_task_id,pm_plan.title as plan_title, pm_task.id,pm_plan.id as plan_id, " +
                              $"CONCAT('AUDITTASK',pm_task.id) as task_code,  " +
                             $"pm_task.category_id,cat.name as category_name, pm_task.facility_id, pm_task.frequency_id as frequency_id, freq.name as frequency_name, pm_task.plan_date as due_date,   " +

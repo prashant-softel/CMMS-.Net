@@ -391,10 +391,8 @@ namespace CMMSAPIs.Repositories.MCVCRepository
                     // Check if the start date is earlier than the end date
                     if (DateTime.Compare(start, end) < 0)
                     {
-                        string formattedStart = start.ToString("yyyy-MM-dd");
-                        string formattedEnd = end.ToString("yyyy-MM-dd");
 
-                        myQuery1 += $" AND DATE_FORMAT(mc.createdAt,'%Y-%m-%d') BETWEEN '{formattedStart}' AND '{formattedEnd}'";
+                        myQuery1 += $" AND DATE_FORMAT(mc.createdAt,'%Y-%m-%d') BETWEEN '{start.ToString("yyyy-MM-dd")}' AND '{end.ToString("yyyy-MM-dd")}'";
                     }
                     else
                     {

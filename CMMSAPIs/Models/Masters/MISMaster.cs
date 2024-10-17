@@ -422,6 +422,7 @@ namespace CMMSAPIs.Models.Masters
 
     public class ChecklistDetails
     {
+        public int month_id { get; set; }
         public int inspectionMonth { get; set; }
         public string inspection_status { get; set; }
         public DateTime? date_of_inspection { get; set; }
@@ -898,6 +899,7 @@ namespace CMMSAPIs.Models.Masters
         public dynamic Remark { get; set; }
         public dynamic Deviation { get; set; }
         public dynamic TimeTaken { get; set; }
+        public dynamic no_of_task { get; set; }
     }
 
     public class AssignToObservation

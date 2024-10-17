@@ -27,13 +27,13 @@ namespace CMMSAPIs.Controllers.MC
 
         [Route("GetMCPlanList")]
         [HttpGet]
-        public async Task<IActionResult> GetMCPlanList(int facilityId, string startDate, string endDate)
+        public async Task<IActionResult> GetMCPlanList(int facilityId, string start_date, string end_date)
         {
             try
             {
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
 
-                var data = await _CleaningBS.GetPlanList(facilityId, facilitytimeZone, startDate, endDate);
+                var data = await _CleaningBS.GetPlanList(facilityId, facilitytimeZone, start_date, end_date);
                 return Ok(data);
             }
             catch (Exception ex)

@@ -339,8 +339,6 @@ namespace CMMSAPIs.Repositories.JC
                                  $"LEFT JOIN  users as user4 ON user4.id = jc.JC_End_By_id " +
                                  $"LEFT JOIN  users as user5 ON user5.id = jc.JC_Approved_By_id " +
                                  $"where jc.id = {jc_id}";
-
-
             List<CMJCDetail> _jcDetails = await Context.GetData<CMJCDetail>(myQuery1).ConfigureAwait(false);
             if (_jcDetails.Count == 0)
                 throw new MissingMemberException($"Job Card with ID {jc_id} not found");

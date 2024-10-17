@@ -1282,11 +1282,12 @@ namespace CMMSAPIs.Repositories.Masters
             List<CMChecklistInspectionReport> facilities = await Context.GetData<CMChecklistInspectionReport>(facilityQuery).ConfigureAwait(false) ?? new List<CMChecklistInspectionReport>();
 
 
-            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,st.id, checklist_number AS checklist_name, " +
+            string checklistQuery = "SELECT  f.id as facility_id, f.name AS facility_name,checklist_number.id as  checklist_id, checklist_number AS checklist_name, " +
                                     "st.title AS SOP_number,  frequency.name AS frequency, CASE WHEN is_ok = 0 THEN 'No' WHEN is_ok = 1 THEN 'Yes' ELSE 'NA' END AS inspection_status, " +
-                                    " PM_Schedule_Observation_add_date AS date_of_inspection, " +
-                                    "MONTHNAME(PM_Schedule_Observation_add_date) AS month ," +
-                                    "MONTH(PM_Schedule_Observation_add_date) AS month_id , YEAR(PM_Schedule_Observation_add_date) AS year_id,  " +
+                                    " COALESCE(PM_Schedule_Observation_add_date, '0001-01-01 00:00:00')   AS date_of_inspection, " +
+                                     "COALESCE(MONTHNAME(PM_Schedule_Observation_add_date), '0') AS month, " +
+                                    "COALESCE(MONTH(PM_Schedule_Observation_add_date), 0) AS month_id, " +
+                                    "COALESCE(YEAR(PM_Schedule_Observation_add_date), 0) AS year_id, " +
                                     " CASE WHEN file_required = 0 THEN 'No' ELSE 'Yes' END AS checklist_attachment  " +
                                     "FROM st_audit st   LEFT JOIN pm_task task ON task.plan_id = st.id  " +
                                     "LEFT JOIN pm_execution pm_execution ON pm_execution.task_id = task.id " +
@@ -1296,30 +1297,26 @@ namespace CMMSAPIs.Repositories.Masters
                                     $"WHERE st.facility_id = {facility_id} AND st.module_type_id = {module_type} group by st.id;";
 
             List<Checklist1> checklistData = await Context.GetData<Checklist1>(checklistQuery).ConfigureAwait(false) ?? new List<Checklist1>();
-
-
             var list = checklistData
-                 .Where(a => a != null)
-     .Select(a => new Checklist1
-     {
-         checklist_id = a.checklist_id,
-         checklist_name = a.checklist_name,
-         SOP_number = a.SOP_number,
-         frequency = a.frequency,
-         monthlyInspection = a.monthlyInspection?
-             .Where(b => b != null)
-             .Select(b => new ChecklistDetails
-             {
-                 inspectionMonth = b.inspectionMonth,
-                 inspection_status = b.inspection_status,
-                 date_of_inspection = b.date_of_inspection,
-                 checklist_attachment = b.checklist_attachment,
-                 no_of_unsafe_observation = b.no_of_unsafe_observation
-
-             }).ToList()
-     })
-     .ToList();
-
+       .Where(a => a != null)
+       .Select(a => new Checklist1
+       {
+           checklist_id = a.checklist_id,
+           checklist_name = a.checklist_name,
+           SOP_number = a.SOP_number,
+           frequency = a.frequency,
+           monthlyInspection = a.monthlyInspection?
+               .Where(b => b != null)
+               .Select(b => new ChecklistDetails
+               {
+                   inspectionMonth = b.inspectionMonth,
+                   inspection_status = b.inspection_status,
+                   date_of_inspection = b.date_of_inspection,
+                   checklist_attachment = b.checklist_attachment,
+                   no_of_unsafe_observation = b.no_of_unsafe_observation
+               }).ToList() ?? new List<ChecklistDetails>() // Ensure it's initialized to an empty list if null
+       })
+       .ToList();
 
             List<CMChecklistInspectionReport> response = facilities
                 .Where(z => z != null)
@@ -1330,11 +1327,9 @@ namespace CMMSAPIs.Repositories.Masters
                     checklist = list
                 })
                 .ToList();
+
             return response;
-
         }
-
-
         internal async Task<List<CMObservationReport>> GetObservationSheetReport(string facility_id, DateTime fromDate, DateTime toDate)
         {
             string myQuery = " select  distinct monthname(PM_Schedule_Observation_add_date) as month_of_observation,st.id, " +
@@ -2149,101 +2144,6 @@ namespace CMMSAPIs.Repositories.Masters
             return Result[0];
         }
 
-        public async Task<GetChecklistInspection> GetChecklistInspection1()
-        {
-            var _GetChecklistInspection = new GetChecklistInspection
-            {
-                FacilityId = 1,
-                FacilityName = "Bellary",
-                InspectionData = new List<InspectionData>
-                {
-                    new InspectionData
-                    {
-                        MonthName = "April",
-                        MonthId = 4,
-                        Year = 2024,
-                        CheckList = new List<CheckList>
-                        {
-                            new CheckList
-                            {
-                                ChecklistName = "Monitoring Checklist of Electrical",
-                                SopNumber = "HFE/HSE/SOP-10/C-1",
-                                Frequency = "Monthly",
-                                InspectionStatus = "Yes",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "No",
-                                NoOfUnsafeObservation = 2
-                            },
-                            new CheckList
-                            {
-                                ChecklistName = "Monitoring Checklist of Electrical2",
-                                SopNumber = "HFE/HSE/SOP-10/C-2",
-                                Frequency = "Monthly",
-                                InspectionStatus = "Yes",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "No",
-                                NoOfUnsafeObservation = 2
-                            },
-                            new CheckList
-                            {
-                                ChecklistName = "Monitoring Checklist of Electrical3",
-                                SopNumber = "HFE/HSE/SOP-10/C-3",
-                                Frequency = "Monthly",
-                                InspectionStatus = "Yes",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "No",
-                                NoOfUnsafeObservation = 2
-                            }
-                        }
-                    },
-                    new InspectionData
-                    {
-                        MonthName = "May",
-                        MonthId = 5,
-                        Year = 2024,
-                        CheckList = new List<CheckList>
-                        {
-                            new CheckList
-                            {
-                                ChecklistName = "Vehicle fitness Checklist",
-                                SopNumber = "HFE/HSE/SOP-11/C-1",
-                                Frequency = "Monthly",
-                                InspectionStatus = "No",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "yes",
-                                NoOfUnsafeObservation = 51
-                            },
-                            new CheckList
-                            {
-                                ChecklistName = "Monitoring Checklist of Electrical2",
-                                SopNumber = "HFE/HSE/SOP-10/C-2",
-                                Frequency = "Monthly",
-                                InspectionStatus = "Yes",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "No",
-                                NoOfUnsafeObservation = 2
-                            },
-                            new CheckList
-                            {
-                                ChecklistName = "Monitoring Checklist of Electrical3",
-                                SopNumber = "HFE/HSE/SOP-10/C-3",
-                                Frequency = "Monthly",
-                                InspectionStatus = "Yes",
-                                DateOfInspection = "2023-09-18",
-                                ChecklistAttachment = "No",
-                                NoOfUnsafeObservation = 2
-                            }
-                        }
-                    }
-                }
-            };
-
-            // Simulate async work
-            // await Task.Delay(100);
-
-            return _GetChecklistInspection;
-        }
-
         internal async Task<CMDefaultResponse> uploadDocument(CMDocumentVersion request, int user_id)
         {
             CMDefaultResponse response = null;
@@ -2714,7 +2614,7 @@ namespace CMMSAPIs.Repositories.Masters
                                     "FROM jobs AS js LEFT JOIN jobcards AS jc ON js.id = jc.jobId " +
                                     "LEFT JOIN facilities AS fc ON js.facilityId = fc.id " +
                                     "LEFT JOIN permits AS per ON jc.PTW_id =per.id " +
-                                    $"Where js.facilityId in({facility_id}) or js.createdAt BETWEEN '{start_date}' and '{end_date}' GROUP BY js.facilityId;";
+                                    $"Where js.facilityId in({facility_id}) AND js.createdAt BETWEEN '{start_date}' and '{end_date}' GROUP BY js.facilityId;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
@@ -2728,14 +2628,15 @@ namespace CMMSAPIs.Repositories.Masters
                                     "FROM  pm_plan AS js " +
                                     "LEFT JOIN pm_task AS jc ON js.id = jc.plan_id " +
                                     "LEFT join permits AS permit on jc.ptw_id = permit.id " +
-                                    "LEFT JOIN facilities AS fc ON js.facility_id = fc.id " +
-                                    $"Where jc.facility_id in({facility_id}) or js.plan_date BETWEEN '{start_date}' AND '{end_date}' GROUP BY js.facility_id ;";
+                                    "LEFT JOIN facilities AS fc ON jc.facility_id = fc.id " +
+                                    $"WHERE jc.facility_id IN ({facility_id})  AND jc.plan_date BETWEEN '{start_date}' AND '{end_date}' GROUP BY jc.facility_id;";
+                // $"Where jc.facility_id in({facility_id}) AND js.plan_date BETWEEN '{start_date}' AND '{end_date}' GROUP BY js.facility_id ;";
                 List<CumalativeReport> data = await Context.GetData<CumalativeReport>(myQueryJob).ConfigureAwait(false);
                 return data;
             }
             if (43 == module_id)
             {
-                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
+                string myQueryJob = $"SELECT f.name AS Site_name,count(DISTINCT  mc.id) as no_of_task, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType, " +
                                     $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.moduleQuantity) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
                                     $"CASE WHEN mc.abandonedById > 0 THEN 'yes' ELSE 'no' END AS Abandoned, mc.reasonForAbandon AS remark, " +
                                     $"CASE WHEN mc.startDate IS NOT NULL THEN sum(TIMESTAMPDIFF(MINUTE, mc.end_approved_at, mc.startDate))  ELSE 0   END AS TimeTaken " +
@@ -2753,7 +2654,7 @@ namespace CMMSAPIs.Repositories.Masters
             }
             if (44 == module_id)
             {
-                string myQueryJob = $"SELECT f.name AS Site_name, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType,  " +
+                string myQueryJob = $"SELECT f.name AS Site_name,count(DISTINCT  mc.id) as no_of_task, CASE WHEN mc.moduleType = 1 THEN 'Wet' WHEN mc.moduleType = 2 THEN 'Dry' ELSE 'Robotic' END AS CleaningType,  " +
                                     $"IFNULL(sub1.TotalWaterUsed, 0) AS waterUsed, SUM(css.area) AS scheduledQuantity, IFNULL(sub2.no_of_cleaned, 0) AS actualQuantity, " +
                                     $"IFNULL(sub3.no_of_cleaned, 0)  AS Abandoned, mc.reasonForAbandon AS remark,  " +
                                     $"CASE WHEN mc.startDate IS NOT NULL THEN sum(TIMESTAMPDIFF(MINUTE, mc.end_approved_at, mc.startDate))  ELSE 0   END AS TimeTaken " +

@@ -203,9 +203,9 @@ namespace CMMSAPIs.Repositories.SM
             string myQuery = "";
             if (ID != null)
 
-                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty ," +
+                myQuery = "SELECT sam.ID,sam.asset_type_ID,sam.asset_code,sam.plant_ID,sam.asset_name,sam.description,if(sam.approval_required = 1, 'Yes','No') as approval_required,sam.section,sam.reorder_qty,sam.max_request_qty ," +
                       " sat.asset_type ,sam.min_qty, sic.cat_name,sm.name as measurement,sm.decimal_status " +
-                      " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID " +
+                      " FROM smassetmasters sam LEFT JOIN smassettypes sat ON sat.ID = sam.asset_type_ID  Left join  smassetitems on smassetitems.facility_ID=sam.plant_ID " +
                       " LEFT JOIN smitemcategory sic ON sic.ID = sam.item_category_ID  LEFT JOIN smunitmeasurement sm ON sm.ID = sam.unit_of_measurement " +
                       $" WHERE sam.plant_ID in ({ID}) AND sam.flag = 1;";
 

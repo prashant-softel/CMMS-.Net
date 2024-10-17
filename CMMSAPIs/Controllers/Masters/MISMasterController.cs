@@ -1183,7 +1183,7 @@ namespace CMMSAPIs.Controllers.Masters
                 throw ex;
             }
         }
-
+        //GetChecklistInspectionReport
         [Route("GetChecklistInspection")]
         [HttpGet]
         public async Task<IActionResult> GetChecklistInspectionReport(int facility_id, int module_type, DateTime fromDate, DateTime toDate)
