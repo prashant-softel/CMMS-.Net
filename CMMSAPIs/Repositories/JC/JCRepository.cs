@@ -408,10 +408,16 @@ namespace CMMSAPIs.Repositories.JC
             List<CMJCIsolatedDetail> _isolatedDetails = await Context.GetData<CMJCIsolatedDetail>(myQuery4).ConfigureAwait(false);
 
             //loto list
-            string myQuery5 = $"SELECT  assets_cat.name as isolated_assest_loto FROM assetcategories as assets_cat " +
-                $"LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
-                $" LEFT JOIN permitlotoassets AS LOTOAssets on LOTOAssets.PTW_id = ptw.id " +
-                $"JOIN jobcards as jc on jc.jobId = ptw.id where jc.id = {jc_id}";
+            string myQuery5 = $"SELECT  asset_cat.name as isolated_assest_loto   FROM jobs as job JOIN jobcards as jc on jc.jobId = job.id " +
+                              "LEFT JOIN  jobmappingassets as mapAssets ON mapAssets.jobId = job.id " +
+                              "Left join assetcategories as asset_cat ON mapAssets.categoryId = asset_cat.id " +
+                              "LEFT JOIN permits as ptw on ptw.id = jc.PTW_id " +
+                              "LEFT JOIN permitlotoassets AS LOTOAssets on LOTOAssets.PTW_id = ptw.id " +
+                              $"where jc.id = {jc_id};";
+            /*string myQuery5 = $"SELECT  assets_cat.name as isolated_assest_loto FROM assetcategories as assets_cat " +
+                              $"LEFT JOIN permits as ptw on ptw.id = assets_cat.id " +
+                              $" LEFT JOIN permitlotoassets AS LOTOAssets on LOTOAssets.PTW_id = ptw.id " +
+                              $"JOIN jobcards as jc on jc.jobId = ptw.id where jc.id = {jc_id}";*/
             List<CMJCLotoDetail> _lotoList = await Context.GetData<CMJCLotoDetail>(myQuery5).ConfigureAwait(false);
 
             // emp list
