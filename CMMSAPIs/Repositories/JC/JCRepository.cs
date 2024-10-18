@@ -388,14 +388,15 @@ namespace CMMSAPIs.Repositories.JC
                 $"CONCAT(user2.firstName , ' ' , user2.lastName) as permit_approved_by_name,ptw.TBT_Done_Check as TBT_Done_Check   " +
                 $"FROM permits as ptw " +
                 $"LEFT JOIN permittypelists as permitType ON permitType.id = ptw.typeId " +
-                $" JOIN jobs as job ON ptw.id = job.linkedPermit " +
+                $"JOIN jobcards as jc on jc.PTW_id = ptw.id " +
+                $" JOIN jobs  as job ON jc.jobId =job.id " +
                 $" LEFT JOIN users as user ON user.id = job.assignedId " +
                 $" LEFT JOIN users as user1 ON user1.id = ptw.issuedById " +
                 $"LEFT JOIN users as user2 ON user2.id = ptw.approvedById " +
                 "LEFT join  assets as passt on ptw.physicalIsoEquips = passt.id " +
                 "Left join users as isotak on ptw.physicalIsolation = isotak.id  " +
                  "left join users as tbtDone on ptw.TBT_Done_By = tbtDone.id " +
-                $"JOIN jobcards as jc on jc.PTW_id = ptw.id where jc.id = {jc_id}";
+                $" where jc.id = {jc_id}";
             List<CMJCPermitDetail> _permitDetails = await Context.GetData<CMJCPermitDetail>(myQuery3).ConfigureAwait(false);
 
             foreach (var permit in _permitDetails)
