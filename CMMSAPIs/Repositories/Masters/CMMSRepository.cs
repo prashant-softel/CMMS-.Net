@@ -1471,7 +1471,6 @@ namespace CMMSAPIs.Repositories.Masters
                     _Job.current_status = status.currentStatus;
                 }
             });
-
             result.created = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CREATED).ToList().Count;
             result.rejected = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_CANCELLED).ToList().Count;
             result.assigned = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.JOB_ASSIGNED).ToList().Count;
@@ -1532,7 +1531,7 @@ namespace CMMSAPIs.Repositories.Masters
                    $"left join assets as a on a.id = ps.Asset_id " +
                    //  $"left join assets as a on a.id=(select Asset_id  from pm_schedule where id=pm_task.id) " +
                    $" JOIN facilities ON pm_task.facility_id = facilities.id " +
-                   $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter} and pm_task.category_id != 0;";
+                   $" WHERE facilities.id in ({facilityId})  and status_id = 1 {filter} and pm_task.category_id != 0  group by pm_task.id;;";
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery).ConfigureAwait(false);
 
             foreach (var plan in itemList)
@@ -1599,7 +1598,7 @@ namespace CMMSAPIs.Repositories.Masters
             string retCurrentStatus = "";
             string retValue;
             retValue = "";
-            
+
             switch (m_notificationID)
             {
                 case CMMS.CMMS_Status.PM_SCHEDULED:
@@ -1708,7 +1707,7 @@ namespace CMMSAPIs.Repositories.Masters
 
             if (fromDate != null && fromDate.ToString("yyyy-MM-dd") != "0001-01-01" && toDate != null && toDate.ToString("yyyy-MM-dd") != "0001-01-01")
             {
-                filter = $" and mc.createdAt between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
+                filter = $" and mc.startDate between '{fromDate.ToString("yyyy-MM-dd")}' and '{toDate.ToString("yyyy-MM-dd")}'";
             }
 
             string statusOut = "CASE ";
@@ -1737,7 +1736,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"LEFT JOIN users as approvedBy ON approvedBy.id = mc.approvedByID " +
                 $"left join facilities as F on F.id = mc.facilityId  " +
                 $"where (mc.moduleType in (1,2) and rescheduled = 0)";
-            myQuery12 += $" and mc.facilityId in ({facilityId})  group by mc.id ";
+            myQuery12 += $" and mc.facilityId in ({facilityId})  {filter}  group by mc.id ";
 
             List<CMDashboadItemList> itemList = await Context.GetData<CMDashboadItemList>(myQuery12).ConfigureAwait(false);
 

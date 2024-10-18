@@ -3,7 +3,6 @@ using CMMSAPIs.Models.Masters;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Utils;
 using Microsoft.AspNetCore.Hosting;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -314,7 +313,7 @@ namespace CMMSAPIs.Repositories.Masters
         internal async Task<List<GETSCHEDULEDETAIL>> GetScheduleCourseDetail(int schedule_id)
         {
 
-            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.status_code,mis_training_schedule.facility_id ,courseId as courseID ,Course_name,mis_training_schedule.hfeEmployeeId, course_name as training_course ,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig,case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End as Training_Agency , Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue,  mis_training_schedule.status_code as status  " +
+            string getsch = $"SELECT  Schid as ScheduleID,mis_training_schedule.status_code,mis_training_schedule.facility_id ,courseId as courseID ,mis_training_schedule.hfeEmployeeId, course_name as training_course ,DATE_FORMAT(ScheduleDate,'%Y-%m-%d') as Date_of_Trainig,case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End as Training_Agency , Trainer,concat(u.firstName,u.lastName) as HFE_Epmloyee, Mode as mode,  Venue,  mis_training_schedule.status_code as status  " +
                 $" from  mis_training_schedule " +
                 $"  LEFT JOIN mis_training_course as c on c.id = mis_training_schedule.courseId " +
                 $"  LEFT JOIN mis_course_category cc on cc.id = c.Traning_category_id " +
@@ -475,11 +474,11 @@ namespace CMMSAPIs.Repositories.Masters
             $" WHERE ts.facility_id = {facility_id} " +
             $" AND status.Status = 1 ";
 
-            if(fromDate!= DateTime.MinValue && toDate != DateTime.MinValue)
+            if (fromDate != DateTime.MinValue && toDate != DateTime.MinValue)
             {
-                 getsch += $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
+                getsch += $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
             }
-            
+
 
 
 

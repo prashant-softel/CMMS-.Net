@@ -58,7 +58,7 @@ namespace CMMSAPIs.Repositories.Users
             }
             else
             {
-                roleQry += "WHERE status = 1";
+                roleQry += " WHERE status = 1";
             }
             List<KeyValuePairs> roleList = await Context.GetData<KeyValuePairs>(roleQry).ConfigureAwait(false);
             return roleList;

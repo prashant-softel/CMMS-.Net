@@ -1166,9 +1166,6 @@ namespace CMMSAPIs.Repositories.Users
                     }
                 }
 
-
-
-
                 default_user_access = default_user_access.ToLookup(item => item.feature_id)
                                     .Select(group => group.First())
                                     .ToList();
