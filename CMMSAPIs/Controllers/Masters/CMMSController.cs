@@ -726,7 +726,10 @@ namespace CMMSAPIs.Controllers.Masters
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                ExceptionResponse item = new ExceptionResponse();
+                item.Status = 400;
+                item.Message = "Invalid data sent.";
+                return Ok(item);
             }
         }
 
