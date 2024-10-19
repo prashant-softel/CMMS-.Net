@@ -51,6 +51,7 @@ namespace CMMSAPIs.BS.Masters
         Task<string> Print(int id, CMMS.CMMS_Modules moduleID, int userID, string facilitytimeZone);
         Task<string> DownloadFile(int id);
         Task<List<CMDashboadModuleWiseList>> getDashboadDetails(string facilityId, string moduleID, DateTime fromDate, DateTime toDate);
+        Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module);
         Task<List<CMModule>> GetEscalationModuleList();
         Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module);
     }
@@ -76,34 +77,6 @@ namespace CMMSAPIs.BS.Masters
                 using (var repos = new CMMSRepository(getDB))
                 {
                     return await repos.AddModule(request);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        public async Task<List<CMModule>> GetEscalationModuleList()
-        {
-            try
-            {
-                using (var repos = new CMMSRepository(getDB))
-                {
-                    return await repos.GetEscalationModuleList();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
-        public async Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module)
-        {
-            try
-            {
-                using (var repos = new CMMSRepository(getDB))
-                {
-                    return await repos.GetEscalationStatusbymodule(module);
                 }
             }
             catch (Exception ex)
@@ -695,7 +668,55 @@ namespace CMMSAPIs.BS.Masters
                 throw;
             }
         }
+
+        public async Task<CMStatus1> GetStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetStatusbymodule(module);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<List<CMModule>> GetEscalationModuleList()
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetEscalationModuleList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<CMStatus1> GetEscalationStatusbymodule(CMMS.CMMS_Modules module)
+        {
+            try
+            {
+                using (var repos = new CMMSRepository(getDB))
+                {
+                    return await repos.GetEscalationStatusbymodule(module);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
         #endregion //helper functions
+
+
         /*
         public async Task<int> eQry(string qry)
         {
@@ -713,5 +734,7 @@ namespace CMMSAPIs.BS.Masters
             }
         }
         */
+
+
     }
 }
