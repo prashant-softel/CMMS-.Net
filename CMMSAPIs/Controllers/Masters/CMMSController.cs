@@ -685,20 +685,32 @@ namespace CMMSAPIs.Controllers.Masters
                 return Ok(item);
             }
         }
-        [Route("GetStatusbymodule")]
+        [Route("GetEscalationStatusbymodule")]
         [HttpGet]
-        public async Task<IActionResult> GetStatusbymodule(CMMS.CMMS_Modules module)
+        public async Task<IActionResult> GetEscalationStatusbymodule(CMMS.CMMS_Modules module)
         {
             try
             {
-                var data = await _CMMSBS.GetStatusbymodule(module);
+                var data = await _CMMSBS.GetEscalationStatusbymodule(module);
                 return Ok(data);
-
             }
             catch (Exception ex)
             {
-
                 return BadRequest(ex.Message);
+            }
+        }
+        [Route("GetEscalationModuleList")]
+        [HttpGet]
+        public async Task<IActionResult> GetEscalationModuleList()
+        {
+            try
+            {
+                var data = await _CMMSBS.GetEscalationModuleList();
+                return Ok(data);
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
