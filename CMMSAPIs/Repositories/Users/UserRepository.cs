@@ -207,7 +207,7 @@ namespace CMMSAPIs.Repositories.Users
             Dictionary<string, int> gender = new Dictionary<string, int>();
             gender.Merge(genderNames, genderIds);
 
-            string roleQry = "SELECT id, UPPER(name) as name FROM userroles";
+            string roleQry = "SELECT id, UPPER(name) as name FROM userroles where status=1";
             DataTable dtRole = await Context.FetchData(roleQry).ConfigureAwait(false);
             List<string> roleNames = dtRole.GetColumn<string>("name");
             List<int> roleIds = dtRole.GetColumn<int>("id");

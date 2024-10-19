@@ -1590,13 +1590,13 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            /* int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour <= 8)).ToList().Count;
-             int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;
-             int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.schedule_time.Value.Hour - x.end_date.Value.Hour > 8)).ToList().Count;*/
+            int completed_on_time = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.time_condition == 1)).ToList().Count;
+            int wo_delay = itemList.Where(x => (x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.time_condition == 0)).ToList().Count;
+            int wo_backlog = itemList.Where(x => (x.status != (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED) && (x.time_condition == 2)).ToList().Count;
 
-            int completed_on_time = itemList.Where(x => x.time_condition == 1).ToList().Count;
+            /*int completed_on_time = itemList.Where(x => x.time_condition == 1).ToList().Count;
             int wo_delay = itemList.Where(x => x.time_condition == 0).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.time_condition == 2).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.time_condition == 2).ToList().Count;*/
             /* int completed_on_time = itemList
          .Where(x => x.status == (int)CMMS.CMMS_Status.PM_CLOSE_APPROVED &&
                  (totalHours <= 8))
@@ -1758,9 +1758,10 @@ namespace CMMSAPIs.Repositories.Masters
                 $"CASE WHEN mc.moduleType=1 THEN 'Wet' " +
                 $"WHEN mc.moduleType=2 THEN 'Dry' " +
                 $"ELSE 'Robotic' END as MC_Type,  " +
+                $"CASE WHEN ABS(TIMESTAMPDIFF(HOUR, mc.startDate, mc.abandonApprovedAt)) < 8 THEN 1    WHEN ABS(TIMESTAMPDIFF(HOUR, mc.startDate, mc.abandonApprovedAt)) > 8 THEN 0   ELSE 2 END AS time_condition  ," +
                 $"CASE WHEN mc.moduleType=1 THEN  SUM(css.moduleQuantity) " +
                 $"ELSE SUM(css.area) end as Scheduled, " +
-                $"mc.startDate as  Start_Date ,mc.abandonedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
+                $"mc.startDate as  Start_Date ,mc.abandonApprovedAt as  End_Date_done,mc.noOfDays as plan_days,sub1.TotalWaterUsed, sub2.no_of_cleaned,SUM(css.moduleQuantity) as Scheduled " +
                 $"from cleaning_execution as mc " +
                 $"LEFT join cleaning_plan as mp on mp.planId = mc.planId " +
                 $"LEFT join cleaning_execution_items as css on css.executionId = mc.id " +
@@ -1798,9 +1799,9 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date == x.start_date).ToList().Count;
-            int wo_delay = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date != x.start_date).ToList().Count;
-            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_TASK_APPROVED && x.start_date != x.start_date).ToList().Count;
+            int completed_on_time = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED && (x.time_condition == 1)).ToList().Count;
+            int wo_delay = itemList.Where(x => x.status == (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED && (x.time_condition == 0)).ToList().Count;
+            int wo_backlog = itemList.Where(x => x.status != (int)CMMS.CMMS_Status.MC_TASK_ABANDONED_APPROVED && (x.time_condition == 2)).ToList().Count;
 
             if (result.total > 0)
             {
@@ -2100,6 +2101,7 @@ namespace CMMSAPIs.Repositories.Masters
                 $"incident.risk_level as risk_level, CONCAT(created_by.firstName ,' ' , created_by.lastName) as reported_by_name, " +
                 $"incident.created_at as reported_at,CONCAT(user.firstName ,' ' , user.lastName) as approved_by," +
                 $" incident.approved_at as approved_at, CONCAT(user1.firstName , ' ' , user1.lastName) as reported_by_name , " +
+                $"CASE WHEN ABS(TIMESTAMPDIFF(HOUR, incident.incident_datetime, incident.approved_at)) < 8 THEN 1    WHEN ABS(TIMESTAMPDIFF(HOUR,  incident.incident_datetime, incident.approved_at)) > 8 THEN 0   ELSE 2 END AS time_condition  ," +
                 $"{statusOut} as status_long ,incident.status,blockName.name location_of_incident, incident_datetime," +
                 $" type_of_job,title," +
                 $" incident.status, incident.is_why_why_required, incident.is_investigation_required " +
@@ -2131,9 +2133,9 @@ namespace CMMSAPIs.Repositories.Masters
             result.pending = result.total - result.completed;
             result.item_list = itemList;
 
-            int completed_on_time = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at == x.reported_at).ToList().Count;
-            int wo_delay = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != x.reported_at).ToList().Count;
-            int wo_backlog = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.reported_at != x.reported_at).ToList().Count;
+            int completed_on_time = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.time_condition == 1).ToList().Count;
+            int wo_delay = getIncidentList.Where(x => x.status == (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.time_condition == 0).ToList().Count;
+            int wo_backlog = getIncidentList.Where(x => x.status != (int)CMMS.CMMS_Status.IR_APPROVED_INITIAL && x.time_condition == 2).ToList().Count;
 
             if (result.total > 0)
             {
