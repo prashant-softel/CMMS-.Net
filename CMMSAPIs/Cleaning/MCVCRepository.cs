@@ -686,7 +686,7 @@ namespace CMMSAPIs.Repositories.MCVCRepository
             statusEx += $"ELSE 'Invalid Status' END";
             statusSc += $"ELSE 'Invalid Status' END";
 
-            string executionQuery = $"select ex.id as executionId,ex.status ,ex.startDate as scheduledDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
+            string executionQuery = $"select ex.id as executionId,ex.status,ex.planId as  planId,ex.startDate as scheduledDate,ex.assignedTo as assignedToId, CONCAT(assignedToUser.firstName, assignedToUser.lastName) as assignedTo ,F.name as site_name , " +
                $"plan.title, CONCAT(createdBy.firstName, ' ' , createdBy.lastName) as plannedBy ,plan.createdAt as plannedAt,freq.name as frequency, ex.executedById as startedById, CONCAT(startedByUser.firstName, ' ' ,startedByUser.lastName) as startedBy ," +
                $" ex.executionStartedAt as startedAt , ex.rejectedById, CONCAT(rejectedByUser.firstName, ' ', rejectedByUser.lastName) as rejectedbyName,ex.rejectedAt,ex.approvedById, CONCAT(approvedByUser.firstName,' ', approvedByUser.lastName) as approvedbyName,ex.approvedAt,  {statusEx} as status_short, " +
                $" CONCAT(endedByUser.firstName, ' ', endedByUser.lastName) as endedBy, ex.endedAt , ex.abandonApprovedAt, ex.abandonRejectedAt, ex.endedById as endedById, f.name as facilityidName, " +

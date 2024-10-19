@@ -1465,7 +1465,7 @@ namespace CMMSAPIs.Repositories.Audits
             //List<CMDefaultList> checklist_collection = await Context.GetData<CMDefaultList>(myQuery2).ConfigureAwait(false);
             List<SubEvalutionTask> Sub_task = new List<SubEvalutionTask>();
 
-            string task1 = "SELECT pme.checkpoint_title AS title,pm_task.id as subtask_id, ck.id as  id ,e.evalution_plan_id as evalution_plan_id, " +
+            string task1 = "SELECT   COALESCE(pm_task.title, pme.checkpoint_title) AS title, pm_task.id as subtask_id, ck.id as  id ,e.evalution_plan_id as evalution_plan_id, " +
                            "Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1  end ptw_tbt_done,  " +
                            $" pm_task.assigned_to as assign_to, pm_task.plan_date as  schedule_date, " +
                            $" CASE when permit.startDate <  now() then 1 else 0 END as  tbt_start, " +
@@ -1477,6 +1477,7 @@ namespace CMMSAPIs.Repositories.Audits
                            $" ef.ptw_req as ptw_required ,  " +
                            $"CASE WHEN  ef.ptw_req=1 THEN 'YES'  else 'NO' END as is_ptw  " +
                            $"FROM  pm_task as pm_task " +
+                           $"left join st_audit as pm_plan  on pm_task.plan_id = pm_plan.id " +
                            $"LEFT join  pm_execution as pme on pm_task.id=pme.task_id  " +
                            $"LEFT join  checkpoint as ckp on pme.Check_Point_id=ckp.id " +
                            $"Left join evalution_checklist_map as e on e.evalution_plan_id = pm_task.plan_id  " +

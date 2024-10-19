@@ -13,6 +13,7 @@ namespace CMMSAPIs.Models.Incident_Reports
         public string type_of_incident { get; set; }
         public string location_of_incident { get; set; }
         public DateTime? incident_datetime { get; set; }
+        public dynamic time_condition { get; set; }
         public DateTime? restoration_datetime { get; set; }
         public string block_name { get; set; }
         public string severity { get; set; }

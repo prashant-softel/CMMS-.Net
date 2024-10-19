@@ -1129,8 +1129,15 @@ namespace CMMSAPIs.Models.Masters
         public dynamic month { get; set; }
         public dynamic month_id { get; set; }
 
-        public int TotalTrainings { get; set; }
-        public int TrainingManHours { get; set; }
+        public dynamic TotalTrainings { get; set; }
+        public dynamic TrainingManHours { get; set; }
+        public dynamic HFE_trainings_conducted { get; set; }
+        public dynamic Training_Man_hours { get; set; }
+        public dynamic People_Inducted { get; set; }
+        public dynamic Mock_Drills_conducted { get; set; }
+        public dynamic Mock_drill_Man_Hours { get; set; }
+        public dynamic pecial_Trainings_conducted { get; set; }
+        public dynamic Special_Mock_Drills_conducted { get; set; }
         public int MockDrillsConducted { get; set; }
         public int SpecialTrainingsConducted { get; set; }
     }

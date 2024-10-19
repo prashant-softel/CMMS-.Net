@@ -60,8 +60,6 @@ namespace CMMSAPIs.Repositories.Masters
 
             { CMMS.CMMS_Modules.VEGETATION_PLAN, 33 }
         };
-
-
         public TrainingRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment _webHost = null) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
@@ -478,10 +476,6 @@ namespace CMMSAPIs.Repositories.Masters
             {
                 getsch += $" AND ts.ScheduleDate BETWEEN '{fromDate:yyyy-MM-dd}' AND '{toDate:yyyy-MM-dd}'";
             }
-
-
-
-
             List<GETSCHEDULE> trainings = await Context.GetData<GETSCHEDULE>(getsch).ConfigureAwait(false);
 
             Dictionary<int, CMTrainingSummary> monthlyTrainingSummary = new Dictionary<int, CMTrainingSummary>();

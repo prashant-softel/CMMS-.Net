@@ -132,7 +132,7 @@ namespace CMMSAPIs.Repositories.Audits
                         }
                         else if (typeValue == 1 || typeValue == 2)
                         {
-                            CPtypeValue = $" , `text` = {schedule_detail.text} ";
+                            CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
                         }
                         else if (typeValue == 4)
                         {

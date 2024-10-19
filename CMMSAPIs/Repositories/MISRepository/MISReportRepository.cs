@@ -47,8 +47,8 @@ namespace CMMSAPIs.Repositories.NewFolder
             List<IncidentAccidentData> incidentAccidentData = await Context.GetData<IncidentAccidentData>(incident).ConfigureAwait(false);
 
             // Fetch HSE Training Data
-            /*string trainingdata = $"SELECT totalTrainings, trainingManHours, mockDrillsConducted, specialTrainingsConducted FROM mis_trainingdata WHERE facility_id={facility_id};";
-            List<HseTrainingData> hseTrainingData = await Context.GetData<HseTrainingData>(trainingdata).ConfigureAwait(false);*/
+            string trainingdata = $"SELECT totalTrainings, trainingManHours, mockDrillsConducted, specialTrainingsConducted FROM is_trainingdata WHERE facility_id={facility_id};";
+            List<HseTrainingData> hseTrainingData = await Context.GetData<HseTrainingData>(trainingdata).ConfigureAwait(false);
             /*
             // Fetch HSE Inspection and Audit Data
             string auditdata = ""; //$"SELECT observationsRaised, observationsClosed, majorObservationsRaised, majorObservationsClosed FROM mis_audit WHERE facility_id={facility_id};";
