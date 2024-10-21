@@ -971,6 +971,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int map_checlist { get; set; }
         public int evalution_plan_id { get; set; }
+        public dynamic Checklist_score { get; set; }
         public string checklist_number { get; set; }
         public decimal weightage { get; set; }
         public string title { get; set; }
@@ -1023,6 +1024,7 @@ namespace CMMSAPIs.Models.Masters
         public int assign_to { get; set; }
         public dynamic is_ptw { get; set; }
         public DateTime schedule_date { get; set; }
+        public int schedule_id { get; set; }
         public string assign_name { get; set; }
         public string checklist_number { get; set; }
         public string status_short_sub { get; set; }
@@ -1036,6 +1038,7 @@ namespace CMMSAPIs.Models.Masters
         public string permit_code { get; set; }
         public int ptw_status { get; set; }
         public int isolation { get; set; }
+        public dynamic score { get; set; }
         public List<CMPMScheduleExecutionDetail> Sub_schedules { get; set; }
     }
     public class ProjectDetails

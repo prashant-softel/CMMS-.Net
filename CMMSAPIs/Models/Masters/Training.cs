@@ -56,6 +56,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public int ScheduleID { get; set; }
         public int CourseID { get; set; }
+        public string course_name { get; set; }
         public DateTime ScheduleDate { get; set; }
         public string TrainingCompany { get; set; }
         public string Trainer { get; set; }

@@ -291,7 +291,7 @@ namespace CMMSAPIs.Repositories.Masters
         */
         internal async Task<List<GETSCHEDULE>> GetScheduleCourseList(int facility_id, DateTime from_date, DateTime to_date)
         {
-            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID ,mis_training_schedule.status_code as status_code, course_name, " +
+            string getsch = $"SELECT  Schid as ScheduleID ,courseId as  courseID,c.Topic as course_name ,mis_training_schedule.status_code as status_code, course_name, " +
                             $"ScheduleDate, case When  TraingCompany=1 then 'Hero Future Energies' else 'Softel Technologies' End  as TrainingCompany , " +
                             $"Trainer, Mode as mode,  Venue , " +
                             $" c.Topic,c.Traning_category_id, c.No_Of_Days, c.Targated_group_id, " +

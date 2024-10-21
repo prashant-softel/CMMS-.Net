@@ -278,7 +278,7 @@ namespace CMMSAPIs.Repositories.JC
                     foreach (int data in request.uploadfile_ids)
                     {
 
-                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={jc_id} where id = {data}";
+                        string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOBCARD},module_ref_id={jc_id} where id = {data}";
                         await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                     }
                 }
@@ -454,7 +454,7 @@ namespace CMMSAPIs.Repositories.JC
             //uploadjobcard
             string myQuery18 = "SELECT jc.id as id, file_path as fileName,  U.File_Size as fileSize, U.status,U.description FROM uploadedfiles AS U " +
                               "Left JOIN jobcards as jc on jc.jobid = U.module_ref_id  " +
-                              "where module_ref_id =" + jc_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.JOB + ";";
+                              "where module_ref_id =" + jc_id + " and U.module_type = " + (int)CMMS.CMMS_Modules.JOBCARD + ";";
 
             List<CMFileDetailJc> Jc_image = await Context.GetData<CMFileDetailJc>(myQuery18).ConfigureAwait(false);
             //materal
@@ -717,7 +717,7 @@ namespace CMMSAPIs.Repositories.JC
                 foreach (int data in request.uploadfile_ids)
                 {
 
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={request.id} where id = {data}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {fid}, module_type={(int)CMMS.CMMS_Modules.JOBCARD},module_ref_id={request.id} where id = {data}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }
@@ -789,7 +789,7 @@ namespace CMMSAPIs.Repositories.JC
                 foreach (int data in request.uploadfile_ids)
                 {
                     int facility_id = 380;
-                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JOB},module_ref_id={request.id} where id = {data}";
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {facility_id}, module_type={(int)CMMS.CMMS_Modules.JOBCARD},module_ref_id={request.id} where id = {data}";
                     await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
                 }
             }

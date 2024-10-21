@@ -1055,7 +1055,7 @@ namespace CMMSAPIs.Repositories.Permits
             }
             else
             {
-                string pmlist = $"Select pm.id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.title as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
+                string pmlist = $"Select pm.id as Subtask_id ,pm.parent_task_id as pmid, pm.status as status, concat(user.firstname, ' ', user.lastname) as assignedto, plan.title as title,DATE_FORMAT(pm.plan_date,'%Y-%m-%d') as startDate, pm.ptw_id as permitid, group_concat(distinct asset_cat.name order by asset_cat.id separator ', ') as equipmentcat, group_concat(distinct assets.name order by assets.id separator ', ') as equipment " +
                 $"from pm_task as pm " +
                 $"left join st_audit as plan on pm.plan_id = plan.id " +
                 $"left join pm_schedule as pmassets on pm.id = pmassets.task_id " +

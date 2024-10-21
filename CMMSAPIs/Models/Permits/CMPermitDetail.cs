@@ -188,6 +188,7 @@ namespace CMMSAPIs.Models.Permits
     public class CMAssociatedPMList
     {
         public int pmId { get; set; }
+        public int Subtask_id { get; set; }
         public int permitId { get; set; }
         public string title { get; set; }
         public string equipmentCat { get; set; }

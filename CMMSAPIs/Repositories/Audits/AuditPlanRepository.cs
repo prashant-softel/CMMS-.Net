@@ -86,8 +86,8 @@ namespace CMMSAPIs.Repositories.Audits
                              "case when st.frequency = 0 then 'False' else 'True' end as FrequencyApplicable, st.Description,st.Schedule_Date," +
                              " st.checklist_id, " +
                              " checklist_number as checklist_name, frequency.name as frequency_name, st.created_at, " +
-                             "concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by_name, " +
-                             "st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
+                             "concat(created.firstName, ' ', created.lastName) created_by, st.approved_Date, concat(ct.firstName, ' ', ct.lastName) approved_by, " +
+                             "st.module_type_id as Module_Type_id, case when st.module_type_id = 1 then 'PM'  when st.module_type_id = 2 then 'HOTO'  when st.module_type_id = 3 then 'Audit' \r\n  when st.module_type_id = 4 then 'MIS'  when st.module_type_id = 5 then 'Evalution' end as  Module_Type,   assignedTo,Employees,  case when is_PTW = 1 then 'True' else 'False' end is_PTW" +
                              " from st_audit st " +
                              "inner join facilities f ON st.Facility_id = f.id " +
                              "left join users au on au.id = st.Auditee_Emp_ID " +
@@ -558,8 +558,8 @@ namespace CMMSAPIs.Repositories.Audits
             string startQry2 = $"UPDATE pm_task SET started_by = {userID}, started_at = '{UtilsRepository.GetUTCTime()}', status = {(int)CMMS.CMMS_Status.AUDIT_START} WHERE id = {task_id};";
             await Context.ExecuteNonQry<int>(startQry2).ConfigureAwait(false);
 
-            string startQry3 = $"UPDATE st_audit SET  status = {(int)CMMS.CMMS_Status.AUDIT_START} WHERE id = {plan_id};";
-            await Context.ExecuteNonQry<int>(startQry3).ConfigureAwait(false);
+            /* string startQry3 = $"UPDATE st_audit SET  status = {(int)CMMS.CMMS_Status.AUDIT_START} WHERE id = {plan_id};";
+             await Context.ExecuteNonQry<int>(startQry3).ConfigureAwait(false);*/
 
 
 
@@ -1466,7 +1466,7 @@ namespace CMMSAPIs.Repositories.Audits
             List<SubEvalutionTask> Sub_task = new List<SubEvalutionTask>();
 
             string task1 = "SELECT   COALESCE(pm_task.title, pme.checkpoint_title) AS title, pm_task.id as subtask_id, ck.id as  id ,e.evalution_plan_id as evalution_plan_id, " +
-                           "Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1  end ptw_tbt_done,  " +
+                           "Case when permit.TBT_Done_By is null or  permit.TBT_Done_By =0 then 0 else 1  end ptw_tbt_done,pme.PM_Schedule_Id as schedule_id ,  " +
                            $" pm_task.assigned_to as assign_to, pm_task.plan_date as  schedule_date, " +
                            $" CASE when permit.startDate <  now() then 1 else 0 END as  tbt_start, " +
                            $"pm_task.PTW_id as permit_id, ef.id as schdule_id,  " +
@@ -1487,7 +1487,11 @@ namespace CMMSAPIs.Repositories.Audits
                            $"LEFT join  users as usr on usr.id=pm_task.assigned_to " +
                            $" WHERE pm_task.parent_task_id= {task_id} group by pm_task.id;";
             Sub_task = await Context.GetData<SubEvalutionTask>(task1).ConfigureAwait(false);
+            foreach (var item in Sub_task)
+            {
+                item.score = await GetChecklistAverageScore(item.schedule_id, item.subtask_id);
 
+            }
             if (Sub_task.Count > 0)
             {
                 foreach (var data in Sub_task)
@@ -1525,8 +1529,10 @@ namespace CMMSAPIs.Repositories.Audits
                         $"where cmp.evalution_plan_id = {data.evalution_plan_id} and ;";*/
 
                     checklist_collection_SubTask = await Context.GetData<CMPMScheduleExecutionDetail>(myQuery21).ConfigureAwait(false);
+
                 }
             }
+
             dynamic type;
             bool check;
             if (checklist_collection_SubTask.Count > 0)
@@ -1541,9 +1547,21 @@ namespace CMMSAPIs.Repositories.Audits
             foreach (var schedule in type)
             {
 
-                string myQuery3 = "SELECT checkpoint.min_range,checkpoint.max_range,is_ok as cp_ok, boolean as type_bool, failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range, pm_execution.text as type_text,pm_execution.id as execution_id,checkpoint.type as check_point_type ,pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement, PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, file_required as is_file_required " +
-                                    $"FROM pm_execution " +
-                                    $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule.schedule_id}  ";
+                string myQuery3 = "SELECT checkpoint.min_range,checkpoint.max_range,is_ok as cp_ok, boolean as type_bool, " +
+                                  " failure_weightage as failure_waightage,type as check_point_type,pm_execution.range as type_range," +
+                                  " pm_execution.text as type_text,pm_execution.id as execution_id , " +
+                                  " pm_execution.range as type_range,pm_execution.text as type_text,pm_execution.is_ok as type_bool, " +
+                                  "CASE WHEN checkpoint.type = 1 then 'Bool'  " +
+                                  "WHEN checkpoint.type = 0 then 'Text' " +
+                                  "WHEN checkpoint.type = 2 then 'Range' " +
+                                  "WHEN checkpoint.type = 3 then 'Input Range' " +
+                                  "WHEN checkpoint.type = 4 then 'Three State Boolean' " +
+                                  "ELSE 'Unknown Type' END as type_name , " +
+                                  " Check_Point_id as check_point_id, Check_Point_Name as check_point_name, Check_Point_Requirement as requirement," +
+                                  " PM_Schedule_Observation as observation, job_created as is_job_created, linked_job_id, custom_checkpoint as is_custom_check_point, " +
+                                  " file_required as is_file_required " +
+                                  $"FROM pm_execution " +
+                                  $"left join checkpoint on checkpoint.id = pm_execution.Check_Point_id WHERE PM_Schedule_Id = {schedule.schedule_id}  ";
                 if (type == checklist_collection_SubTask)
                 {
                     myQuery3 += $" AND task_id = {schedule.subtask_id}";
@@ -1590,6 +1608,7 @@ namespace CMMSAPIs.Repositories.Audits
                 //taskViewDetail[0].schedule_check_points = scheduleCheckList;
                 //taskViewDetail[0].history_log = log; 
 
+
                 schedule.checklist_observation = scheduleCheckList;
             }
             taskViewDetail[0].schedules = checklist_collection;
@@ -1607,6 +1626,10 @@ namespace CMMSAPIs.Repositories.Audits
                     data.Sub_schedules = filteredSubSchedules;
                 }
             }
+            /*foreach (var item in taskViewDetail[0].schedules)
+            {
+                item.sco = await GetChecklistAverageScore(item.schedule_id, item.subtask_id);
+            }*/
             CMMS.CMMS_Status _Status = (CMMS.CMMS_Status)(taskViewDetail[0].status);
             //if (_Status != CMMS.CMMS_Status.AUDIT_APPROVED)
             //{
@@ -1647,7 +1670,28 @@ namespace CMMSAPIs.Repositories.Audits
 
             return taskViewDetail[0];
         }
+        public async Task<dynamic> GetChecklistAverageScore(int checklist_id, int subtask_id)
+        {
 
+            // SQL query to calculate the average score
+            dynamic score = 0;
+            string query = $"SELECT AVG(pm_execution.range) as score FROM pm_execution WHERE PM_Schedule_Id = {checklist_id} AND task_id = {subtask_id};";
+            DataTable dt = await Context.FetchData(query).ConfigureAwait(false);
+
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                if (dt.Rows[0][0] != DBNull.Value)
+                {
+                    score = Convert.ToInt32(dt.Rows[0][0]);
+
+                }
+                else
+                {
+                    return 0.0;
+                }
+            }
+            return score;
+        }
         internal string getLongStatus_taskview(CMMS.CMMS_Modules moduleID, CMMS.CMMS_Status notificationID, CMPMTaskView Obj)
         {
             string retValue = " ";
@@ -2029,10 +2073,10 @@ namespace CMMSAPIs.Repositories.Audits
             List<CMCreateAuditPlan> auditPlanList = await Context.GetData<CMCreateAuditPlan>(SelectQ).ConfigureAwait(false);
 
 
-            string updateQry = $"update st_audit set Audit_update_by_id = {updatedBy},status = {(int)CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT}, Audit_update_date = '{UtilsRepository.GetUTCTime()}', linked_permit_id = {ptw_id}  where id =  {auditPlanList[0].id};";
-            int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);
+            /* string updateQry = $"update st_audit set Audit_update_by_id = {updatedBy},status = {(int)CMMS.CMMS_Status.PTW_LINKED_TO_AUDIT}, Audit_update_date = '{UtilsRepository.GetUTCTime()}', linked_permit_id = {ptw_id}  where id =  {auditPlanList[0].id};";
+             int retVal = await Context.ExecuteNonQry<int>(updateQry).ConfigureAwait(false);*/
             CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
-            if (retVal > 0)
+            if (retVal_task > 0)
             {
                 retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
@@ -2093,6 +2137,7 @@ namespace CMMSAPIs.Repositories.Audits
         {
             int task_id = auditPlanList.task_id;
             int plan_id = auditPlanList.plan_id;
+            List<int> Deleted_id = new List<int>();
             CMDefaultResponse response = new CMDefaultResponse();
             int parent_task_id = 0;
 
@@ -2119,6 +2164,7 @@ namespace CMMSAPIs.Repositories.Audits
             List<ScheduleIDData> schedule_details = await Context.GetData<ScheduleIDData>(getParamsQry).ConfigureAwait(false);
             foreach (CMEvaluationAudit schedule in auditPlanList.map_checklist)
             {
+                Deleted_id.Add(schedule.subtask_id);
                 if (schedule.subtask_id == 0)
                 {
                     if (parent_task_id > 0)
@@ -2130,6 +2176,7 @@ namespace CMMSAPIs.Repositories.Audits
                          $" from pm_task where id = {task_id};SELECT LAST_INSERT_ID();";
                         DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                         task_id = Convert.ToInt32(dt2.Rows[0][0]);
+                        Deleted_id.Add(task_id);
                     }
 
                     string checkpointsQuery = "SELECT checkpoint.id, checkpoint.check_point, checkpoint.check_list_id as checklist_id, checkpoint.requirement, checkpoint.is_document_required,checkpoint.status " +
@@ -2172,6 +2219,13 @@ namespace CMMSAPIs.Repositories.Audits
                     await Context.ExecuteNonQry<int>(startQry1).ConfigureAwait(false);
                 }
 
+            }
+
+            if (Deleted_id.Count > 0)
+            {
+                string ids = string.Join(",", Deleted_id);
+                string deletpmtask = $"DELETE FROM pm_task  WHERE  parent_task_id={auditPlanList.task_id} and id not in ({ids}) ;";
+                await Context.ExecuteNonQry<int>(deletpmtask).ConfigureAwait(false);
             }
             response = new CMDefaultResponse(task_id, CMMS.RETRUNSTATUS.SUCCESS, "Evaluation plan with sub task id : " + task_id + " created successfully.");
 

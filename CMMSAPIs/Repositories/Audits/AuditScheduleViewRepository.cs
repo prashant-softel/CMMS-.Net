@@ -134,9 +134,9 @@ namespace CMMSAPIs.Repositories.Audits
                         {
                             CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
                         }
-                        else if (typeValue == 4)
+                        else if (typeValue == 3)
                         {
-                            CPtypeValue = $" ,`range`={schedule_detail.input_range}";
+                            CPtypeValue = $" ,`range`={schedule_detail.text}";
                         }
                     }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";

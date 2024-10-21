@@ -62,6 +62,7 @@ namespace CMMSAPIs.Models.PM
 
     public class CMPMScheduleExecutionDetail
     {
+
         public int schedule_id { get; set; }
         public int subtask_id { get; set; }
         public int clone_of_asset { get; set; }
@@ -92,6 +93,10 @@ namespace CMMSAPIs.Models.PM
         public string facilityidbyName { get; set; }
 
 
+    }
+    public class Scorecheck
+    {
+        public dynamic score { get; set; }
     }
     public class CMPMTaskView : CMPMTaskList
     {
@@ -208,6 +213,7 @@ namespace CMMSAPIs.Models.PM
         public int check_point_type { get; set; }
         public int cp_ok { get; set; }
         public int type_range { get; set; }
+        public string type_name { get; set; }
         public int type_bool { get; set; }
         public string type_text { get; set; }
         public string observation { get; set; }
