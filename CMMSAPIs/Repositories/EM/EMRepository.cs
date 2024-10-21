@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.EM
@@ -227,7 +228,7 @@ namespace CMMSAPIs.Repositories.EM
             return response;
         }
 
-        public async Task<CMEscalationResponse> Escalate_2(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone)
+        public async Task<CMEscalationResponse> Escalate_2(string moduleIds, CMMS.CMMS_Status statusId, string additionalUserIds, int userID, string facilitytimeZone)
         {
             /*
              * Checks the current UTC time with the time since status was last updated
@@ -236,44 +237,67 @@ namespace CMMSAPIs.Repositories.EM
              * Also sends notification to all users under the plant
              * 
              */
+            CMMS.RETRUNSTATUS retCode = CMMS.RETRUNSTATUS.FAILURE;
             CMEscalationResponse response = null;
             string responseString = "";
-            var esvalationList = await GetEscalationMatrixList(moduleId);
+            int module = 0;
+            int status = 0;
+            int currentModuleId = 0;
 
-            if (esvalationList.Count == 0)
+            List<int> moduleIdList = moduleIds.Split(',').Select(int.Parse).ToList();
+            List<int> processeedModuleIds = new List<int>();
+            try
             {
-                responseString = "No esclations matched";
-            }
-            int processedCount = 0;
-            for (var i = 0; i < esvalationList.Count; i++)
-            {
-                int module = esvalationList[i].module_id;
-                int status = esvalationList[i].status_id;
+                foreach (var moduleId in moduleIdList)
+                {
+                    currentModuleId = moduleId;
+                    var esvalationList = await GetEscalationMatrixList((CMMS.CMMS_Modules)moduleId);
 
-                if (0 == (int)moduleId && statusId == 0)
-                {
-                    //Escalation for all status of the given module (When statusId is 0
-                    responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
-                    processedCount++;
-                }
-                else if (moduleId > 0 && module == (int)moduleId)
-                {
-                    if (status == (int)statusId || statusId == 0)
+                    if (esvalationList.Count == 0)
                     {
-                        //Escalation for specific module and status
-                        responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
-                        processedCount++;
-                        if (statusId != 0)
-                            break;
+                        responseString = "No esclations matched";
+                    }
+                    int processedCount = 0;
+                    for (var i = 0; i < esvalationList.Count; i++)
+                    {
+                        module = esvalationList[i].module_id;
+                        status = esvalationList[i].status_id;
+
+                        if (moduleId == 0 && statusId == 0)
+                        {
+                            //Escalation for all status of the given module (When statusId is 0
+                            responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
+                            processedCount++;
+                        }
+                        else if (moduleId > 0 && module == moduleId)
+                        {
+                            if (status == (int)statusId || statusId == 0)
+                            {
+                                //Escalation for specific module and status
+                                responseString += await Escalate_ForStatus((CMMS.CMMS_Modules)module, (CMMS.CMMS_Status)status, additionalUserIds, userID, facilitytimeZone);
+                                processedCount++;
+                                if (statusId != 0)
+                                    break;
+                            }
+                        }
+                    }
+                    if (processedCount > 0)
+                    {
+                        //update proceessed module id 
+                        processeedModuleIds.Add(moduleId);
+                        responseString += $"Processed {processedCount} Escalations for module <{currentModuleId}> and status <{status}> ";
                     }
                 }
 
+                retCode = CMMS.RETRUNSTATUS.SUCCESS;
             }
-            if (processedCount > 0)
+            catch(Exception ex)
             {
-                responseString += $"Processed {processedCount} Escalations for module <{moduleId}> and status <{statusId}> ";
+                responseString += $"An error occurred while processing Escalations for module <{currentModuleId}> and status <{status}>: {ex.Message}. ";
+                retCode = CMMS.RETRUNSTATUS.FAILURE;
             }
-            response = new CMEscalationResponse(moduleId, (int)statusId, CMMS.RETRUNSTATUS.SUCCESS, responseString);
+            
+            response = new CMEscalationResponse(CMMS.CMMS_Modules.ESCALATION_MATRIX, processeedModuleIds, retCode, responseString);
 
             return response;
         }

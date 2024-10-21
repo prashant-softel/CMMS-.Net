@@ -105,13 +105,13 @@ namespace CMMSAPIs.Controllers.EM
         //[Authorize]
         [Route("Escalate")]
         [HttpPost]
-        public async Task<IActionResult> Escalate(CMMS.CMMS_Modules moduleId, CMMS.CMMS_Status statusId, int facilityId, string additionalUserIds)
+        public async Task<IActionResult> Escalate(string moduleIds, CMMS.CMMS_Status statusId, int facilityId, string additionalUserIds)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
                 var facilitytimeZone = JsonConvert.DeserializeObject<List<CMFacilityInfo>>(HttpContext.Session.GetString("FacilitiesInfo")).FirstOrDefault(x => x.facility_id == facilityId)?.timezone;
-                var data = await _EMBS.Escalate(moduleId, statusId, additionalUserIds, userID, facilitytimeZone);
+                var data = await _EMBS.Escalate(moduleIds, statusId, additionalUserIds, userID, facilitytimeZone);
                 return Ok(data);
             }
             catch (Exception)
