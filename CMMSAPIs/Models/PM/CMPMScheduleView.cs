@@ -105,6 +105,7 @@ namespace CMMSAPIs.Models.PM
         public List<CMEvaluationAuditList> map_checklist { get; set; }
         public List<SubEvalutionTask> Sub_PmTask { get; set; }
         public int plan_id { get; set; }
+        public dynamic Total_Score { get; set; }
         public string closedApprovedByName { get; set; }
         public DateTime Schedule_Date { get; set; }
         public int started_by_id { get; set; }

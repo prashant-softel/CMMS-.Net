@@ -115,6 +115,7 @@ namespace CMMSAPIs.Models.PM
         public int category_id { get; set; }
         public int frequency_id { get; set; }
         public int checklist_id { get; set; }
+        public int module_type_id { get; set; }
         public DateTime schedule_date { get; set; }
     }
 }

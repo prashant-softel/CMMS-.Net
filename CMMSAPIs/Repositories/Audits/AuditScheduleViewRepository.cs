@@ -136,7 +136,13 @@ namespace CMMSAPIs.Repositories.Audits
                         }
                         else if (typeValue == 3)
                         {
-                            CPtypeValue = $" ,`range`={schedule_detail.text}";
+                            CPtypeValue = $" , `text` = '{schedule_detail.text}' ";
+                            if (schedule_detail.text != null && schedule_detail.text != "")
+                            {
+                                int valuse = int.Parse(schedule_detail.text);
+                                CPtypeValue += $" ,`range`={valuse} ";
+
+                            }
                         }
                     }
                     CPtypeValue = CPtypeValue + $" , is_ok = {schedule_detail.cp_ok} ";

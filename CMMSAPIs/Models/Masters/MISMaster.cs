@@ -953,6 +953,7 @@ namespace CMMSAPIs.Models.Masters
         public int id { get; set; }
         public int evalution_id { get; set; }
         public int checklist_id { get; set; }
+        public int map_checlist { get; set; }
         public string title { get; set; }
         public int audit_id { get; set; }
         public int assign_to { get; set; }
@@ -970,8 +971,9 @@ namespace CMMSAPIs.Models.Masters
     {
         public int id { get; set; }
         public int map_checlist { get; set; }
+        public dynamic Score_of_checklist { get; set; }
         public int evalution_plan_id { get; set; }
-        public dynamic Checklist_score { get; set; }
+
         public string checklist_number { get; set; }
         public decimal weightage { get; set; }
         public string title { get; set; }

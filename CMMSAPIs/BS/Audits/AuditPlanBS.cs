@@ -3,9 +3,6 @@ using CMMSAPIs.Models.Audit;
 using CMMSAPIs.Models.PM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.Audits;
-using iTextSharp.tool.xml.html.head;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,10 +11,10 @@ namespace CMMSAPIs.BS.Audits
 {
     public interface IAuditPlanBS
     {
-        Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate,string facilitytime, int module_type_id);
-        Task<CMAuditPlanList> GetAuditPlanByID(int id,string facilitytime);
+        Task<List<CMAuditPlanList>> GetAuditPlanList(int facility_id, DateTime fromDate, DateTime toDate, string facilitytime, int module_type_id);
+        Task<CMAuditPlanList> GetAuditPlanByID(int id, string facilitytime);
         Task<CMDefaultResponse> CreateAuditPlan(CMCreateAuditPlan request, int userID, string facilitytimeZone);
-        Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request);
+        Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request, int user_id);
         Task<CMDefaultResponse> DeleteAuditPlan(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> ApproveAuditPlan(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> RejectAuditPlan(CMApproval request, int userId, string facilitytimeZone);
@@ -30,7 +27,7 @@ namespace CMMSAPIs.BS.Audits
         Task<List<CMPMPlanList>> GetPlanList(int facility_id, string category_id, string frequency_id, DateTime? start_date, DateTime? end_date, string facilitytime);
         Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime);
         Task<List<CMPMTaskList>> GetTaskList(int facility_id, DateTime? start_date, DateTime? end_date, string frequencyIds, string facilitytime, int module_type_id);
-        Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime);
+        Task<CMPMTaskView> GetTaskDetail(int task_id, string facilitytime);
         Task<CMDefaultResponse> CreateAuditSkip(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> RejectAuditSkip(CMApproval request, int userId, string facilitytimeZone);
         Task<CMDefaultResponse> ApproveAuditSkip(CMApproval request, int userId, string facilitytimeZone);
@@ -98,13 +95,13 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request)
+        public async Task<CMDefaultResponse> UpdateAuditPlan(CMCreateAuditPlan request, int user_id)
         {
             try
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    return await repos.UpdateAuditPlan(request);
+                    return await repos.UpdateAuditPlan(request, user_id);
 
                 }
             }
@@ -114,7 +111,7 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMDefaultResponse> DeleteAuditPlan(CMApproval request,int userId, string facilitytimeZone)
+        public async Task<CMDefaultResponse> DeleteAuditPlan(CMApproval request, int userId, string facilitytimeZone)
         {
             try
             {
@@ -261,7 +258,7 @@ namespace CMMSAPIs.BS.Audits
             {
                 using (var repos = new AuditPlanRepository(getDB))
                 {
-                    
+
                     return await repos.GetAuditPlanList(facility_id, category_id, frequency_id, start_date, end_date, facilitytime);
 
                 }
@@ -272,7 +269,7 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMPMPlanDetail> GetPlanDetail(int id,string facilitytime)
+        public async Task<CMPMPlanDetail> GetPlanDetail(int id, string facilitytime)
         {
             try
             {
@@ -304,7 +301,7 @@ namespace CMMSAPIs.BS.Audits
             }
         }
 
-        public async Task<CMPMTaskView> GetTaskDetail(int task_id,string facilitytime)
+        public async Task<CMPMTaskView> GetTaskDetail(int task_id, string facilitytime)
         {
             try
             {

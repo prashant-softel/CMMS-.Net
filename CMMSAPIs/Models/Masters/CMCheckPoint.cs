@@ -6,6 +6,7 @@ namespace CMMSAPIs.Models.Masters
     {
         public int id { get; set; }
         public string check_point { get; set; }
+        public int schdule_id { get; set; }
         public int checklist_id { get; set; }
         public string requirement { get; set; }
         public DateTime schedule_date { get; set; }
