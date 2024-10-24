@@ -8,19 +8,19 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CMMSAPIs.Repositories.SM
 {
     public class SMMasterRepository : GenericRepository
     {
+
         private UtilsRepository _utilsRepo;
         private ErrorLog m_errorLog;
-        public SMMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment webHostEnvironment = null) : base(sqlDBHelper)
+        public SMMasterRepository(MYSQLDBHelper sqlDBHelper, IWebHostEnvironment iwebhostobj) : base(sqlDBHelper)
         {
             _utilsRepo = new UtilsRepository(sqlDBHelper);
-            m_errorLog = new ErrorLog(webHostEnvironment);
+            m_errorLog = new ErrorLog(iwebhostobj);
         }
 
         internal async Task<List<CMAssetTypes>> GetAssetTypeList(int ID)
@@ -602,9 +602,7 @@ namespace CMMSAPIs.Repositories.SM
                                 catch (Exception ex)
                                 {
                                     ex.GetType();
-                                    //+ ex.ToString();
-                                    //status = status.Substring(0, (status.IndexOf("Exception") + 8));
-                                    // m_ErrorLog.SetError("," + status);
+
                                 }
                             }
                             if (newR.IsEmpty())
@@ -615,18 +613,16 @@ namespace CMMSAPIs.Repositories.SM
 
                             string newRowName = newR[0].ToString();
 
-                            bool isDuplicate = dt2.AsEnumerable().Any(row => row.Field<string>("name") == newRowName);
+                            /*  bool isDuplicate = AssetCodeMasterList.ContainsKey(newRowName);
 
-                            if (isDuplicate)
-                            {
-                                m_errorLog.SetError($"[Matrial: {newR[0].ToString()}] Duplicate Materail .");
-                                newR.Delete();
-                                continue;
-                            }
+                              if (isDuplicate)
+                              {
+                                  m_errorLog.SetError($"[Matrial: {newR[0].ToString()}] Duplicate Materail .");
+                                  newR.Delete();
+                                  continue;
+                              }*/
 
                             newR["name"] = newR[0];
-
-
 
                             newR["description"] = newR[1];
                             try
@@ -690,19 +686,7 @@ namespace CMMSAPIs.Repositories.SM
                             newR["row_no"] = rN;
                             dt2.Rows.Add(newR);
                         }
-                        //string insertQuery = "INSERT INTO smassetmasters (plant_ID, asset_code, asset_name,description, " +
-                        //    "unit_of_measurement, flag, lastmodifieddate, asset_type_ID, item_category_ID, approval_required,Section)";
-                        //foreach (DataRow row in dt2.Rows)
-                        //{
-                        //    insertQuery = insertQuery + $"Select {row.ItemArray[2]},'{row.ItemArray[0]}', '{row.ItemArray[1]}', '{row.ItemArray[1]}'," +
-                        //        $"{row.ItemArray[4]}, 1, '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', {row.ItemArray[11]},{row.ItemArray[12]},{row.ItemArray[10]},'{row.ItemArray[8]}' UNION ALL ";
-                        //}
-                        //int lastIndex = insertQuery.LastIndexOf("UNION ALL ");
-                        //insertQuery = insertQuery.Remove(lastIndex, "UNION ALL ".Length);
-                        //var insertedResult = await Context.ExecuteNonQry<int>(insertQuery).ConfigureAwait(false);
-
                         int go_id = 0;
-
                         foreach (DataRow row in dt2.Rows)
                         {
                             object value = row.ItemArray[5];
@@ -719,6 +703,7 @@ namespace CMMSAPIs.Repositories.SM
                             }
                             string insertQuery = "";
                             int sm_asset_id = 0;
+                            int Updated_id = 0;
                             string asset_code = row.ItemArray[0].ToString();
                             if (AssetCodeMasterList.ContainsKey(Convert.ToString(asset_code).ToUpper()))
                             {
@@ -754,17 +739,13 @@ namespace CMMSAPIs.Repositories.SM
                                     sm_asset_id = 0;
                                     plantID = Convert.ToInt32(row.ItemArray[2]);
                                 }
-
+                                Updated_id = AssetMasterList[Convert.ToString(asset_code).ToUpper()];
                                 insertQuery = $" UPDATE smassetmasters set plant_ID = {plantID}, asset_code = '{row.ItemArray[0]}', asset_name = \"{row.ItemArray[1]}\", " +
                                     $" description = \"{row.ItemArray[1]}\", unit_of_measurement = {row.ItemArray[4]}, flag = 1, lastmodifieddate = '{DateTime.Now.ToString("yyyy-MM-dd HH:mm")}', " +
                                     $" asset_type_ID = {row.ItemArray[14]}, item_category_ID = '{row.ItemArray[15]}', approval_required = {row.ItemArray[10]},Section = '{row.ItemArray[8]}'," +
                                     $" min_qty = {row.ItemArray[11]},reorder_qty = {row.ItemArray[12]},isImported =1  " +
                                     $" where id = {AssetMasterList[Convert.ToString(asset_code).ToUpper()]}; Select 0;";
-                                int id = await Context.CheckGetData(insertQuery).ConfigureAwait(false);
-
-
-
-
+                                await Context.CheckGetData(insertQuery).ConfigureAwait(false);
                             }
                             else
                             {
@@ -828,10 +809,35 @@ namespace CMMSAPIs.Repositories.SM
                                     $" 0, {qty}, '{assetImportStartDate}',1,1,{userID};";
                                 var insertedResult = await Context.ExecuteNonQry<int>(insertTransition).ConfigureAwait(false);
                             }
+                            else
+                            {
+                                if (Updated_id > 0)
+                                {
+                                    string poDetailsUpdateQuery = $"UPDATE smgoodsorderdetails SET purchaseID = {go_id}, " +
+                                        $"cost = {(qty > 0 ? Convert.ToDecimal(Convert.ToString(row.ItemArray[6]).Replace(",", "")) / qty : 0)}," +
+                                        $" ordered_qty = {qty}, location_ID = 0, paid_by_ID = 0, requested_qty = {qty}, sr_no = '', " +
+                                        $"spare_status = 0, is_splited = 1, requestOrderId = 0, requestOrderItemID = 0, isOpening = 1" +
+                                        $" WHERE assetItemID = {Updated_id};";
+                                    await Context.CheckGetData(poDetailsUpdateQuery).ConfigureAwait(false);
+
+                                    string updateTransDetail = $"UPDATE smtransactiondetails SET fromActorID = {userID}," +
+                                        $" fromActorType = {(int)CMMS.SM_Actor_Types.Vendor},  " +
+                                        $"toActorID = {row.ItemArray[2]}, toActorType = {(int)CMMS.SM_Actor_Types.Store}, qty = {qty}, " +
+                                        $"plantID = {row.ItemArray[2]}, referedby = 32, reference_ID = {(int)CMMS.CMMS_Modules.SM_RO}, " +
+                                        $"remarks = 'Material Import', lastInsetedDateTime = '{assetImportStartDate}', createdBy = {userID}," +
+                                        $" createdAt = '{UtilsRepository.GetUTCTime()}', isImported = 1, isOpening = 1" +
+                                        $" WHERE assetItemID = {Updated_id};";
+                                    int asset_TransDetail = await Context.ExecuteNonQry<int>(updateTransDetail).ConfigureAwait(false);
+
+                                    string updateTransition = $"UPDATE smtransition SET debitQty = CASE  WHEN actorType = 1 THEN {qty} ELSE 0  END , " +
+                                                              $"creditQty = CASE WHEN actorType = 2 THEN {qty} ELSE 0 END, lastModifiedDate ='{UtilsRepository.GetUTCTime()}', " +
+                                                              $" isImported = 1, isOpening = 1, createdBy = {userID} WHERE assetItemID IN ({Updated_id});";
+                                    var updatedResult = await Context.ExecuteNonQry<int>(updateTransition).ConfigureAwait(false);
+                                }
+
+                            }
 
                         }
-
-
                     }
                 }
                 else //
@@ -840,19 +846,18 @@ namespace CMMSAPIs.Repositories.SM
 
                 }
             }
-            //string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportMaterial_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
-            //string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
-            //await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
-            //logPath = logPath.Replace("\\\\", "\\");
-            //if (response == null)
-            //    response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, null, "Errors found while importing file.");
-            //else
-            //{
+            string logPath = m_errorLog.SaveAsText($"ImportLog\\ImportInventories_File{file_id}_{DateTime.UtcNow.ToString("yyyyMMdd_HHmmss")}");
+            string logQry = $"UPDATE uploadedfiles SET logfile = '{logPath}' WHERE id = {file_id}";
+            await Context.ExecuteNonQry<int>(logQry).ConfigureAwait(false);
+            logPath = logPath.Replace("\\\\", "\\");
+            if (response == null)
+                response = new CMImportFileResponse(0, CMMS.RETRUNSTATUS.FAILURE, logPath, m_errorLog.errorLog(), "Errors found while importing file.");
+            else
+            {
 
-            //   response.error_log_file_path = null;
-            //   response.import_log = null;
-            //}
-
+                response.error_log_file_path = logPath;
+                response.import_log = m_errorLog.errorLog();
+            }
             return new CMImportFileResponse(file_id, CMMS.RETRUNSTATUS.SUCCESS, null, m_errorLog.errorLog(), "File imported successfully.");
             //return response;*/
         }

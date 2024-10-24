@@ -431,12 +431,12 @@ namespace CMMSAPIs.Controllers.SM
 
         [Route("ImportMaterialFile")]
         [HttpPost]
-        public async Task<IActionResult> ImportMaterialFile(int file_id, int facility_id)
+        public async Task<IActionResult> ImportMaterialFile(int file_id, int facilityID)
         {
             try
             {
                 int userID = Convert.ToInt32(HttpContext.Session.GetString("_User_Id"));
-                var data = await _SMMasterBS.ImportMaterialFile(file_id, facility_id, userID);
+                var data = await _SMMasterBS.ImportMaterialFile(file_id, facilityID, userID);
                 return Ok(data);
             }
             catch (Exception ex)

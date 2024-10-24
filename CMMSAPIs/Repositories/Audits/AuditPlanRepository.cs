@@ -2096,16 +2096,16 @@ namespace CMMSAPIs.Repositories.Audits
                     DataTable dt2 = await Context.FetchData(entryInTask).ConfigureAwait(false);
                     int task_id = Convert.ToInt32(dt2.Rows[0][0]);
 
-                    string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
-                                    $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE} as status from st_audit  where id = {auditPlanList[i].id}";
-                    await Context.ExecuteNonQry<int>(scheduleQry);
+                    /* string scheduleQry = $"INSERT INTO pm_schedule(task_id,plan_id,Asset_id,checklist_id,PM_Schedule_date,status) " +
+                                     $"select {task_id} as task_id,id as plan_id, 0 as Asset_id, Checklist_id  as checklist_id,Schedule_Date    as PM_Schedule_date,{(int)CMMS.CMMS_Status.AUDIT_SCHEDULE} as status from st_audit  where id = {auditPlanList[i].id}";
+                     await Context.ExecuteNonQry<int>(scheduleQry);
 
-                    string setCodeNameQuery = "UPDATE pm_schedule " +
-                                                "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
-                                                "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
-                                                "PM_Schedule_Number = CONCAT('SCH',id), " +
-                                                "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
-                    await Context.ExecuteNonQry<int>(setCodeNameQuery);
+                     string setCodeNameQuery = "UPDATE pm_schedule " +
+                                                 "SET PM_Schedule_Code = CONCAT(id,Facility_Code,Asset_Category_Code,Asset_Code,PM_Frequecy_Code), " +
+                                                 "PM_Schedule_Name = CONCAT(id,' ',Facility_Name,' ',Asset_Category_name,' ',Asset_Name), " +
+                                                 "PM_Schedule_Number = CONCAT('SCH',id), " +
+                                                 "PM_Maintenance_Order_Number = CONCAT('PMSCH',id);";
+                     await Context.ExecuteNonQry<int>(setCodeNameQuery);*/
                 }
 
             }

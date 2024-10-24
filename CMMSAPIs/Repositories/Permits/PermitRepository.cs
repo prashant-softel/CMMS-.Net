@@ -1823,7 +1823,14 @@ namespace CMMSAPIs.Repositories.Permits
             int updatePrimaryKey = request.permit_id;
 
             CMPermitDetail permitDetails = await GetPermitDetails(request.permit_id, "");
-
+            if (request.TBT_Done_By > 0)
+            {
+                foreach (int data in request.uploadfile_ids)
+                {
+                    string qryuploadFiles = $"UPDATE uploadedfiles SET facility_id = {request.facility_id}, module_type={(int)CMMS.CMMS_Modules.PTW},module_ref_id={request.permit_id} where id = {data}";
+                    await Context.ExecuteNonQry<int>(qryuploadFiles).ConfigureAwait(false);
+                }
+            }
             if (request.block_ids != null)
             {
                 if (request.block_ids.Count > 0)

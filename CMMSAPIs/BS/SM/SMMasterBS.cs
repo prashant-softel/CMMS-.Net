@@ -2,6 +2,7 @@
 using CMMSAPIs.Models.SM;
 using CMMSAPIs.Models.Utils;
 using CMMSAPIs.Repositories.SM;
+using Microsoft.AspNetCore.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -44,9 +45,11 @@ namespace CMMSAPIs.BS.SM
     {
         private readonly DatabaseProvider databaseProvider;
         private MYSQLDBHelper getDB => databaseProvider.SqlInstance();
-        public SMMasterBS(DatabaseProvider dbProvider)
+        public static IWebHostEnvironment _environment;
+        public SMMasterBS(DatabaseProvider dbProvider, IWebHostEnvironment environment)
         {
             databaseProvider = dbProvider;
+            _environment = environment;
         }
 
 
@@ -54,7 +57,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetAssetTypeList(ID);
                 }
@@ -69,7 +72,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.AddAssetType(request, userID);
                 }
@@ -84,7 +87,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.UpdateAssetType(request, userID);
                 }
@@ -99,7 +102,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.DeleteAssetType(Id, userID);
                 }
@@ -114,7 +117,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetMaterialCategoryList(ID);
                 }
@@ -129,7 +132,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.AddMaterialCategory(request, userID);
                 }
@@ -144,7 +147,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.UpdateMaterialCategory(request, userID);
                 }
@@ -159,7 +162,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.DeleteMaterialCategory(acID, userID);
                 }
@@ -174,7 +177,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetUnitMeasurementList(ID);
                 }
@@ -189,7 +192,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.AddUnitMeasurement(request, userID);
                 }
@@ -204,7 +207,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.UpdateUnitMeasurement(request, userID);
                 }
@@ -219,7 +222,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.DeleteUnitMeasurement(umID, userID);
                 }
@@ -234,7 +237,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetAssetMasterList(ID);
                 }
@@ -249,7 +252,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.AddAssetMaster(request, fileData, UserID);
                 }
@@ -264,7 +267,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.UpdateAssetMaster(request, fileData, UserID);
                 }
@@ -279,7 +282,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.DeleteAssetMaster(request, UserID);
                 }
@@ -294,7 +297,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetAssetDataList(facility_id);
                 }
@@ -309,7 +312,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetVendorList();
                 }
@@ -323,7 +326,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetAssetBySerialNo(serial_number);
                 }
@@ -337,7 +340,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.GetPaidByList(ID);
                 }
@@ -352,7 +355,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.AddPaidBy(request, UserID);
                 }
@@ -367,7 +370,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.UpdatePaidBy(request, UserID);
                 }
@@ -382,7 +385,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.DeletePaidBy(request, UserID);
                 }
@@ -396,7 +399,7 @@ namespace CMMSAPIs.BS.SM
         {
             try
             {
-                using (var repos = new SMMasterRepository(getDB))
+                using (var repos = new SMMasterRepository(getDB, _environment))
                 {
                     return await repos.ImportMaterialFile(file_id, facility_id, userID);
                 }
